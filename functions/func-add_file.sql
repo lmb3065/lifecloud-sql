@@ -5,16 +5,19 @@
 --  returns > 0 : UID of new file created
 --  returns   0 : Can't find specified folder
 --   -1 thru -9 : Permissions error codes from member_can_update_member()
---  returns -10 : INSERT didn't work, database fail
+--  returns -10 : A file with that name already exists in that folder
+--  returns -11 : INSERT didn't work, database fail
 -----------------------------------------------------------------------------
 -- 2013-10-29 dbrown: created
 -- 2013-10-30 dbrown: new Name and Description fields
+-- 2013-11-01 dbrown: update event codes, disallow dup filenames in a folder
+-- 2013-11-01 dbrown: change fid to folder_uid
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
 
     source_mid int, -- Member making the change
-    parent_fid int, -- Parent folder which will own the file
+    parent_folder_uid int, -- Parent folder which will own the file
     _name varchar,
     _desc varchar
     
@@ -28,13 +31,13 @@ declare
     nrows int;
     newfileuid int;
     
+    _ext_name varchar;
 begin
     
     -- Get folder's owner
-    select mid into target_mid from folders where fid = parent_fid;
+    select mid into target_mid from folders where uid = parent_folder_uid;
     if (target_mid is null) then -- 9024 = "error adding item"
-        perform log_event( source_cid, source_mid, '9024',
-                    'No such folder', target_cid, target_mid );
+        perform log_event( source_cid, source_mid, '9080', 'no such parent folder', target_cid, target_mid );
         return 0; 
     end if;
 
@@ -43,29 +46,35 @@ begin
         from member_can_update_member(source_mid, target_mid);
 
     if (result < 1) then 
-        perform log_permissions_error( '9024', result,
-                    source_cid, source_mid, target_cid, target_mid );
+        perform log_permissions_error( '4080', result, source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
     
+    select fdecrypt(x_name) into _ext_name from Files
+        where lower(fdecrypt(x_name)) = lower(_desc);
+    if _ext_name is not null then
+        perform log_event( source_cid, source_mid, '9080', 'filename already exists in folder', target_cid, target_mid);
+        return -10;
+    end if;
+    
     -- Insert the new file
-    insert into Files ( fid, mid, x_name, x_desc )
-        values ( parent_fid, target_mid, fencrypt(_name), fencrypt(_desc) );
+    insert into Files ( folder_uid, mid, x_name, x_desc )
+        values ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc) );
     
     -- Error checking
     get diagnostics nrows = row_count;
     select last_value into newfileuid from files_uid_seq;
     if (nrows <> 1) then
-        perform log_event( source_cid, source_mid, '9024', 'INSERT INTO FILES failed',
+        perform log_event( source_cid, source_mid, '9080', 'insert into Files failed',
                 target_cid, target_mid );
-        return -10;
+        return -11;
     end if;
     
     -- Success
-    perform log_event( source_cid, source_mid, '0024', '', target_cid, target_mid );
+    perform log_event( source_cid, source_mid, '1080', '', target_cid, target_mid );
     return newfileuid;
     
-end;
+end
 $$ language plpgsql;
     
 

@@ -17,6 +17,7 @@
 -- 2013-10-16 dbrown : Names are case-preserved but case-insensitive
 -- 2013-10-18 dbrown : new column 'profilepic', reordered args
 -- 2013-10-24 dbrown : isAdmin is now 0 for all new members
+-- 2013-11-01 dbrown : update eventcodes
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -63,7 +64,7 @@ begin
     -- Find account which will be this member's parent
     SELECT count(*) into nrows from Accounts WHERE CID = _CID;
     if (nrows < 1) then
-        perform log_event( _cid, null, '9003', 'unknown account [cid]');
+        perform log_event( _cid, null, '9030', 'unknown account [cid]');
         return 0;
     end if;
 
@@ -71,7 +72,7 @@ begin
     if length(_email) > 0 then
       SELECT count(*) into nrows from Members WHERE lower(fdecrypt(x_email)) = _email_c;
       if (nrows > 0) then
-          perform log_event( _CID, null, '9003', 'email '||_email_c||' already in use');
+          perform log_event( _CID, null, '4030', 'email '||_email_c||' already in use');
           return -1;
       end if;
     end if;
@@ -79,7 +80,7 @@ begin
     -- Make sure we're not going to create more than MaxLogins members 
     SELECT count(*) into nrows from Members WHERE CID = _CID;
     if (nrows >= _maxlogins) then
-        perform log_event( _CID, null, '9003', 'too many ( > maxlogins ) members');
+        perform log_event( _CID, null, '4030', 'too many ( > maxlogins ) members');
         return -3;
     end if;
 
@@ -88,7 +89,7 @@ begin
         -- Ensure userid is not already in use
         SELECT count(*) into nrows from Members WHERE lower(fdecrypt(x_userid)) = _userid_c;
         if (nrows > 0) then
-            perform log_event( _cid, null, '9003', 'userid '||_userid_c||' already in use');
+            perform log_event( _cid, null, '4030', 'userid '||_userid_c||' already in use');
             return -2;
         end if;
         
@@ -100,7 +101,7 @@ begin
                 and lower(fdecrypt(x_mi))    = lower(_mi)
                 and lower(fdecrypt(x_lname)) = lower(_lname);
         if (nrows > 0) then
-            perform log_event( _cid, null, '9003', 'duplicate CID-Name combination');
+            perform log_event( _cid, null, '4030', 'duplicate CID-Name combination');
             return -2;
         end if;
 
@@ -124,12 +125,12 @@ begin
           
     get diagnostics nrows = row_count;
     if (nrows <> 1) then
-        perform log_event( _cid, null, '9003', 'INSERT INTO MEMBERS failed'); 
+        perform log_event( _cid, null, '9030', 'insert into members failed'); 
         return -4;
     end if;
     
     SELECT last_value into newmid from members_mid_seq; 
-    perform log_event( _cid, newmid, '0013', _fname||' '||_lname|| ' (' ||_email_c||')');
+    perform log_event( _cid, newmid, '1030', _fname||' '||_lname|| ' (' ||_email_c||')');
         -- user login added    
 
 

@@ -12,6 +12,7 @@
 -- 2013-10-09 dbrown: moved call to add_initial_folders into add_member
 -- 2013-10-18 dbrown: Fixed outdated call to add_member (new 'profilepic')
 -- 2013-10-24 dbrown: removed isAdmin argument
+-- 2013-11-01 dbrown: Updated EventCodes
 -----------------------------------------------------------------------------
 
 create or replace function add_account
@@ -61,8 +62,8 @@ begin
         return fcid;
     end if;
 
-    if (fcid is not null) then -- Die 9001 'error adding account'
-        perform log_event( fcid, fmid, '9001', 'email "' || _email || '" already in use' );
+    if (fcid is not null) then -- Die 4020 'user error adding account'
+        perform log_event( fcid, fmid, '4020', 'email "' || _email || '" already in use' );
         return 0;
     end if;
     
@@ -76,9 +77,9 @@ begin
         
     get diagnostics nrows = row_count;
     select last_value into newcid from accounts_cid_seq;
-    if (nrows = 1) then perform log_event( newcid, null, '0012', '' );
+    if (nrows = 1) then perform log_event( newcid, null, '1020', '' );
     else
-        perform log_event( newcid, null, '9001', 'INSERT INTO ACCOUNTS failed' );
+        perform log_event( newcid, null, '9020', 'insert into Accounts failed' );
         return -1;
     end if;
     

@@ -10,78 +10,100 @@
 -- 2013-10-13 dbrown: Added 9999 'assert failure'
 -- 2013-10-29 dbrown: Added 9026 'error deleting file', 'item' is now 'file'
 --                    Changed 9031 'error updating item' to 9025
+-- 2013-11-01 dbrown: Revised to better reflect current project
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes()  returns int as $$
 
 begin
     truncate table ref_eventcodes;
-    
-    insert into ref_eventcodes(Code, Description) values ('0000', 'user logged in');
-    insert into ref_eventcodes(Code, Description) values ('0001', 'user logged out');
-    insert into ref_eventcodes(Code, Description) values ('0002', 'invalid login attempt');
-    insert into ref_eventcodes(Code, Description) values ('0003', 'auto log-in');
-    insert into ref_eventcodes(Code, Description) values ('0004', 'userid/password e-mailed');
-    insert into ref_eventcodes(Code, Description) values ('0005', 'imaging options notified');
-    insert into ref_eventcodes(Code, Description) values ('0006', 'unauthorized page attempt');
-    insert into ref_eventcodes(Code, Description) values ('0007', 'auto log-out');
-    
-    insert into ref_eventcodes(Code, Description) values ('0010', 'account added by admin');
-    insert into ref_eventcodes(Code, Description) values ('0011', 'account deleted by admin');
-    insert into ref_eventcodes(Code, Description) values ('0012','new account registration');
-    insert into ref_eventcodes(Code, Description) values ('0013','new member added');
-    insert into ref_eventcodes(Code, Description) values ('0014','member deleted');
-    insert into ref_eventcodes(Code, Description) values ('0015','account updated');
-    insert into ref_eventcodes(Code, Description) values ('0016','member updated');
-    insert into ref_eventcodes(Code, Description) values ('0017','member password reset');
-    
-    insert into ref_eventcodes(Code, Description) values ('0020','folder added'); 
-    insert into ref_eventcodes(Code, Description) values ('0021','folder updated');
-    insert into ref_eventcodes(Code, Description) values ('0022','folder deleted');
-    insert into ref_eventcodes(Code, Description) values ('0023','folder purged');
-    insert into ref_eventcodes(Code, Description) values ('0024','item added');
-    insert into ref_eventcodes(Code, Description) values ('0025','item updated');
-    insert into ref_eventcodes(Code, Description) values ('0026','item deleted');
-    insert into ref_eventcodes(Code, Description) values ('0027','item purged');
-    insert into ref_eventcodes(Code, Description) values ('0028','image uploaded');
-    insert into ref_eventcodes(Code, Description) values ('0029','image deleted');
-    
-    insert into ref_eventcodes(Code, Description) values ('0030','user updated password');
-    insert into ref_eventcodes(Code, Description) values ('0031','owner updated password');
-    insert into ref_eventcodes(Code, Description) values ('0032','admin updated password');
-    
-    insert into ref_eventcodes(Code, Description) values ('0040','payment recorded');
-    insert into ref_eventcodes(Code, Description) values ('0041','payment declined');
-    insert into ref_eventcodes(Code, Description) values ('0042','IPN recevied');
-    insert into ref_eventcodes(Code, Description) values ('0043','promotion code added');
-    insert into ref_eventcodes(Code, Description) values ('0044','promotion code updated');
-    insert into ref_eventcodes(Code, Description) values ('0045','promotion code deleted');
+    insert into ref_eventcodes(code, description) values
 
-    -- error codes are OVER 9000
-    insert into ref_eventcodes(Code, Description) values ('9000','failed login attempt');
-    insert into ref_eventcodes(Code, Description) values ('9001','error adding account');
-    insert into ref_eventcodes(Code, Description) values ('9002','error updating account');
-    insert into ref_eventcodes(Code, Description) values ('9003','error adding member');
-    insert into ref_eventcodes(Code, Description) values ('9004','error updating member');
-    insert into ref_eventcodes(Code, Description) values ('9005','error updating session');  
-    insert into ref_eventcodes(Code, Description) values ('9006','error updating password');  
-    insert into ref_eventcodes(Code, Description) values ('9011','reserved');
-    insert into ref_eventcodes(Code, Description) values ('9012','IPN update error');
-    insert into ref_eventcodes(Code, Description) values ('9013','i/o notification error');
-    insert into ref_eventcodes(Code, Description) values ('9014','error generating password');
-    insert into ref_eventcodes(Code, Description) values ('9015','mail error on lost password');
-    insert into ref_eventcodes(Code, Description) values ('9016','error adding promocode');
-    insert into ref_eventcodes(Code, Description) values ('9017','error updating promocode');
-    insert into ref_eventcodes(Code, Description) values ('9020','error inserting folder');
-    insert into ref_eventcodes(Code, Description) values ('9021','error updating folder');
-    insert into ref_eventcodes(Code, Description) values ('9022','error marking folder deleted');
-    insert into ref_eventcodes(Code, Description) values ('9023','error purging folder');
-    insert into ref_eventcodes(Code, Description) values ('9024','error adding file');
-    insert into ref_eventcodes(Code, Description) values ('9025','error updating file');
-    insert into ref_eventcodes(Code, Description) values ('9026','error deleting file');
-    insert into ref_eventcodes(Code, Description) values ('9040','error uploading image');
-    insert into ref_eventcodes(Code, Description) values ('9041','error adding image');
-    insert into ref_eventcodes(Code, Description) values ('9999','ASSERT failure');
+    /* -- general rules :
+        nnn0 Add/Create
+        nnn3 Update
+        nnn5 Get
+        nnn8 Delete
+        nnn9 Delete by Admin
+    
+        nn2n Account
+        nn3n Member
+        nn4n Password
+        nn5n Session
+        nn6n Event
+        nn7n Folder
+        nn8n File
+      */  
+    
+    
+    -- 0000 - 0999 : Detailed (debug) information
+    
+    -- 1000 - 1999 : Normal conditions / notifications 
+    
+        ( '1000', 'user logged in' ),
+        ( '1001', 'user logged out' ),
+        ( '1003', 'automatic log-in' ),
+        ( '1004', 'userid/password e-mailed' ),
+        ( '1005', 'delphi notified' ),
+        ( '1020', 'new account registration' ),
+        ( '1021', 'new account added by admin' ),
+        ( '1022', 'account updated' ),
+        ( '1028', 'account deleted' ),
+        ( '1029', 'account deleted by admin' ),
+        ( '1030', 'new member added' ),
+        ( '1031', 'new member added by admin' ),
+        ( '1032', 'member updated' ),
+        ( '1038', 'member deleted' ),
+        ( '1039', 'member deleted by admin' ),
+        ( '1040', 'password changed' ),
+        ( '1041', 'password changed by owner' ),
+        ( '1042', 'password changed by admin' ),
+        ( '1070', 'new folder added' ),
+        ( '1071', 'new folder added by owner' ),
+        ( '1072', 'new folder added by admin' ),
+        ( '1073', 'folder updated' ),
+        ( '1077', 'folder deleted' ),
+        ( '1078', 'folder deleted by owner' ),
+        ( '1079', 'folder deleted by admin' ),
+        ( '1080', 'new file added' ),
+        ( '1081', 'new file added by owner' ),
+        ( '1082', 'new file added by admin' ),
+        ( '1087', 'file deleted' ),
+        ( '1088', 'file deleted by owner' ),
+        ( '1089', 'file deleted by admin' ),
+        
+    -- 4000 - 4999 : User's Fault errors
+    
+        ( '4000', 'invalid login attempt' ),
+        ( '4006', 'unauthorized page attempt' ),
+        ( '4020', 'user could not add account' ),
+        ( '4030', 'user could not add member' ),
+        ( '4040', 'user could not update password' ),       
+        ( '4070', 'user could not add folder' ),
+        ( '4073', 'user could not update folder' ),
+        ( '4078', 'user could not delete folder' ),
+        ( '4080', 'user could not add file' ),
+        ( '4088', 'user could not delete file' ),
+        
+           
+    -- 9000+ : Database errors
+        ( '9020', 'error adding account' ),
+        ( '9022', 'error updating account' ),
+        ( '9030', 'error adding member' ),
+        ( '9032', 'error updating member' ),
+        ( '9040', 'error updating password' ),
+        ( '9050', 'error updating session'  ),
+        ( '9070', 'error adding folder' ),
+        ( '9073', 'error updating folder' ),
+        ( '9079', 'error deleting folder' ),
+        ( '9080', 'error adding file' ),
+        ( '9085', 'error getting file(s)' ),
+        ( '9089', 'error deleting file' ),
+        
+    -- 9500+: Programming errors
+        ( '9500', 'required argumemt(s) were NULL' ),
+        ( '9501', 'an argument had an invalid value' ),
+        ( '9999', 'ASSERT failure' );
 
     return 1;
 end;

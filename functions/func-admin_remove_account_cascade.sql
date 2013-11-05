@@ -7,6 +7,7 @@
 -- This is a convenience account for development and debugging 
 --   and it should never be run on live data !!
 -- 2013-10-24 dbrown: Also removes Session data
+-- 2013-11-01 dbrown: revise event codes
 --===========================================================================
 
 create or replace function admin_remove_account_cascade( _cid integer ) 
@@ -20,8 +21,7 @@ begin
     delete from Folders  where cid = _cid;
     delete from Members  where cid = _cid;
     delete from Accounts where cid = _cid;
-    perform log_event( _cid, null, '0011',
-        'admin_remove_account_cascade()' );
+    perform log_event( _cid, null, '1029', 'admin_remove_account_cascade()' );
     
     return 1;
 end;

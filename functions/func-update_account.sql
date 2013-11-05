@@ -7,6 +7,7 @@
 -- Returns 0 on failure, 1 on success
 -- -----------------------------------------------------------------------------
 -- 2013-10-04 dbrown created
+-- 2013-11-01 revised event codes
 -- -----------------------------------------------------------------------------
 
 create or replace function update_account(
@@ -35,8 +36,8 @@ begin
     
     get diagnostics nrows = row_count;  
     if (nrows = 1) then
-         perform log_event( _cid, null, '0015', '' );
-    else perform log_event( _cid, null, '9002', 'UPDATE ACCOUNTS failed');
+         perform log_event( _cid, null, '1022', '' );
+    else perform log_event( _cid, null, '9022', 'update accounts failed');
     end if;
 
     return nrows;

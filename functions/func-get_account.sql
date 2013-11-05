@@ -4,6 +4,7 @@
 -- ----------------------------------------------------------------------------------------------
 -- 2013-10-16 dbrown: added column member_count; made e-mail case insensitive
 -- 2013-10-16 dbrown: simplified to a single main query
+-- 2013-11-01 dbrown: revised event code, add error logging
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function get_account(
@@ -30,7 +31,10 @@ begin
         where lower(fdecrypt(x_email)) = lower(_email)
             and userlevel = 0;
             
-    else return null; -- both arguments were null!
+    else
+        -- 9500 = 'required argument(s) were NULL'
+        perform log_event(  null, null, '9500', 'get_account()' );
+        return null;
     end if;
 
     

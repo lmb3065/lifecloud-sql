@@ -26,7 +26,7 @@ declare
         
 begin
 
-    -- "I NEED AN ADULT" (find an admin account)
+    -- find an admin account
     select mid into admin_mid from members where isadmin = 1 limit 1;
 
     for r in c loop -- Copy them with new owner    
