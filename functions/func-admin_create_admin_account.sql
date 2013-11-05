@@ -51,7 +51,8 @@ begin
     -- Create the Account record
     
     newcid := add_account( 
-        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, C_ADMIN_MI, expiration ); 
+        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, C_ADMIN_MI, expiration,
+        '', '', '', '', '', '', 'US' );  -- referrer, addr1, addr2, city, state, postcode, country
     
     if (newcid < 1) then -- Error
         -- add_account() will have logged the error event 
