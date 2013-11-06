@@ -19,7 +19,7 @@ Getting the Install package
 
 There are two ways to get the database installation package on the target machine:
 
- - The easier is: "git clone https://github.com/mojo-blues/lifecloud.git".  You will need a username and password.  This will create a subdirectory called 'lifecloud' from your current directory, with the install pack therein.
+ - The easier is: "git clone git@github.com:mojo-blues/lifecloud.git".  You may need a username and password.  This will create a subdirectory called 'lifecloud' from your current directory, with the install pack therein.
 
  - The second:  Edit and run the script 'transfer.sh', which copies the installation package onto the target machine via scp (cp|ssh).  
 
