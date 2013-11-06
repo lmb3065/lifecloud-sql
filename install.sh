@@ -24,7 +24,7 @@ echo
 echo LifeCloud Database Installer
 
 echo 1/9 Disconnecting all database users
-pg_ctl restart -w -D $pgdatadir
+pg_ctl restart -m FAST -D $pgdatadir
 
 echo 2/9 Dropping old LifeCloud database
 dropdb lc;
@@ -44,18 +44,18 @@ for i in $lcdir/types/type-*.sql; do
 done
 
 echo 6/9 Installing Tables
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-folders.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-files.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-events.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-profilepics.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-sessions.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-pgpkeys.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-ref_defaultfolders.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-ref_eventcodes.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-ref_apps.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-accounts.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-members.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-events.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-folders.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-files.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-profilepics.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-sessions.sql
+psql --dbname=lc --username=pgsql --file=$lcdir/tables/table-member_apps.sql
 
 echo 7/9 Installing Functions
 for i in $lcdir/functions/func-*.sql; do
