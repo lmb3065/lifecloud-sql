@@ -15,6 +15,7 @@
 ## -----------------------------------------------------------------------------
 ## 2013-10-11 dbrown : Unrolled table loading loop -- the tables were being
 ##                     created in a sequence that caused dependency errors
+## 2013-11-05 dbrown : removed pg_ctl, added ref_apps and admin_create_applist
 ## -----------------------------------------------------------------------------
 
 lcdir=.
@@ -67,6 +68,7 @@ done
 echo 8/8 Running Setup Functions
 psql --dbname=lc --username=pgsql --command='select admin_create_eventcodes();' > /dev/null
 psql --dbname=lc --username=pgsql --command='select admin_create_defaultfolders();' > /dev/null
+psql --dbname=lc --username=pgsql --command='select admin_create_applist();' > /dev/null
 psql --dbname=lc --username=pgsql --command='select admin_create_admin_account();' > /dev/null
 psql --dbname=lc --username=pgsql --command='select admin_create_demo_account();' > /dev/null
 
