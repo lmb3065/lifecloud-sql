@@ -49,6 +49,7 @@ psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_default
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-folders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-files.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-events.sql
