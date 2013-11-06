@@ -12,6 +12,8 @@
 -- 2013-10-30 dbrown: new Name and Description fields
 -- 2013-11-01 dbrown: update event codes, disallow dup filenames in a folder
 -- 2013-11-01 dbrown: change fid to folder_uid
+-- 2013-11-06 dbrown: put source_mid into new Files column 'modified_by'
+-- 2013-11-06 dbrown: fixed broken 'disallow dup filenames' change
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -50,16 +52,16 @@ begin
         return result;
     end if;
     
-    select fdecrypt(x_name) into _ext_name from Files
-        where lower(fdecrypt(x_name)) = lower(_desc);
-    if _ext_name is not null then
-        perform log_event( source_cid, source_mid, '9080', 'filename already exists in folder', target_cid, target_mid);
+    if exists (select uid from Files
+                    where folder_uid = parent_folder_uid
+                    and lower(fdecrypt(x_name)) = lower(_name) ) then
+        perform log_event( source_cid, source_mid, '4080', 'Name collision', target_cid, target_mid);
         return -10;
     end if;
     
     -- Insert the new file
-    insert into Files ( folder_uid, mid, x_name, x_desc )
-        values ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc) );
+    insert into Files ( folder_uid, mid, x_name, x_desc, modified_by )
+        values ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc), source_mid );
     
     -- Error checking
     get diagnostics nrows = row_count;

@@ -2,7 +2,10 @@
 -- ==========================================================================
 -- add_folder
 -----------------------------------------------------------------------------
--- return values from member_can_update_member
+-- returns > 0 : UID of new Folder created
+-- returns   0 : Folder name collision
+--  -1 thru -9 : Permissions error code from member_can_update_member()
+-- returns -10 : INSERT didn't work, database fail
 -----------------------------------------------------------------------------
 -- 2013-10-10 dbrown: created
 -- 2013-10-11 dbrown: removed parentfid
@@ -14,6 +17,8 @@
 -- 2013-10-29 dbrown: folders no longer have 'deleted' field
 -- 2013-11-01 dbrown: revised EventCodes, removed Logging arg
 -- 2013-11-01 dbrown: replaced Logging arg
+-- 2013-11-06 dbrown: Disallow folder name collision, returns new folder UID
+-- 2013-11-06 dbrown: changed return values
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -29,7 +34,8 @@ create or replace function add_folder(
 
 declare
     result int;
-    nrows int; 
+    nrows int;
+    newfolderuid int;
 
     source_cid int;
     source_level int;
@@ -49,6 +55,16 @@ begin
         return result;
     end if;
     
+    
+    -- Make sure the member doesn't already have a folder with this name.
+    if exists ( select uid from folders 
+                    where mid = target_mid
+                    and lower(fdecrypt(x_name)) = lower(_foldername) 
+              ) then
+        perform log_event( source_cid, source_mid, '4070', 'Name collision', target_cid, target_mid );
+        return 0;
+    end if;
+    
     -- Add folder to database --
     
     insert into Folders (
@@ -61,6 +77,7 @@ begin
     -- Error-checking
         
     get diagnostics nrows = row_count;    
+    select last_value into newfolderuid from folders_uid_seq;
     if (nrows <> 1) then
         -- Log error regardless of _logging argument
         -- 9070 = database error inserting folder
@@ -81,7 +98,7 @@ begin
         end if;
     end if;
     
-    return result;
+    return newfolderuid;
     
 end;
 $$ language plpgsql;

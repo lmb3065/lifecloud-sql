@@ -16,6 +16,7 @@
 -- 2013-11-01 dbrown: Further simplified structure, standardized failure output
 -- 2013-11-01 dbrown: Now logs events on calling errors
 -- 2013-11-01 dbrown: Revised event codes
+-- 2013-11-06 dbrown: added retrieval of column files.modified_by
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -34,6 +35,7 @@ create or replace function get_files(
     created     timestamp, 
     filename    text,
     description text,
+    modified_by int,
     nrows       int,
     npages      int
     
@@ -62,7 +64,8 @@ begin
     create temporary table files_out on commit drop as
         select f.uid, f.folder_uid, f.mid, f.created,
                 fdecrypt(f.x_name) as filename,
-                fdecrypt(f.x_desc) as description 
+                fdecrypt(f.x_desc) as description ,
+                f.modified_by
             from files f 
             where ( (_fileuid is not null)   and (f.uid = _fileuid) )
                or ( (_folder_uid is not null) and (f.folder_uid = _folder_uid) )
@@ -108,7 +111,7 @@ begin
     -- Output final results
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.created, 
-            fo.filename, fo.description, _nrows, _npages
+            fo.filename, fo.description, fo.modified_by, _nrows, _npages
         from files_out fo
         order by created desc
         limit _pagesize offset (_page * _pagesize);
