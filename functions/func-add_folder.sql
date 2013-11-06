@@ -3,9 +3,9 @@
 -- add_folder
 -----------------------------------------------------------------------------
 -- returns > 0 : UID of new Folder created
+-- returns   0 : Folder name collision
 --  -1 thru -9 : Permissions error code from member_can_update_member()
--- returns -10 : Folder name collision
--- returns -11 : INSERT didn't work, database fail
+-- returns -10 : INSERT didn't work, database fail
 -----------------------------------------------------------------------------
 -- 2013-10-10 dbrown: created
 -- 2013-10-11 dbrown: removed parentfid
@@ -18,6 +18,7 @@
 -- 2013-11-01 dbrown: revised EventCodes, removed Logging arg
 -- 2013-11-01 dbrown: replaced Logging arg
 -- 2013-11-06 dbrown: Disallow folder name collision, returns new folder UID
+-- 2013-11-06 dbrown: changed return values
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -61,7 +62,7 @@ begin
                     and lower(fdecrypt(x_name)) = lower(_foldername) 
               ) then
         perform log_event( source_cid, source_mid, '4070', 'Name collision', target_cid, target_mid );
-        return -10;
+        return 0;
     end if;
     
     -- Add folder to database --
@@ -81,7 +82,7 @@ begin
         -- Log error regardless of _logging argument
         -- 9070 = database error inserting folder
         perform log_event( source_cid, source_mid, '9070', 'insert into Folders failed', target_cid, target_mid );
-        return -11;
+        return -10;
     end if;
 
     
