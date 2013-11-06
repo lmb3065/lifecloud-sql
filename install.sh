@@ -47,6 +47,7 @@ echo 6/9 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql
