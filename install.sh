@@ -23,27 +23,24 @@ pgdatadir=/opt/pgsql/data/
 echo
 echo LifeCloud Database Installer
 
-echo 1/9 Disconnecting all database users
-pg_ctl restart --mode=fast --pgdata=$pgdatadir
-
-echo 2/9 Dropping old LifeCloud database
+echo 1/8 Dropping old LifeCloud database
 dropdb lc;
 
-echo 3/9 Creating new LifeCloud database
+echo 2/8 Creating new LifeCloud database
 createdb lc;
 
-echo 4/9 Installing Crypto Functions
+echo 3/8 Installing Crypto Functions
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/crypto/pgcrypto.sql
 for i in $lcdir/crypto/func-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 5/9 installing Data Types
+echo 4/8 installing Data Types
 for i in $lcdir/types/type-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 6/9 Installing Tables
+echo 5/8 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
@@ -57,17 +54,17 @@ psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-profilepics
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-sessions.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql
 
-echo 7/9 Installing Functions
+echo 6/8 Installing Functions
 for i in $lcdir/functions/func-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 8/9 Installing Roles
+echo 7/8 Installing Roles
 for i in $lcdir/roles/role-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 9/9 Running Setup Functions
+echo 8/8 Running Setup Functions
 psql --dbname=lc --username=pgsql --command='select admin_create_eventcodes();' > /dev/null
 psql --dbname=lc --username=pgsql --command='select admin_create_defaultfolders();' > /dev/null
 psql --dbname=lc --username=pgsql --command='select admin_create_admin_account();' > /dev/null
