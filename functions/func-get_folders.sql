@@ -3,11 +3,12 @@
 --  get_folders()
 -- --------------------------------------------------------------------------------
 --  2013-10-30 dbrown: Completely rewritten to incorporate get_folder and folder_t
+--  2013-11-01 dbrown: Coded to new folders.uid but still outputs it as "fid"
 -- --------------------------------------------------------------------------------
 
 create or replace function get_folders(
 
-    _fid        int default null,
+    _folder_uid int default null,
     _mid        int default null,
     _pagesize   int default null,
     _page       int default 0
@@ -26,7 +27,6 @@ create or replace function get_folders(
     updated     timestamp,
     nrows       int,
     npages      int
-    
 )
 
 as $$
@@ -39,17 +39,17 @@ declare
 
 begin
 
-    if (_fid is not null) then -- Search by folderID
+    if (_folder_uid is not null) then -- Search by folderID
     
         create temporary table folders_out on commit drop as        
-            select f.fid, f.mid, m.cid,
+            select f.uid as fid, f.mid, m.cid,
                 fdecrypt(m.x_fname) as memberfname,
                 fdecrypt(m.x_lname) as memberlname,
                 fdecrypt(f.x_name) as foldername,
                 fdecrypt(f.x_desc) as description,
                 f.itemtype, f.created, f.updated
             from Folders f join Members m on (f.mid = m.mid)
-            where f.fid = _fid; 
+            where f.uid = _folder_uid; 
 
     elsif (_mid is not null) then -- Search by MemberID
         
@@ -60,7 +60,7 @@ begin
         if (_mid = _owner_mid) then
             -- Yes: retrieve folders from all members under this account
             create temporary table folders_out on commit drop as
-                select f.fid, f.mid, m.cid,
+                select f.uid as fid, f.mid, m.cid,
                     fdecrypt(m.x_fname) as memberfname,
                     fdecrypt(m.x_lname) as memberlname,
                     fdecrypt(f.x_name) as foldername,
@@ -71,7 +71,7 @@ begin
                 
         else -- No: retrieve folders from only this member
             create temporary table folders_out on commit drop as
-                select f.fid, f.mid, m.cid,
+                select f.uid as fid, f.mid, m.cid,
                     fdecrypt(m.x_fname) as memberfname,
                     fdecrypt(m.x_lname) as memberlname,
                     fdecrypt(f.x_name) as foldername,

@@ -14,12 +14,19 @@ Directory Structure
  update-functions.sh  Development utility which updates all of the database functions
                 without restarting the database
                 
+Getting the Install package
+---------------------------
+
+There are two ways to get the database installation package on the target machine:
+
+ - The easier is: "git clone git@github.com:mojo-blues/lifecloud.git".  You may need a username and password.  This will create a subdirectory called 'lifecloud' from your current directory, with the install pack therein.
+
+ - The second:  Edit and run the script 'transfer.sh', which copies the installation package onto the target machine via scp (cp|ssh).  
+
 Installation
 ------------
+You must have a running installation of PostgreSQL with the pgcrypto library installed.
+You must know where PostgreSQL stores its data files and have rwx access there
+You must have permission to run pg_ctl, which stops and restarts PostgreSQL to kick the web service users off -- required in order to drop and recreate the database
 
-The LifeCloud database install requires a running installation of PostgreSQL
-with the pgcrypto library installed.
-
-1. Edit and run "transfer.sh" to copy the install package to your destination (it uses scp).
-2. SSH to the destination directory and run "install.sh".
-3. Done.
+Once the installation package is in place, go to its 'lifecloud' directory and run ./install.sh.

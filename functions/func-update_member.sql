@@ -11,6 +11,7 @@
 -- 2013-10-13 dbrown : perms/retvals moved into member_can_update_member()
 -- 2013-10-16 dbrown : forced lowercase (insensitive) on userid and email
 -- 2013-10-18 dbrown : new column 'profilepic', reordered args
+-- 2013-11-01 dbrown : revised eventcodes
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
@@ -125,17 +126,13 @@ begin --------------------------------------------------------------------------
     
     get diagnostics nrows = row_count;
     if (nrows <> 1) then -- You had permission but something went wrong
-        perform log_event( source_cid, source_mid, '9004', 'UPDATE MEMBERS failed!', target_cid, target_mid );
+        perform log_event( source_cid, source_mid, '9032', '', target_cid, target_mid );
         return -10; end if;
 
         
     -- Success
     
-    if (result = 3) then
-          perform log_event( source_cid, source_mid, '0016', 'Admin Member was updated', target_cid, target_mid );        
-    else  perform log_event( source_cid, source_mid, '0016', '', target_cid, target_mid );
-    end if;
-
+    perform log_event( source_cid, source_mid, '1032', '', target_cid, target_mid );
     return result;
     
 end;

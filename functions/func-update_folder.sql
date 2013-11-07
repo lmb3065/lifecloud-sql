@@ -10,12 +10,14 @@
 -- ----------------------------------------------------------------------------
 -- 2013-10-29 dbrown: created, based on stripped-down update_member()
 -- 2013-10-29 dbrown: Fixed eventcodes, removed level-dependent logging/retval
+-- 2013-11-01 dbrown: Update eventcodes
+-- 2013-11-01 dbrown: change folder.fid to folder.uid
 -- -----------------------------------------------------------------------------
 
 create or replace function update_folder(
 
     source_mid    int,                       -- Member making the change
-    folderid      int,                       -- Folder being changed
+    _folder_uid   int,                       -- Folder being changed
     _name         varchar(64)  default null, -- Fields of the member record
     _desc         varchar      default null  --  that can be updated
     
@@ -39,9 +41,9 @@ begin
     if ( length(_name) = 0 and length(_desc) = 0 ) then return -10; end if;
 
     -- Get folder's owner    
-    select mid into target_mid from folders where fid = folderid;
+    select mid into target_mid from folders where uid = _folder_uid;
     if (target_mid is null) then -- 9021 = 'error updating folder'
-        perform log_event( source_cid, source_mid, '9021',
+        perform log_event( source_cid, source_mid, '9073',
                     'No such folder', target_cid, target_mid );
         return 0; 
     end if;
@@ -51,7 +53,7 @@ begin
         from member_can_update_member(source_mid, target_mid);
         
     if (result < 1) then 
-        perform log_permissions_error( '9021', result, 
+        perform log_permissions_error( '4073', result, 
                 source_cid, source_mid, target_cid, target_mid ); 
         return result;
     end if;
@@ -67,19 +69,11 @@ begin
         x_name  = coalesce(x_new_name, folders.x_name),
         x_desc  = coalesce(x_new_desc, folders.x_desc),
         updated = clock_timestamp()
-    where fid = folderid;
+    where uid = _folder_uid;
     
-    
-    -- Error checking    
-    get diagnostics nrows = row_count;
-    if (nrows <> 1) then 
-        perform log_event( source_cid, source_mid, '9021',
-                    'DATABASE INCONSISTENCY', target_cid, target_mid );
-        return -11;
-    end if;
-    
+        
     -- Success    
-    perform log_event( source_cid, source_mid, '0016', '', target_cid, target_mid );
+    perform log_event( source_cid, source_mid, '1073', '', target_cid, target_mid );
     return 1;
     
 end;

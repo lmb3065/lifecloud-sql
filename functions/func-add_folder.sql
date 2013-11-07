@@ -2,7 +2,10 @@
 -- ==========================================================================
 -- add_folder
 -----------------------------------------------------------------------------
--- return values from member_can_update_member
+-- returns > 0 : UID of new Folder created
+-- returns   0 : Folder name collision
+--  -1 thru -9 : Permissions error code from member_can_update_member()
+-- returns -10 : INSERT didn't work, database fail
 -----------------------------------------------------------------------------
 -- 2013-10-10 dbrown: created
 -- 2013-10-11 dbrown: removed parentfid
@@ -12,6 +15,10 @@
 -- 2013-10-13 dbrown: perms/retvals moved into member_can_update_member()
 -- 2013-10-15 dbrown: removed _complete and _vieworder
 -- 2013-10-29 dbrown: folders no longer have 'deleted' field
+-- 2013-11-01 dbrown: revised EventCodes, removed Logging arg
+-- 2013-11-01 dbrown: replaced Logging arg
+-- 2013-11-06 dbrown: Disallow folder name collision, returns new folder UID
+-- 2013-11-06 dbrown: changed return values
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -27,21 +34,35 @@ create or replace function add_folder(
 
 declare
     result int;
-    nrows int; 
+    nrows int;
+    newfolderuid int;
 
     source_cid int;
+    source_level int;
+    source_isadmin int;
     target_cid int;
 
 begin
 
     -- Check permissions
 
-    select allowed, scid, tcid into result, source_cid, target_cid
+    select allowed, scid, slevel, sisadmin, tcid 
+        into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
     
-    if result < 1 then -- 9020 = Error inserting folder
-        perform log_permissions_error( '9020', result, source_cid, source_mid, target_cid, target_mid );
+    if result < 1 then -- 4070 = User error inserting folder
+        perform log_permissions_error( '4070', result, source_cid, source_mid, target_cid, target_mid );
         return result;
+    end if;
+    
+    
+    -- Make sure the member doesn't already have a folder with this name.
+    if exists ( select uid from folders 
+                    where mid = target_mid
+                    and lower(fdecrypt(x_name)) = lower(_foldername) 
+              ) then
+        perform log_event( source_cid, source_mid, '4070', 'Name collision', target_cid, target_mid );
+        return 0;
     end if;
     
     -- Add folder to database --
@@ -56,20 +77,28 @@ begin
     -- Error-checking
         
     get diagnostics nrows = row_count;    
+    select last_value into newfolderuid from folders_uid_seq;
     if (nrows <> 1) then
         -- Log error regardless of _logging argument
-        perform log_event( source_cid, source_mid, '9020', 'INSERT INTO Folders failed!', target_cid, target_mid );
+        -- 9070 = database error inserting folder
+        perform log_event( source_cid, source_mid, '9070', 'insert into Folders failed', target_cid, target_mid );
         return -10;
     end if;
 
     
-    -- Success
+    -- Success : 1070 new folder added
     
-    if (_logging > 0) then
-        perform log_event( source_cid, source_mid, '0020', '', target_cid, target_mid );
+    if (_logging = 1) then
+        if (source_isadmin = 1) then
+            perform log_event( source_cid, source_mid, '1072', '', target_cid, target_mid );
+        elsif (source_level = 0) then
+            perform log_event( source_cid, source_mid, '1071', '', target_cid, target_mid );
+        else
+            perform log_event( source_cid, source_mid, '1070', '', target_cid, target_mid );
+        end if;
     end if;
     
-    return result;
+    return newfolderuid;
     
 end;
 $$ language plpgsql;

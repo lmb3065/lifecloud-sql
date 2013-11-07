@@ -12,7 +12,8 @@
 --     no match: all fields are null
 -- ----------------------------------------------------------------------
 -- 2013-09-25 dbrown : Account/Member refactor (lots more result cols)
--- 2013-10-16 dbrown : UserID validation is case insentitive
+-- 2013-10-16 dbrown : UserID validation is case insensitive
+-- 2013-11-01 dbrown : eventcodes revision
 -- ----------------------------------------------------------------------
 
 create or replace function validate_login(
@@ -40,14 +41,13 @@ begin
             and status = 0;
 
     if (_mid is null) then    
-        -- No match / Auth failed
-        -- 0002 = invalid login attempt
-        perform log_event( 0, null, '0002', _userid_c );
+        -- No match / Auth failed : 4000 = 'failed login attempt'
+        perform log_event( 0, null, '4000', _userid_c );
         return null; 
     end if;
     
-    -- Auth succeeded
-    perform log_event( _cid, _mid, '0000', _userid_c ); 
+    -- Auth succeeded: 0000 = 'user logged in'
+    perform log_event( _cid, _mid, '1000', _userid_c ); 
     
     -- ... increment login counter ...
     update members set logincount = logincount + 1 where mid = _mid;

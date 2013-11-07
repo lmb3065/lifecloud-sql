@@ -36,8 +36,8 @@ create or replace function get_events(
     mid int,
     tcid int,
     tmid int,
-    event varchar,
     descrip varchar,
+    event varchar,
     nrows int,
     npages int
 

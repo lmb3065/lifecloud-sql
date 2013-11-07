@@ -2,13 +2,14 @@
 /*  =============================================================================
      update_session                                                     function
     -----------------------------------------------------------------------------     
-        _tag varchar(32)    : client-supplied unique? string to tag this session
+      _tag varchar(32)    : client-supplied unique? string to tag this session
       _mid int            : member.mid of the client in this session
       _ipaddr varchar(15) : ip address of client connection
-      _action char        : "I" login or "O" logout
+      _action char        : "I" log-In or "O" log-Out
     -----------------------------------------------------------------------------    
      2009-08-26 lbrown : original (T-SQL)
      2013-08-29 dbrown : ported to PL/pgSQL
+     2013-11-01 dbrown : eventcodes revision
     ============================================================================= */
 
 create or replace function update_session(
@@ -28,12 +29,13 @@ declare
     n_clos1 int = 0;
     n_clos2 int = 0;
     n_purg int = 0;
-    err_cid int = null;
+    _cid int = null;
     
 begin
 
     cutoff := current_date - interval '1 year';
     n_purg := purge_sessions_before( cutoff );
+    select cid into _cid from members where mid = _mid;
 
     if lower(_action) = 'o' then -- o for logOut
     
@@ -55,8 +57,8 @@ begin
         
     else -- Unknown action code
     
-        select cid into err_cid from members where mid = _mid;
-        perform log_event( err_cid, _mid, '9005', "unknown action '" || char || "'");
+        -- eventcode 9040 : error updating session
+        perform log_event( _cid, _mid, '9501', "unknown action '" || char || "'");
         select (-1, -1, -1) into n_ins, n_clos1, n_purg;
         
     end if;

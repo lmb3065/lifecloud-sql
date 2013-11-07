@@ -9,6 +9,7 @@
 -- 2013-10-15 dbrown: now checks and whacks ALL MEMBERS with the admin flag
 --                      before creating a new one
 -- 2013-10-24 dbrown: now actually makes the member admin
+-- 2013-11-01 dbrown: revised event codes
 -- --------------------------------------------------------------------------
 
 create or replace function admin_create_admin_account( ) returns int as $$
@@ -41,7 +42,7 @@ begin
     fetch first from cur into _cid, _mid;
     loop
         exit when _cid is null;
-        perform log_event( _cid, _mid, '0011', 'old admin/root account deleted');
+        perform log_event( _cid, _mid, '1029', 'old admin/root account deleted');
         perform admin_remove_account_cascade( _cid );
         fetch next from cur into _cid, _mid;
     end loop;
@@ -50,7 +51,8 @@ begin
     -- Create the Account record
     
     newcid := add_account( 
-        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, C_ADMIN_MI, expiration ); 
+        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, C_ADMIN_MI, expiration,
+        '', '', '', '', '', '', 'US' );  -- referrer, addr1, addr2, city, state, postcode, country
     
     if (newcid < 1) then -- Error
         -- add_account() will have logged the error event 
@@ -62,7 +64,6 @@ begin
     select owner_mid into newmid from Accounts where cid = newcid;
     update Members set isadmin = 1 where mid = newmid;     
         
-    perform log_event( newcid, newmid, '0010', 'new admin/root account created');
     return 1; 
     
 end;
