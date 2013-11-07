@@ -12,8 +12,9 @@ create or replace function admin_create_applist() returns integer as $$
 
 begin
                                                                                          
- truncate table ref_apps;                                                                
-                                                                                         
+ truncate table ref_apps;                                                                              
+ perform setval('ref_apps_uid_seq', 1 , false);  -- Reset ref_apps.UID sequence
+ 
  insert into ref_apps( app_url, app_name, app_icon) values                               
      ( 'activities',      'Activities',               'activities.gif'    ),             
      ( 'autos',           'Autos',                    'auto.gif'          ),             
@@ -53,7 +54,8 @@ begin
      ( 'taxes',           'Tax&nbsp;Returns',         'taxes.gif'         ),             
      ( 'toDo',            'To&nbsp;Do&nbsp;List',     'todo.gif'          ),             
      ( 'vacation',        'Vacation',                 'vacation.gif'      ),             
-     ( 'wallet',          'Wallet Contents',          'wallet.gif'        ),             
+     ( 'wallet',          'Wallet Contents',          'wallet.gif'        ),
+     ( 'vim',             'Delphi VIM',               'vim.gif'           ),
      ( 'reminder',        'Reminder',                 'reminder.gif'      ),             
      ( 'reminder',        'Review<br/>Reminders',     'reminders.gif'     );             
  return 1;                                                                               

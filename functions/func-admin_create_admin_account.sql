@@ -64,7 +64,6 @@ begin
     select owner_mid into newmid from Accounts where cid = newcid;
     update Members set isadmin = 1 where mid = newmid;     
         
-    perform log_event( newcid, newmid, '1021', 'new admin/root account created');
     return 1; 
     
 end;
