@@ -17,7 +17,6 @@ create or replace function add_initial_folders( _mid int )
     returns int as $$
 
 declare
-
     admin_mid int;
     r record;
     c cursor for -- Get initial folders
@@ -26,11 +25,8 @@ declare
         
 begin
 
-    -- find an admin account
-    select mid into admin_mid from members where isadmin = 1 limit 1;
-
     for r in c loop -- Copy them with new owner    
-        perform add_folder( admin_mid, _mid, r.fname, r.fdesc, 0, 0 );
+        perform add_folder( 1, _mid, r.fname, r.fdesc, 0, 0 );
     end loop;
     
     return 1;
