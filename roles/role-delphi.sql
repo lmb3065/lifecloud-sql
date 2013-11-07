@@ -7,15 +7,16 @@ grant all on
     events,   events_eid_seq,
     files,    files_uid_seq,
     folders,  folders_uid_seq,
+    member_apps,
     members,  members_mid_seq,
-    sessions, sessions_sid_seq,
-    profilepics
+    profilepics, profilepics_ppid_seq,    
+    sessions, sessions_sid_seq
 to delphi;
 
 grant select on
     pgpkeys,
     ref_defaultfolders,
     ref_eventcodes,
-    ref_apps
+    ref_apps, ref_apps_uid_seq
 to delphi;
 
