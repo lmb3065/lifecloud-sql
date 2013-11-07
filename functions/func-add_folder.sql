@@ -6,7 +6,7 @@
 -- returns   0 : A required argument (_foldername) was NULL
 -- returns -11 : Source Member does not exist
 -- returns -12 : Target Member does not exist
--- returns -25 : Member already has folder with that name
+-- returns -26 : Member already has folder with that name
 -- returns -80 : Source Member has insufficient permissions
 -- returns -81 : Source and Target are in different Accounts
 -- returns -82 : Source outranked by Target
@@ -26,6 +26,7 @@
 --                     disallows empty folder name
 --                     removed unnecessary INSERT sanity check
 --                     replaced magic numbers and codes with constants
+-- 2013-11-07 dbrown: changed value of RETVAL_ERR_FOLDER_EXISTS to -26
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -47,7 +48,7 @@ declare
     EC_DEVERR_ADDING_FOLDER    constant varchar := '9070';
     RETVAL_ERR_ARG_MISSING     constant int :=  0;
     RETVAL_ERR_MEMBER_NOTFOUND constant int := -11;
-    RETVAL_ERR_FOLDER_EXISTS   constant int := -25;
+    RETVAL_ERR_FOLDER_EXISTS   constant int := -26;
 
     result int;
     newfolderuid int;

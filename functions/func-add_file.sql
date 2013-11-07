@@ -7,7 +7,7 @@
 --  returns  -11 : Source Member does not exist
 --  returns  -12 : Target Member does not exist
 --  returns  -13 : Destination folder does not exist
---  returns  -26 : Filename already exists in that folder
+--  returns  -27 : Filename already exists in that folder
 --  returns  -80 : Source Member has insufficient permissions
 --  returns  -82 : Source outranked by Target
 -----------------------------------------------------------------------------
@@ -22,6 +22,7 @@
 --                    Removed unnecessary INSERT sanity check
 --                    Added requirement that File must have a name
 --                    added source level logging
+-- 2013-11-07 dbrown: RETVAL_ERR_FILE_EXISTS changed to -27
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -36,7 +37,7 @@ create or replace function add_file(
 declare
     RETVAL_ERR_ARG_MISSING      constant int := 0;
     RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
-    RETVAL_ERR_FILE_EXISTS      constant int := -26;
+    RETVAL_ERR_FILE_EXISTS      constant int := -27;
     EC_OK_ADDED_FILE            constant varchar := '1080';
     EC_OK_OWNER_ADDED_FILE      constant varchar := '1081';
     EC_OK_ADMIN_ADDED_FILE      constant varchar := '1082';

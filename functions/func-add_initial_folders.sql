@@ -6,7 +6,7 @@
 -- ARGUMENT _mid integer : member_mid that will own the created folders
 -- -----------------------------------------------------------------------------
 -- RETURNS 1 : RETVAL_SUCCESS
---       -25 : RETVAL_ERR_FOLDER_EXISTS : This member already has folders.
+--       -26 : RETVAL_ERR_FOLDER_EXISTS : This member already has folders.
 -- -----------------------------------------------------------------------------
 -- 2013-10-09 dbrown : changed cid to mid (Members own us, not Accounts)
 -- 2013-10-10 dbrown : moved meat into function add_folder()
@@ -15,6 +15,7 @@
 -- 2013-11-07 dbrown : updated return values and event codes
 --                     Replaced magic retvals and eventcodes with constants
 --                     quits if member already has folders
+-- 2013-11-07 dbrown : changed value of RETVAL_ERR_FOLDER_EXISTS to -26
 --------------------------------------------------------------------------------
 
 create or replace function add_initial_folders( _mid int ) 
@@ -22,7 +23,7 @@ create or replace function add_initial_folders( _mid int )
 
 declare
     RETVAL_SUCCESS           constant int :=   1;
-    RETVAL_ERR_FOLDER_EXISTS constant int := -25;
+    RETVAL_ERR_FOLDER_EXISTS constant int := -26;
     EC_DEVERR_ADDING_FOLDER  constant varchar := '9070';
 
     nfolders int;
