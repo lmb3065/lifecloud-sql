@@ -1,0 +1,99 @@
+
+ALL POSSIBLE ERRORS FROM ALL FUNCTIONS
+-----------------------------------------------------------------------------
+
+ALL                     x  Success
+ALL                     x  Permission/Security Error
+ALL                     x  Database Failure
+
+add_account             x  Account already exists with this E-mail                  Already_Exists  Account (Email)
+add_file                x  File already exists in this Folder                       Already_Exists  File
+                        x  Can't find parent Folder                                 Cannot_Find     Folder
+add_folder              x  Folder already exists in parent Member                   Already_Exists  Folder
+add_initial_folders     x  Folders already exist for parent Member                  Already_Exists  Folder
+add_member              x  Can't find parent Account                                Cannot_Find     Account
+                        x  Member already exists with this E-mail                   Already_Exists  Member (Email)
+                        x  Member already exists with this Name in this Account     Already_Exists  Member (Name/CID)
+                        x  Parent Account already contains maximum members          Too_Many        Member
+create_admin_account    x  Admin account already exists                             Already_Exists  Account (Admin)
+create_applist             (no error possible; truncates & populates reftable)
+create_defaultfolders      (no error possible; truncates & populates reftable)
+create_demo_account     x  Demo account already exists                              Already_Exists  Account (Demo)
+create_eventcodes          (no error possible; truncates & populates reftable)
+delete_file             x  Can't find file to delete                                Cannot_Find     File
+delete_folder           x  Can't find folder to delete                              Cannot_Find     Folder
+get_account           ( L  Can't find requested Account )                           Cannot_Find     Account
+                      ( L  You must supply a field to search by )                   Cannot_Find     Args
+get_accounts          ( L  You must supply a valid filter type )                    Cannot_Find     Args
+get_apps                   (no error possible; 'no results' is ok )
+get_events                 (no error possible; 'no results' is ok )
+get_files             ( L  You must supply a field to search by )                   Cannot_Find     Args
+                      ( L  Can't find requested File )                              Cannot_Find     File
+                      ( L  Can't find requested Folder )                            Cannot_Find     Folder
+                      ( L  Can't find requested Member )                            Cannot_Find     Member
+get_folders           ( L  Can't find requested Folder )                            Cannot_Find     Folder
+                      ( L  Can't find requested Member )                            Cannot_Find     Member
+get_member_apps       ( L  Can't find requested Member )                            Cannot_Find     Member
+get_members           ( L  Can't find requested Member )                            Cannot_Find     Member
+log_event                  (no error possible.  what would we do, log it??)
+update_account          x  Can't find account to update                             Cannot_Find     Account
+update_folder           x  You must supply a field to update                        Cannot_Find     Args
+                        x  Can't find folder to update                              Cannot_Find     Folder
+update_member           x  You must supply a field to update                        Cannot_Find     Args
+                        x  Can't find member to update                              Cannot_Find     Member
+update_member_apps      x  Can't find member to update                              Cannot_Find     Member
+update_password            (all errors are Permission/Security errors)
+update_session          x  Can't find member to update Session for                  Cannot_Find     Member
+validate_login             (all errors are Permission/Security errors)
+
+( L : Returns a table of results instead of a retval -- find these in the eventlog. )
+
+-----------------------------------------------------------------------------
+                
+   GENERAL (Inf..-9)
+
+    > 1     Success (typically the UID of whatever you just added)
+      1     Success
+      0     A required argument was NULL                                RETVAL_ERR_ARG_MISSING
+     -1     A required argument was invalid                             RETVAL_ERR_ARG_INVALID
+
+   MISSING OBJECT (-10..-19)
+   
+    -10     Cannot Find Account                                         RETVAL_ERR_ACCOUNT_NOTFOUND
+    -11     Cannot Find (Source) Member                                 RETVAL_ERR_MEMBER_NOTFOUND
+    -12     Cannot find Target member                                   RETVAL_ERR_TARGET_NOTFOUND
+    -12     Cannot Find Folder                                          RETVAL_ERR_FOLDER_NOTFOUND
+    -13     Cannot Find File                                            RETVAL_ERR_FILE_NOTFOUND
+   
+   OBJECT ALREADY EXISTS (-20..-39)
+   
+    -20     Account already exists with this e-mail address             RETVAL_ERR_ACCOUNT_EXISTS
+    -21     Admin/Demo account already exists
+    -22     Member already exists with this e-mail address
+    -23     Member already exists with this Name and Account
+    -24     Member would exceed Account's maximum members
+    -25     Folder already exists for this member                       RETVAL_ERR_FOLDER_EXISTS
+    -26     File already exists in this folder                          RETVAL_ERR_FILE_EXISTS
+      
+   PERMISSIONS ERRORS (-80..-98)
+   
+    -80  Source member has insufficient permissions (userlevel > max_userlevel) RETVAL_ERR_USERLEVEL
+    -81  Source & Target in different CIDs, and Source isn't an admin           RETVAL_ERR_DIFFCIDS
+    -82  Target outranks (i.e., has lower userlevel than) Source                RETVAL_ERR_OUTRANKED
+    
+   OH SHIT
+    -99     Database failure
+        
+        
+TO DO
+-----------------------------------------------------------------------------
+ * General : Remove all stupid 'Oh no we got more than one item by PK' checks
+ * add_initial_folder() : add "user already has folders" bailout
+ * admin_create_admin_account() :
+        always insert the admin directly at CID=1, MID=1
+        add "admin user already exists" bailout
+ * get_member_apps() : log "can't find requested Member" error
+ * log_permissions_error() : rewrite to use new codes
+ * member_can_update_member() : rewrite to use new codes
+ * update_member: add smarter 'no such member' check
+ * update_session: check that MID exists
