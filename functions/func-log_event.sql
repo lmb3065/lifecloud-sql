@@ -7,6 +7,7 @@
 -- 2013-09-25 dbrown : added _mid
 -- 2013-09-28 dbrown : added _target_cid, _target_mid
 -- 2013-11-01 dbrown : _data field may now be omitted
+-- 2013-11-06 dbrown : _data field may now be NULL
 -------------------------------------------------------------------------
 
 create or replace function log_event(
@@ -24,6 +25,8 @@ declare
     cutoff timestamp;
     
 begin
+    if _data is null then _data := ''; end if;
+
     -- Get rid of old events
     cutoff := now() - interval '1 year';
     perform purge_events_before( cutoff );
