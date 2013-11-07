@@ -66,11 +66,11 @@ for i in $lcdir/roles/role-*.sql; do
 done
 
 echo 8/8 Running Setup Functions
-psql --dbname=lc --username=pgsql --command='select admin_create_eventcodes();'
-psql --dbname=lc --username=pgsql --command='select admin_create_defaultfolders();'
-psql --dbname=lc --username=pgsql --command='select admin_create_applist();' 
-psql --dbname=lc --username=pgsql --command='select admin_create_admin_account();'
-psql --dbname=lc --username=pgsql --command='select admin_create_demo_account();'
+psql --dbname=lc --username=pgsql --command='select admin_create_eventcodes();' > /dev/null
+psql --dbname=lc --username=pgsql --command='select admin_create_defaultfolders();' > /dev/null
+psql --dbname=lc --username=pgsql --command='select admin_create_applist();' > /dev/null
+psql --dbname=lc --username=pgsql --command='select admin_create_admin_account();' > /dev/null
+psql --dbname=lc --username=pgsql --command='select admin_create_demo_account();' > /dev/null
 
 echo Finished.
 echo
