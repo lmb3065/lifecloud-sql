@@ -13,6 +13,7 @@
 -- 2013-11-01 dbrown : added filtertype 'c' to search by cid
 -- 2013-11-01 dbrown : added logging of bad filtertype argument
 -- 2013-11-01 dbrown : revised eventcodes
+-- 2013-11-11 dbrown : uses RAISE to communicate developer errors
 ---------------------------------------------------------------------------------
 
 create or replace function get_accounts(
@@ -39,12 +40,11 @@ begin
         _cid := null;
     end;
 
-    -- Log and bail out if the filtertype doesn't make sense
+    -- Raise error if filtertype doesn't make sense
     
     if  ( (_lower_filtertype is not null) 
     and   (_lower_filtertype not in ('c','e','f','l','')) ) then
-        perform log_event( _cid, null, '9501', 'filtertype not in (C, E, F, L)' );
-        return;
+        raise 'Invalid _filtertype (expected [CEFL ])';
     end if;
     
     -- Do our main unpaged query into a temporary table
