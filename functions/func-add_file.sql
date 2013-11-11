@@ -22,6 +22,7 @@
 --                    Added requirement that File must have a name
 --                    added source level logging
 -- 2013-11-10 dbrown : update to latest revision of eventcodes/retvals
+--                    add filename to success event log
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -115,7 +116,7 @@ begin
         eventcode_out := EC_OK_ADDED_FILE;
     end if;
     
-    perform log_event( source_cid, source_mid, eventcode_out, null, target_cid, target_mid );
+    perform log_event( source_cid, source_mid, eventcode_out, _name, target_cid, target_mid );
     
     select last_value into newfileuid from files_uid_seq;
     return newfileuid;
