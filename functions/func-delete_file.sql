@@ -9,6 +9,7 @@
 -- 2013-11-01 dbrown: update event codes, changed all "item" to "file"
 -- 2013-11-10 dbrown: update retvals, replace magic with constants,
 --               removed unnecessary sanity check, source-level eventcodes
+-- 2013-11-11 dbrown: logs filename
 -- -----------------------------------------------------------------------------
 
 create or replace function delete_file(
@@ -32,13 +33,16 @@ declare
     source_isadmin int;
     target_mid int;
     target_cid int;
+    filename text;
     eventcode_out varchar;
     nrows int;
 
 begin
 
     -- Get target file's owner
-    select mid into target_mid from files f where f.uid = file_uid;
+    SELECT f.mid, fdecrypt(f.x_name) INTO target_mid, filename 
+        FROM files f
+        WHERE f.uid = file_uid;
     
     if (target_mid is null) then
         perform log_event( source_cid, source_mid, EC_DEVERR_DELETING_FILE, 'File does not exist' );
@@ -52,26 +56,27 @@ begin
         from member_can_update_member(source_mid, target_mid);
 
     if (result < 1) then 
-        return log_permissions_error( DEVERR_DELETING_FILE, result,
+        perform log_permissions_error( DEVERR_DELETING_FILE, result,
                     source_cid, source_mid, target_cid, target_mid );
+        return result;
     end if;
     
     
     -- Delete the file
     delete from files where files.uid = file_uid;
     
+    
     -- Success
     if (source_isadmin > 0) then 
         eventcode_out := EC_OK_ADMIN_DELETED_FILE;
-    elsif (source_isowner > 0) and (source_mid <> target_mid) then 
+    elsif (source_ulevel = 0) and (source_mid <> target_mid) then 
         eventcode_out := EC_OK_OWNER_DELETED_FILE;
     else
         eventcode_out := EC_OK_DELETED_FILE;
-    end if
-    
+    end if;
 
     
-    perform log_event( source_cid, source_mid, eventcode_out, null, target_cid, target_mid);
+    perform log_event( source_cid, source_mid, eventcode_out, filename, target_cid, target_mid);
     return RETVAL_SUCCESS;
         
 end;
