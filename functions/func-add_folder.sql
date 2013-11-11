@@ -26,7 +26,7 @@
 --                     disallows empty folder name
 --                     removed unnecessary INSERT sanity check
 --                     replaced magic numbers and codes with constants
--- 2013-11-07 dbrown: changed value of RETVAL_ERR_FOLDER_EXISTS to -26
+-- 2013-11-10 dbrown: updated to latest eventcodes, add name to success event
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -45,7 +45,9 @@ declare
     EC_OK_OWNER_ADDED_FOLDER   constant varchar := '1071';
     EC_OK_ADMIN_ADDED_FOLDER   constant varchar := '1072';
     EC_USERERR_ADDING_FOLDER   constant varchar := '4070';
+    EC_PERMERR_ADDING_FOLDER   constant varchar := '6070';
     EC_DEVERR_ADDING_FOLDER    constant varchar := '9070';
+    
     RETVAL_ERR_ARG_MISSING     constant int :=  0;
     RETVAL_ERR_MEMBER_NOTFOUND constant int := -11;
     RETVAL_ERR_FOLDER_EXISTS   constant int := -26;
@@ -56,17 +58,16 @@ declare
     source_cid int;
     source_level int;
     source_isadmin int;
-    target_cid int;
-    
+    target_cid int;    
     existing_uid int;
-
+    eventcode_out varchar;
+    
 begin
 
     -- Validate arguments
     
     if (_foldername is null) or (length(_foldername) = 0) then
-        perform log_event( null, source_mid, EC_USERERR_ADDING_FOLDER,
-                    'Required argument _foldername was null' );
+        perform log_event( null, source_mid, EC_DEVERR_ADDING_FOLDER, '_foldername is required' );
         return RETVAL_ERR_ARG_MISSING;
     end if;
 
@@ -77,7 +78,7 @@ begin
         into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
     if (result < 1) then
-        return log_permissions_error( EC_DEVERR_ADDING_FOLDER, result,
+        return log_permissions_error( EC_PERMERR_ADDING_FOLDER, result,
                                       source_cid, source_mid, target_cid, target_mid );
     end if;
     
@@ -103,16 +104,19 @@ begin
 
     -- Success
     
-    if (_logsuccess = 0) then return newfolderuid; end if;
-            
-    if (source_isadmin = 1) then 
-        perform log_event( source_cid, source_mid, EC_OK_ADMIN_ADDED_FOLDER, null, target_cid, target_mid );
-    elsif (source_level = 0) then
-        perform log_event( source_cid, source_mid, EC_OK_OWNER_ADDED_FOLDER, null, target_cid, target_mid );
-    else
-        perform log_event( source_cid, source_mid, EC_OK_ADDED_FOLDER, null, target_cid, target_mid );
+    if (_logsuccess > 0) then
+    
+        if (source_isadmin = 1) then 
+            eventcode_out := EC_OK_ADMIN_ADDED_FOLDER;
+        elsif (source_level = 0) and (source_mid <> target_mid) then
+            eventcode_out := EC_OK_OWNER_ADDED_FOLDER;
+        else
+            eventcode_out := EC_OK_ADDED_FOLDER;
+        end if;    
+        perform log_event( source_cid, source_mid, eventcode_out, _foldername, target_cid, target_mid );
+        
     end if;
-
+    
     return newfolderuid;
     
 end;
