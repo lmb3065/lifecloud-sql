@@ -8,11 +8,13 @@
 -- 2013-10-11 dbrown: renamed "Funeral" to "Funeral Plans" (cough)
 -- 2013-10-15 dbrown: removed vieworder field
 -- 2013-11-09 dbrown: resets UID sequence
+-- 2013-11-10 dbrown: returns void, communicates via RAISE
 -- -----------------------------------------------------------------------------
 
 
-create or replace function admin_create_defaultfolders() returns int as $$
-
+create or replace function admin_create_defaultfolders() returns void as $$
+declare
+    nrows int;
 begin
     truncate table ref_defaultfolders;
     perform setval('ref_defaultfolders_uid_seq', 1 , false);  -- Reset UID sequence
@@ -29,8 +31,9 @@ begin
         (fencrypt('Passwords'),             fencrypt('Passwords folder'),       0),
         (fencrypt('Personal Info'),         fencrypt('Personal Info folder'),   0),
         (fencrypt('To Do List'),            fencrypt('To Do List folder'),      0);
-        
-    return 1;
+    
+    get diagnostics nrows = row_count;
+    raise notice 'DefaultFolders reference table loaded: % rows.', nrows;
 end;
 $$ language plpgsql;
 

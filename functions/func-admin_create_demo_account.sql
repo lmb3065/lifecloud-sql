@@ -15,9 +15,10 @@
 -- 2013-10-24 dbrown Fixed outdated call to add_member() [h_profilepic]
 -- 2013-11-09 dbrown Updated retvals, eventcodes, replaced magic with constants
 --                   Returns new add_member or add_account result directly
+-- 2013-11-10 dbrown Returns void, communicates by RAISE NOTICE
 -----------------------------------------------------------------------------
 
-create or replace function admin_create_demo_account() returns int as $$
+create or replace function admin_create_demo_account() returns void as $$
 
 declare
     EC_USERERR_ADDING_ACCOUNT constant varchar := '4020';
@@ -50,11 +51,18 @@ begin
     -- Add an account.  This automagically creates an Owner member.
     cid := add_account( A_EMAIL, A_PWORD, A_LNAME, A_FNAME, A_MI, A_EXP );
     
-    if (cid < 1) then return cid; end if;
+    if (cid < 1) then
+        raise error 'FAILED to create Demonstration account!';
+        return; end if;
         
     -- Add an extra (non-admin) member.  This account now has TWO members.
     mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
-        
+
+    if (mid < 1) then
+        raise error 'FAILED to create Demonstration member!';
+        return; end if; 
+    
+    raise notice 'Demonstration account created.';
     return mid;
     
 end;
