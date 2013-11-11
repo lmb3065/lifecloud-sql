@@ -17,6 +17,7 @@
 --       Null '_expires' arg now OK; default value is assigned by table,
 --       E-mail is forced to lowercase before insert,
 --       Removed unnecessary INSERT sanity check, add success logging
+-- 2013-11-10 dbrown: includes owner e-mail in new success log
 -----------------------------------------------------------------------------
 
 create or replace function add_account(
@@ -87,7 +88,7 @@ begin
         values ( 0, _status, C_QUOTA, _referrer, _expires );
         
     select last_value into newcid from accounts_cid_seq;
-    perform log_event( newcid, null, EC_OK_ADDED_ACCOUNT );     
+    perform log_event( newcid, null, EC_OK_ADDED_ACCOUNT, _email );     
 
 
     -- Create Owner Member record and add it to the account --      
