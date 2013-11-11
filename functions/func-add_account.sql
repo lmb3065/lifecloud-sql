@@ -12,11 +12,11 @@
 -- 2013-10-18 dbrown: Fixed outdated call to add_member (new 'profilepic')
 -- 2013-10-24 dbrown: removed isAdmin argument
 -- 2013-11-01 dbrown: Updated EventCodes
--- 2013-11-06 dbrown: Updated return values and lots of cleanup
---       Replaced all magic codes and numbers with constants
---       Null '_expires' arg now OK; default value is assigned by table
---       E-mail is forced to lowercase before insert
---       Removed unnecessary INSERT sanity check
+-- 2013-11-06 dbrown: Updated return values and lots of cleanup,
+--       Replaced all magic codes and numbers with constants,
+--       Null '_expires' arg now OK; default value is assigned by table,
+--       E-mail is forced to lowercase before insert,
+--       Removed unnecessary INSERT sanity check, add success logging
 -----------------------------------------------------------------------------
 
 create or replace function add_account(
@@ -32,7 +32,7 @@ create or replace function add_account(
     
     -- Optional arguments
     _mi         char(1)      default  '',
-    _expires    timestamp    default  null, -- goes into Account
+    _expires    timestamp    default  current_date + interval '1 year', -- goes into Account
     _referrer   varchar(64)  default  '',   -- goes into Account
     _address1   varchar(64)  default  '',
     _address2   varchar(64)  default  '',
@@ -46,12 +46,13 @@ create or replace function add_account(
 ) returns int as $$
     
 declare
-    RETVAL_ERR_ACCOUNT_EXISTS constant int := -20;
+    EC_OK_ADDED_ACCOUNT       constant varchar := '1020';
     EC_USERERR_ADDING_ACCOUNT constant varchar := '4020';
-    C_QUOTA constant int := 100000000;
+    RETVAL_ERR_ACCOUNT_EXISTS constant int := -20;
     
     fstatus int; fcid int; fmid int; -- "found" status, cid, mid
     newcid int; newmid int;
+    C_QUOTA constant int := 100000000;
         
 begin
 
@@ -84,17 +85,18 @@ begin
 
     insert into Accounts ( owner_mid, status, quota, referrer, expires )
         values ( 0, _status, C_QUOTA, _referrer, _expires );
+        
+    select last_value into newcid from accounts_cid_seq;
+    perform log_event( newcid, null, EC_OK_ADDED_ACCOUNT );     
 
 
     -- Create Owner Member record and add it to the account --      
     
-    select last_value into newcid from accounts_cid_seq;
     newmid := add_member( newcid, _fname, _lname, _mi, _passwd, _email, _email, null,  
         _address1, _address2, _city, _state, _postalcode, _country, _phone, 
         null, 0, 0, 0, 1 );
     update Accounts set owner_mid = newmid where cid = newcid;
 
-    
     return newcid;
     
 end;
