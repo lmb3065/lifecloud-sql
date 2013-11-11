@@ -58,16 +58,16 @@ begin
         ( '1040', 'password changed' ),
         ( '1041', 'password changed by owner' ),
         ( '1042', 'password changed by admin' ),
-        ( '1070', 'new folder added' ),
-        ( '1071', 'new folder added by owner' ),
-        ( '1072', 'new folder added by admin' ),
+        ( '1070', 'new folder added' ),                 -- EC_OK_ADDED_FOLDER
+        ( '1071', 'new folder added by owner' ),        -- EC_OK_OWNER_ADDED_FOLDER
+        ( '1072', 'new folder added by admin' ),        -- EC_OK_ADMIN_ADDED_FOLDER
         ( '1073', 'folder updated' ),
         ( '1077', 'folder deleted' ),
         ( '1078', 'folder deleted by owner' ),
         ( '1079', 'folder deleted by admin' ),
-        ( '1080', 'new file added' ),
-        ( '1081', 'new file added by owner' ),
-        ( '1082', 'new file added by admin' ),
+        ( '1080', 'new file added' ),                   -- EC_OK_ADDED_FILE
+        ( '1081', 'new file added by owner' ),          -- EC_OK_OWNER_ADDED_FILE
+        ( '1082', 'new file added by admin' ),          -- EC_OK_ADMIN_ADDED_FILE
         ( '1087', 'file deleted' ),
         ( '1088', 'file deleted by owner' ),
         ( '1089', 'file deleted by admin' ),
@@ -76,35 +76,30 @@ begin
     
         ( '4000', 'invalid login attempt' ),
         ( '4006', 'unauthorized page attempt' ),
-        ( '4020', 'user could not add account' ),
+        ( '4020', 'user could not add account' ),       -- EC_USERERR_ADDING_ACCOUNT
         ( '4030', 'user could not add member' ),
         ( '4040', 'user could not update password' ),       
-        ( '4070', 'user could not add folder' ),
+        ( '4070', 'user could not add folder' ),        -- EC_USERERR_ADDING_FOLDER
         ( '4073', 'user could not update folder' ),
         ( '4078', 'user could not delete folder' ),
-        ( '4080', 'user could not add file' ),
+        ( '4080', 'user could not add file' ),          -- EC_USERERR_ADDING_FILE
         ( '4088', 'user could not delete file' ),
         
            
     -- 9000+ : Database errors
-        ( '9020', 'error adding account' ),
+        ( '9020', 'error adding account' ),             -- EC_DEVERR_ADDING_ACCOUNT
         ( '9022', 'error updating account' ),
         ( '9030', 'error adding member' ),
         ( '9032', 'error updating member' ),
         ( '9040', 'error updating password' ),
         ( '9050', 'error updating session'  ),
-        ( '9070', 'error adding folder' ),
-        ( '9073', 'error updating folder' ),
+        ( '9070', 'error adding folder' ),              -- EC_DEVERR_ADDING_FOLDER
+        ( '9073', 'error updating folder' ),            -- EC_DEVERR_UPDATING_FOLDER
         ( '9079', 'error deleting folder' ),
-        ( '9080', 'error adding file' ),
+        ( '9080', 'error adding file' ),                -- EC_DEVERR_ADDING_FILE
         ( '9085', 'error getting file(s)' ),
         ( '9089', 'error deleting file' ),
         
-    -- 9500+: Programming errors
-        ( '9500', 'required argumemt(s) were NULL' ),
-        ( '9501', 'an argument had an invalid value' ),
-        ( '9999', 'ASSERT failure' );
-
     return 1;
 end;
 $$ language plpgsql;
