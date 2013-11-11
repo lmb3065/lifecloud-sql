@@ -5,6 +5,7 @@
 -- 2013-10-16 dbrown: added column member_count; made e-mail case insensitive
 -- 2013-10-16 dbrown: simplified to a single main query
 -- 2013-11-01 dbrown: revised event code, add error logging
+-- 2013-11-11 dbrown: emphasized SQL, uses RAISE for (dev) error
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function get_account(
@@ -15,43 +16,43 @@ create or replace function get_account(
 ) returns account_ext_t as $$ -- see /types/account_ext_t.pgsql
 
 declare
-    acct_members int;
-    foundcid int;
+    nmembers int;
+    fcid int;
     r account_ext_t;
     
 begin
-
-    -- Get e-mail address if we don't have CID
+    _email := lower(_email);
     
-    if _cid is not null then 
-        foundcid = _cid; -- Accept argument CID
+    if _cid is not null then
+         -- Accept argument CID
+        fcid = _cid;
+
+    elsif _email is not null then
+        -- find CID using E-mail
                 
-    elsif _email is not null then -- find CID ourselves using E-mail
-        select cid into foundcid from members
-        where lower(fdecrypt(x_email)) = lower(_email)
+        SELECT cid INTO fcid FROM members
+        WHERE lower(fdecrypt(x_email)) = _email
             and userlevel = 0;
             
     else
-        -- 9500 = 'required argument(s) were NULL'
-        perform log_event(  null, null, '9500', 'get_account()' );
-        return null;
+        raise 'get_account(cid int, email varchar) : one argument must be NOT NULL';
+        
     end if;
-
     
     -- Count members and return output --
     
-    select count(*) into acct_members from Members where cid = foundcid;
+    SELECT count(*) INTO nmembers FROM Members WHERE cid = fcid;
  
-    select a.cid, a.status, a.quota, a.referrer, a.created, a.updated,
-            a.expires, acct_members, m.mid,
+    SELECT a.cid, a.status, a.quota, a.referrer, a.created, a.updated,
+            a.expires, nmembers, m.mid,
             fdecrypt(x_userid), fdecrypt(x_email), fdecrypt(x_fname), 
             fdecrypt(x_mi), fdecrypt(x_lname), fdecrypt(x_address1), 
             fdecrypt(x_address2), fdecrypt(x_city), fdecrypt(x_state), 
             fdecrypt(x_postalcode), fdecrypt(x_country), fdecrypt(x_phone), 
             m.status, m.pwstatus, m.userlevel, m.tooltips, m.isadmin,
             m.logincount, m.created, m.updated 
-        into r from Accounts a join Members m on (a.owner_mid = m.mid)
-        where a.cid = foundcid;
+        INTO r FROM Accounts a JOIN Members m ON (a.owner_mid = m.mid)
+        WHERE a.cid = fcid;
                     
     return r;
     
