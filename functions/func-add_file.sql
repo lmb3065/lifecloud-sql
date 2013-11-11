@@ -5,7 +5,6 @@
 --  returns  > 0 : SUCCESS.  UID of new file created
 --  returns    0 : A required argument (_name) was NULL
 --  returns  -11 : Source Member does not exist
---  returns  -12 : Target Member does not exist
 --  returns  -13 : Destination folder does not exist
 --  returns  -27 : Filename already exists in that folder
 --  returns  -80 : Source Member has insufficient permissions
@@ -22,7 +21,7 @@
 --                    Removed unnecessary INSERT sanity check
 --                    Added requirement that File must have a name
 --                    added source level logging
--- 2013-11-07 dbrown: RETVAL_ERR_FILE_EXISTS changed to -27
+-- 2013-11-10 dbrown : update to latest revision of eventcodes/retvals
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -35,15 +34,16 @@ create or replace function add_file(
 ) returns int as $$
 
 declare
-    RETVAL_ERR_ARG_MISSING      constant int := 0;
-    RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
-    RETVAL_ERR_FILE_EXISTS      constant int := -27;
     EC_OK_ADDED_FILE            constant varchar := '1080';
     EC_OK_OWNER_ADDED_FILE      constant varchar := '1081';
     EC_OK_ADMIN_ADDED_FILE      constant varchar := '1082';
     EC_USERERR_ADDING_FILE      constant varchar := '4080';
+    EC_PERMERR_ADDING_FILE      constant varchar := '6080';
     EC_DEVERR_ADDING_FILE       constant varchar := '9080';
-    EC_DEVERR_ARGS_MISSING      constant varchar := '9500';
+
+    RETVAL_ERR_ARG_MISSING      constant int :=   0;
+    RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
+    RETVAL_ERR_FILE_EXISTS      constant int := -27;
 
     result          int;
     source_cid      int;
@@ -53,13 +53,14 @@ declare
     target_cid      int;
     existing_uid    int;
     newfileuid      int;
+    eventcode_out   varchar;
         
 begin
 
     -- Validate arguments
     
     if (_name is null) or (length(_name) = 0) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, 'Required argument _name was null' );
+        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, '_name is required' );
         return RETVAL_ERR_ARG_MISSING;
     end if;
 
@@ -79,8 +80,9 @@ begin
         into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
     if (result < 1) then 
-        return log_permissions_error( EC_DEVERR_ADDING_FILE, result,
+        perform log_permissions_error( EC_PERMERR_ADDING_FILE, result,
                   source_cid, source_mid, target_cid, target_mid );
+        return result;
     end if;
     
     
@@ -90,8 +92,8 @@ begin
         where folder_uid = parent_folder_uid
         and lower(fdecrypt(x_name)) = lower(_name);
     if (existing_uid is not null) then
-        perform log_event( source_cid, source_mid, EC_USERERR_ADDING_FILE, 'File already exists in folder',
-                   target_cid, target_mid);
+        perform log_event( source_cid, source_mid, EC_USERERR_ADDING_FILE,
+            'File already exists in folder', target_cid, target_mid);
         return RETVAL_ERR_FILE_EXISTS;
     end if;
     
@@ -99,20 +101,23 @@ begin
     -- Add file to database
     
     insert into Files ( folder_uid, mid, x_name, x_desc, modified_by )
-        values ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc), source_mid );
-    select last_value into newfileuid from files_uid_seq;
+        values ( parent_folder_uid, target_mid, 
+            fencrypt(_name), fencrypt(_desc), source_mid );
 
 
     -- Success
     
     if (source_isadmin = 1) then
-        perform log_event( source_cid, source_mid, EC_OK_ADMIN_ADDED_FILE, null, target_cid, target_mid );
-    elsif (source_level = 0) then
-        perform log_event( source_cid, source_mid, EC_OK_OWNER_ADDED_FILE, null, target_cid, target_mid );
+        eventcode_out := EC_OK_ADMIN_ADDED_FILE;
+    elsif (source_level = 0) and (source_mid <> target_mid) then
+        eventcode_out := EC_OK_OWNER_ADDED_FILE;
     else
-        perform log_event( source_cid, source_mid, EC_OK_ADDED_FILE, null, target_cid, target_mid );
+        eventcode_out := EC_OK_ADDED_FILE;
     end if;
     
+    perform log_event( source_cid, source_mid, eventcode_out, null, target_cid, target_mid );
+    
+    select last_value into newfileuid from files_uid_seq;
     return newfileuid;
     
 end
