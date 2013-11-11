@@ -6,9 +6,6 @@
 --     _pagesize int   : [optional] # of rows that define a "page"
 --     _page int = 0   : [optional] which "page" to return (0 is first)
 -- ----------------------------------------------------------------------
--- example:
---     select * from get_events( null, null, 10, 0 ) ;
--- ----------------------------------------------------------------------
 -- Returns a table of all events befween _from and _to
 --   sorted by date descending
 --   optionally divide into _pagesize-row pages and return page _page
@@ -18,6 +15,8 @@
 -- 2013-10-11 dbrown : New pagination technique using temporary table
 -- 2013-10-12 dbrown : Can now be called with no arguments at all
 -- 2013-10-30 dbrown : Integrated event_t into the function definition
+-- 2013-11-10 dbrown : ref_EventCodes is now a Left Outer Join in case we
+--                have typoed eventCodes or missing entries 
 -----------------------------------------------------------------------------
 
 create or replace function get_events(
@@ -58,7 +57,7 @@ begin
         select e.eid, e.dt, e.code, e.cid, e.mid, e.target_cid, e.target_mid,
             cast(fdecrypt(e.x_data) as varchar) as event,
             re.description, 0 as nrows, 0 as npages
-        from Events e join ref_EventCodes re on (e.code = re.code) 
+        from Events e left outer join ref_EventCodes re on (e.code = re.code) 
         where e.dt between _from and _to;
         
     -- Calculate pages from the temp table
