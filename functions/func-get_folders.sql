@@ -4,6 +4,7 @@
 -- --------------------------------------------------------------------------------
 --  2013-10-30 dbrown: Completely rewritten to incorporate get_folder and folder_t
 --  2013-11-01 dbrown: Coded to new folders.uid but still outputs it as "fid"
+--  2013-11-12 dbrown: Raises warning, rets NULL if neither search term provided
 -- --------------------------------------------------------------------------------
 
 create or replace function get_folders(
@@ -82,7 +83,8 @@ begin
                 
         end if;
     else
-        return; -- Neither search criterion was provided
+        raise warning 'get_folders(): no search criteria supplied';
+        return null;
     end if;
 
     

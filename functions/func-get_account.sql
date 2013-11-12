@@ -5,7 +5,7 @@
 -- 2013-10-16 dbrown: added column member_count; made e-mail case insensitive
 -- 2013-10-16 dbrown: simplified to a single main query
 -- 2013-11-01 dbrown: revised event code, add error logging
--- 2013-11-11 dbrown: emphasized SQL, uses RAISE for (dev) error
+-- 2013-11-11 dbrown: emphasized SQL, raises warning on missing args
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function get_account(
@@ -35,7 +35,8 @@ begin
             and userlevel = 0;
             
     else
-        raise 'get_account() : no search criteria';
+        raise warning 'get_account(): no search criteria supplied';
+        return null;
         
     end if;
     
