@@ -3,6 +3,7 @@
 -- function admin_delete_account_cascade
 -----------------------------------------------------------------------------
 -- DELETES ALL TRACE OF AN ACCOUNT.  Use with caution
+-- 2013-11-12 dbrown : Raise exception if CID doesn't exist
 -----------------------------------------------------------------------------
 
 create or replace function admin_delete_account_cascade(
@@ -15,6 +16,10 @@ declare
     EC_OK_ADMIN_DELETED_ACCOUNT constant varchar := '1029';
 
 begin
+
+    if not exists (select cid from accounts where cid = arg_cid) then
+        raise 'admin_delete_account_cascade(): account.cid '||arg_cid||' does not exist!';
+    end if;
 
     create temporary table account_members on commit drop as
         select mid from members where cid = arg_cid;
@@ -32,7 +37,7 @@ begin
     perform log_event( arg_cid, null, EC_OK_ADMIN_DELETED_ACCOUNT,
                 'Nuked via admin_delete_account_cascade()' );
     
-    raise notice 'All trace of CID % has been permanently destroyed!', arg_cid;
+    raise warning 'admin_delete_account_cascade(): CID % completely destroyed!', arg_cid;
     
 end
 $$ language plpgsql;
