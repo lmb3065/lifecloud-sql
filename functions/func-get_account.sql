@@ -35,7 +35,7 @@ begin
             and userlevel = 0;
             
     else
-        raise 'get_account(cid int, email varchar) : one argument must be NOT NULL';
+        raise 'get_account() : no search criteria';
         
     end if;
     
