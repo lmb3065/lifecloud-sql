@@ -9,7 +9,7 @@
 -- 2013-11-01 dbrown: update event codes, changed all "item" to "file"
 -- 2013-11-10 dbrown: update retvals, replace magic with constants,
 --               removed unnecessary sanity check, source-level eventcodes
--- 2013-11-11 dbrown: logs filename
+-- 2013-11-11 dbrown: logs filename (or uid on error)
 -- -----------------------------------------------------------------------------
 
 create or replace function delete_file(
@@ -47,7 +47,7 @@ begin
     
     if (target_mid is null) then
         perform log_event( source_cid, source_mid, EC_DEVERR_DELETING_FILE,
-                    'File does not exist' );
+                    'UID '||file_uid||' does not exist' );
         return RETVAL_FILE_NOTFOUND;
     end if;
     
