@@ -9,7 +9,8 @@
 -- 2013-11-01 dbrown: revised event codes, added source-level eventcodes
 -- 2013-11-01 dbrown: changed folder.fid to folder.uid
 -- 2013-11-11 dbrown: update retvals and eventcodes, remove magic, 
---               remove unnecessary sanity check, logs foldername
+--               remove unnecessary sanity check
+--               logs foldername in eventlog (or uid on error)
 -- ---------------------------------------------------------------------------
 
 create or replace function delete_folder(
@@ -47,7 +48,7 @@ begin
         
     if (target_mid is null) then
         perform log_event( source_cid, source_mid, EC_DEVERR_DELETING_FOLDER,
-                    'Folder does not exist');
+                    'UID '||folderid||' does not exist');
         return RETVAL_FOLDER_NOTFOUND;
     end if;
     
