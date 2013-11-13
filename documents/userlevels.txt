@@ -1,0 +1,8 @@
+
+    0 : Account Owner  : can modify all other Members in the Account.
+    1 : Trusted Member : can modify all other Members EXCEPT the Owner.
+    2 : Member : can modify only themselves and their own Objects
+    3 : Viewer : can only view their own objects
+    4 : (Reserved for "Designated Viewer")
+    5+ : (Reserved)
+           
