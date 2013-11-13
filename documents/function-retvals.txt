@@ -1,97 +1,228 @@
 
-ALL POSSIBLE ERRORS FROM ALL FUNCTIONS                                       
------------------------------------------------------------------------------  
-                                                                               
-ALL                     x  Success                                             
-ALL                     x  Permission/Security Error                           
-ALL                     x  Database Failure                                    
-                                                                               
-add_account             x  Account already exists with this E-mail               
-add_file                x  File already exists in this Folder                    
-                        x  Can't find parent Folder                              
-add_folder              x  Folder already exists in parent Member                
-add_initial_folders     x  Folders already exist for parent Member               
-add_member              x  Can't find parent Account                             
-                        x  Member already exists with this E-mail                
-                        x  Member already exists with this Name in this Account  )
-                        x  Parent Account already contains maximum members       
-create_admin_account    x  Admin account already exists                          
-create_applist             (no error possible; truncates & populates reftable)   
-create_defaultfolders      (no error possible; truncates & populates reftable)   
-create_demo_account     x  Demo account already exists                           
-create_eventcodes          (no error possible; truncates & populates reftable)   
-delete_file             x  Can't find file to delete                             
-delete_folder           x  Can't find folder to delete                           
-get_account           ( L  Can't find requested Account )                        
-                      ( L  You must supply a field to search by )                
-get_accounts          ( L  You must supply a valid filter type )                 
-get_apps                   (no error possible; 'no results' is ok )              
-get_events                 (no error possible; 'no results' is ok )              
-get_files             ( L  You must supply a field to search by )                
-                      ( L  Can't find requested File )                           
-                      ( L  Can't find requested Folder )                         
-                      ( L  Can't find requested Member )                         
-get_folders           ( L  Can't find requested Folder )                         
-                      ( L  Can't find requested Member )                         
-get_member_apps       ( L  Can't find requested Member )                         
-get_members           ( L  Can't find requested Member )                         
-log_event                  (no error possible.  what would we do, log it??)      
-update_account          x  Can't find account to update                          
-update_folder           x  You must supply a field to update                     
-                        x  Can't find folder to update                           
-update_member           x  You must supply a field to update                     
-                        x  Can't find member to update                           
-update_member_apps      x  Can't find member to update                           
-update_password            (all errors are Permission/Security errors)           
-update_session          x  Can't find member to update Session for               
-validate_login             (all errors are Permission/Security errors)           
+ 
+=============================================================================
 
-( L : Returns a table of results instead of a retval -- find these in the eventlog. )
+    The behavior of a database should be completely defined.
+    Where the code and this documentation differ, 
+            THIS DOCUMENTATION IS AUTHORITATIVE AND CORRECT, and
+            THE CODE IS PROBABLY OUT OF DATE.
+
+revised by dbrown @ 2013-11-12 12:44 PM
 
 -----------------------------------------------------------------------------
-                
+The admin_... functions don't return anything, they communicate using RAISE
+
+    admin_create_admin_account      N/A (communicates to shell via RAISE)
+    admin_create_applist            N/A (communicates to shell via RAISE)
+    admin_create_defaultfolders     N/A (communicates to shell via RAISE)
+    admin_create_demo_account       N/A (communicates to shell via RAISE)
+    admin_create_eventcodes         N/A (communicates to shell via RAISE)
+    admin_delete_account_cascade    N/A (communicates to shell via RAISE)
+
+-----------------------------------------------------------------------------
+Some utility functions don't throw any sane errors
+    
+    log_event                  N/A (no error possible)
+    log_permissions_error      N/A (no error possible)
+    member_can_update_member   N/A (no error possible)
+    
+        checks for errors in this order:
+        
+          Get source-member info
+            source-member does not exist          : -> No
+            source-member is view-only            : -> No
+            source-member is target-member (self) : -> OK
+            
+          Get target-member info
+            target-member does not exist             : -> No
+            source-member is admin                   : -> OK        
+            source-member is Owner, target is in CID : -> OK            
+            source-member is Proxy, target is non-Owner in CID : -> OK
+            done (default) : -> No
+    
+    purge_events_before        N/A (no error possible)
+    purge_sessions_before      N/A (no error possible)
+        
+-----------------------------------------------------------------------------
+These functions all return tables. No-Results is always? a possibility.
+All warnings are logged as Developer errors ('x' as described below)
+                              
+    get_account             No-Results is ok
+                                 warn/log if No-Criteria-Supplied
+    get_accounts            No-Results is ok
+                                 warn/log if Invalid-Filtertype                   
+    get_apps                N/A (no error possible)              
+    get_events              N/A (no error possible)
+    get_files               No-Results is ok
+                                 warn/log if [Target-File] does not exist
+                                 warn/log if [Target-Folder] does not exist
+                                 warn/log if [Target-Member] does not exist
+    get_folders             No-Results is ok
+                                 warn/log if No-Criteria-Supplied                         
+    get_member_apps         No-Results is ok (return space-string)
+                                 warn/log if [Target-Member] does not exist
+    get_members             No-Results is ok
+                                 warn/log if No-Criteria-Supplied
+                                 warn/log if [Target-Member] does not exist
+                                 warn/log if [Target-Account] does not exist
+    update_session          N/A (no error possible)
+                                 warn/log if [User-Member] does not exist
+
+-----------------------------------------------------------------------------
+The 'validate' security functions are unique
+
+    validate_login          Logs success/failure, returns get_members(mid)
+    validate_session        Returns success/failure
+    
+    
+=============================================================================
+THE REST OF THE FUNCTIONS
+
+    The results/tests for each function are applied from the BOTTOM UP,
+        with success LAST at the top after all tests are passed.
+    
+    there are FOUR levels of failure, from minor to severe:    
+ 
+      -  No Problem : Notable success
+            1000-series EventCode
+            in general, anything that changes data is logged
+     
+      e  User Error : Problem with user input
+            4000-series EventCode
+            e.g. Data from args collided / was missing
+    
+      i  User isn't authorized to do that!
+            6000-series event code
+            In general, this is more severe than User Error because
+              the UI should have (in theory) made this query impossible.
+            
+      x  Developer Error
+            9000-series event code
+            e.g. Direct request for nonexistent item
+        
+-----------------------------------------------------------------------------
+
+add_account             -  Success : Here is your new Account
+                        e  Account already exists with this E-mail
+                           (No permissions checking)
+
+add_file                -  Success : User added a File to their own Folder
+                        -  Success : Owner added a File to a Member's Folder
+                        -  Success : ADMIN added a File to a Member's Folder                 
+                        e  [Filename] already exists in [Target-Folder]
+                        e  [Filename] is a required field
+                        i  [User-Member] not allowed to modify [Target-Folder]
+                        x  [Target-Folder] doesn't exist    
+                        x  [User-Member] doesn't exist
+                        
+add_folder              -  Success : User added their own Folder
+                        -  Success : Owner added a Folder for a Member
+                        -  Success : ADMIN added a Folder for a Member
+                        e  [Foldername] already exists for [Target-Member]
+                        e  [Foldername] is a required field
+                        i  [User-Member] not allowed to modify [Target-Member]
+                        x  [Target-Member] doesn't exist                       
+                        x  [User-Member] doesn't exist
+
+add_initial_folders     -  Success
+                        x  [Target-Member] doesn't exist
+                           (No permissions checking)
+      
+add_member              -  Success : Here is your new Member
+                        e  Member with [Name] already exists in [Target-Account]
+                        e  Member with [UserID] already exists
+                        e  Member with [E-mail] already exists
+                        e  Member would give [Target-Account] more than [MaxLogins] members
+                        x  [Target-Account] doesn't exist
+                           (No permissions checking)
+
+delete_file             -  Success : User deleted their own file
+                        -  Success : Owner deleted a member's file
+                        -  Success : ADMIN deleted a member's file
+                        i  [User-Member] not allowed to modify [Target-File]
+                        x  [Target-File] doesn't exist
+                        x  [User-Member] doesn't exist
+
+delete_folder           -  Success : User deleted their own folder
+                        -  Success : Owner deleted a member's folder
+                        -  Success : ADMIN deleted a member's folder
+                        i  [User-Member] not allowed to modify [Target-Folder]
+                        x  [Target-Folder] doesn't exist
+                        x  [User-Member] doesn't exist
+
+update_account          -  Success
+                           (No permissions checking)
+                        x  [Target-Account] doesn't exist
+
+update_folder           -  Success : User updated their own folder
+                        -  Success : Owner updated a member's folder
+                        -  Success : ADMIN updated a member's folder
+                        e  You must supply a field to update
+                        i  [User-Member] not allowed to modify [Target-Folder]
+                        x  [Target-Folder] doesn't exist
+                        x  [User-Member] doesn't exist
+                        
+update_member           -  Success : Member updated themselves
+                        -  Success : Owner upated a member
+                        -  Success : ADMIN updated a member
+                        e  You must supply a field to update
+                        i  [User-Member] not allowed to modify [Target-Member]
+                        x  [Target-Member] doesn't exist
+                        x  [User-Member] doesn't exist
+                        
+update_member_apps      -  Success
+                           (No permissions checking)
+                        x  [Target-Member] doesn't exist
+
+update_password         -  Success : Member updated their own password
+                        -  Success : Owner updated a member's password
+                        -  Success : ADMIN updated a member's password
+                        e  [New-Password] must not be whitespace or NULL
+                        i  [User-Member] not allowed to modify [Target-Member]
+                        x  [Target-Member] doesn't exist                        
+                        i  [User-Member] not allowed to Update Passwords
+                        x  [User-Member] doesn't exist
+
+
+=============================================================================
+return values
+
    GENERAL (Inf..-9)
 
     > 1     Success (typically the UID of whatever you just added)
-      1     Success                                                RETVAL_SUCCESS
-      0     A required argument was NULL                           RETVAL_ERR_ARG_MISSING
-     -1     A required argument was invalid                        RETVAL_ERR_ARG_INVALID
+      1     Success                                    RETVAL_SUCCESS
+      0     A required argument was NULL               RETVAL_ERR_ARG_MISSING
+     -1     A required argument was invalid            RETVAL_ERR_ARG_INVALID
 
-   MISSING OBJECT (-10..-19)
+   MISSING (DIRECTLY REFERENCED) OBJECT (-10..-19)
    
-    -10     Cannot Find Account                                    RETVAL_ERR_ACCOUNT_NOTFOUND
-    -11     Cannot Find (Source) Member                            RETVAL_ERR_MEMBER_NOTFOUND
-    -12     Cannot find Target member                              RETVAL_ERR_TARGET_NOTFOUND
-    -13     Cannot Find Folder                                     RETVAL_ERR_FOLDER_NOTFOUND
-    -14     Cannot Find File                                       RETVAL_ERR_FILE_NOTFOUND
+    -10     Cannot Find Account                        RETVAL_ERR_ACCOUNT_NOTFOUND
+    -11     Cannot Find (Source/User) Member           RETVAL_ERR_MEMBER_NOTFOUND
+    -12     Cannot find Target member                  RETVAL_ERR_TARGET_NOTFOUND
+    -13     Cannot Find Folder                         RETVAL_ERR_FOLDER_NOTFOUND
+    -14     Cannot Find File                           RETVAL_ERR_FILE_NOTFOUND
    
    OBJECT ALREADY EXISTS (-20..-39)
    
-    -20     Account already exists (with this e-mail address)      RETVAL_ERR_ACCOUNT_EXISTS
-    -22     Member already exists with this e-mail address         RETVAL_ERR_MEMBER_EXISTS_EMAIL
-    -23     Member already exists with this UserID                 RETVAL_ERR_MEMBER_EXISTS_USERID
-    -24     Member already exists with this Name and Account       RETVAL_ERR_MEMBER_EXISTS_NAME
-    -25     Member would exceed Account's maximum members          RETVAL_ERR_MEMBER_EXISTS_FULL
-    -26     Folder already exists for this member                  RETVAL_ERR_FOLDER_EXISTS
-    -27     File already exists in this folder                     RETVAL_ERR_FILE_EXISTS
+    -20     Account exists (with this e-mail address)  RETVAL_ERR_ACCOUNT_EXISTS
+    -22     Member exists with this e-mail address     RETVAL_ERR_MEMBER_EXISTS_EMAIL
+    -23     Member exists with this UserID             RETVAL_ERR_MEMBER_EXISTS_USERID
+    -24     Member exists with this Name and Account   RETVAL_ERR_MEMBER_EXISTS_NAME
+    -25     Member would exceed maximum members        RETVAL_ERR_MEMBER_EXISTS_FULL
+    -26     Folder already exists for this member      RETVAL_ERR_FOLDER_EXISTS
+    -27     File already exists in this folder         RETVAL_ERR_FILE_EXISTS
       
    PERMISSIONS ERRORS (-80..-98)
    
-    -80  Source member has insufficient permissions                RETVAL_ERR_USERLEVEL
-    -81  Source & Target in different CIDs, and Source isn't admin RETVAL_ERR_DIFFACCOUNTS
-    -82  Target outranks (i.e., has lower userlevel than) Source   RETVAL_ERR_OUTRANKED
+    -80  Source member has insufficient permissions    RETVAL_ERR_USERLEVEL
+    -81  Source & Target in different CIDs             RETVAL_ERR_DIFFACCOUNTS
+    -82  Target outranks Source                        RETVAL_ERR_OUTRANKED    
+    -88  Not Allowed! (General Permission Failure)     RETVAL_ERR_NOT_ALLOWED
     
-   OH SHIT
-    -99     Database failure
-        
-        
+=============================================================================
 TO DO
------------------------------------------------------------------------------
+
  * General : Remove all stupid 'Oh no we got more than one item by PK' checks
- * admin_create_admin_account() : REWRITE
-        add "admin user already exists" bailout
- * get_member_apps() : log "can't find requested Member" error
- * log_permissions_error() : rewrite to use new codes
- * member_can_update_member() : rewrite to use new codes
  * update_member: add smarter 'no such member' check
  * update_session: check that MID exists
+ 
