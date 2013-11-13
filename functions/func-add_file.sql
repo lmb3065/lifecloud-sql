@@ -23,6 +23,7 @@
 --                    added source level logging
 -- 2013-11-10 dbrown : update to latest revision of eventcodes/retvals
 --                    add filename to success event log
+-- 2013-11-12 dbrown : add filename to failure event log too; raise warnings
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -58,19 +59,20 @@ declare
         
 begin
 
-    -- Validate arguments
+    -- Make sure source user exists
     
-    if (_name is null) or (length(_name) = 0) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, '_name is required' );
-        return RETVAL_ERR_ARG_MISSING;
-    end if;
-
-
+    if not exists (select mid from members where mid = source_mid)
+        raise notice 'add_file(): Fail - Source MID [%] does not exist', source_mid;
+        perform log_event( null, null, EC_DEVERR_ADDING_FILE,
+                    'Source MID '||source_mid||' does not exist' );
+    
     -- Get folder's owner
     
     select mid into target_mid from folders where uid = parent_folder_uid;
     if (target_mid is null) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, 'Folder does not exist' );
+        raise notice 'add_file(): Fail - Folder [%] does not exist', parent_folder_uid; 
+        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE,
+                    'Folder '||parent_folder_uid||' does not exist' );
         return RETVAL_ERR_FOLDER_NOTFOUND; 
     end if;
 
@@ -86,6 +88,13 @@ begin
         return result;
     end if;
     
+    -- Validate arguments
+    
+    if (_name is null) or (length(_name) = 0) then
+        raise notice 'add_file(): Fail - Name is required';
+        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, 'Name is required' );
+        return RETVAL_ERR_ARG_MISSING;
+    end if;
     
     -- Ensure file doesn't already exist in folder 
     
@@ -93,8 +102,9 @@ begin
         where folder_uid = parent_folder_uid
         and lower(fdecrypt(x_name)) = lower(_name);
     if (existing_uid is not null) then
+        raise notice 'add_file(): Fail - A file named "%" already exists in folder [%]', _name, parent_folder_uid;
         perform log_event( source_cid, source_mid, EC_USERERR_ADDING_FILE,
-            'File already exists in folder', target_cid, target_mid);
+            'A file named "'||_name||'" already exists in folder "'||parent_folder_uid, target_cid, target_mid);
         return RETVAL_ERR_FILE_EXISTS;
     end if;
     
@@ -119,6 +129,7 @@ begin
     perform log_event( source_cid, source_mid, eventcode_out, _name, target_cid, target_mid );
     
     select last_value into newfileuid from files_uid_seq;
+    raise notice 'add_file(): Success - File [%] created in Folder [%]', newfileuid, parent_folder_uid;
     return newfileuid;
     
 end
