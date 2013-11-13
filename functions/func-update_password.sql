@@ -7,6 +7,8 @@
 -- 2013-10-12 dbrown: Added source-mid, extensive logging
 -- 2013-10-13 dbrown : perms/retvals moved into member_can_update_member()
 -- 2013-11-01 dbrown : update eventcodes, remove target-level logging
+-- 2013-11-12 dbrown : update to spec with constants, simplification
+-- 2013-11-13 dbrown : Fixed: was updating source-user instead of target-user
 -----------------------------------------------------------------------------
 
 create or replace function update_password(
@@ -18,53 +20,71 @@ create or replace function update_password(
 ) returns int as $$
     
 declare
-    result      int;
-    source_cid  int;
-    source_level   int;
-    source_isadmin int;
-    target_cid  int;
-    nrows       int;
+    EC_OK_UPDATED_PASSWORD        constant char(4) := '1043';
+    EC_OK_OWNER_UPDATED_PASSWORD  constant char(4) := '1044';
+    EC_OK_ADMIN_UPDATED_PASSWORD  constant char(4) := '1045';
+    EC_USERERR_UPDATING_PASSWORD  constant char(4) := '4043';
+    EC_AUTHERR_UPDATING_PASSWORD  constant char(4) := '6093';
+    EC_DEVERR_UPDATING_PASSWORD   constant char(4) := '9043';
+
+    RETVAL_SUCCESS  constant int := 1;
+    RETVAL_ERR_ARG_INVALID constant int := -1;
     
+    result          int;
+    source_cid      int;
+    source_level    int;
+    source_isadmin  int;
+    target_cid      int;
+    nrows           int;
+    eventcode_out   char(4);
 begin
 
     -- Check permissions
 
-    select allowed, scid, slevel, sisadmin, tcid 
-        into result, source_cid, source_level, source_isadmin, target_cid
-        from member_can_update_member(source_mid, target_mid);
+    SELECT allowed, scid, slevel, sisadmin, tcid 
+        INTO result, source_cid, source_level, source_isadmin, target_cid
+        FROM member_can_update_member(source_mid, target_mid);
         
-    if (result < 1) then -- 9010 = error updating password
-        perform log_permissions_error( '4040', result, source_cid, source_mid, target_cid, target_mid);
+    if (result <> RETVAL_SUCCESS) then
+        perform log_permissions_error( EC_AUTHERR_UPDATING_PASSWORD, 
+                    result, source_cid, source_mid, target_cid, target_mid);
         return result;
     end if;        
     
+    -- Check new data for validity
+    
+    newpassword := coalesce(newpassword, '');
+    
+    if (position(' ' in newpassword) < 1) then
+        perform log_event( source_cid, source_mid, EC_USERERR_UPDATING_PASSWORD,
+             'Password cannot contain spaces', target_cid, target_mid );
+        return RETVAL_ERR_ARG_INVALID;
+        
+    elsif (length(newpassword) < 6) then
+        perform log_event( source_cid, source_mid, EC_USERERR_UPDATING_PASSWORD,
+             'Password must be at least 6 characters', target_cid, target_mid );
+        return RETVAL_ERR_ARG_INVALID;
+    end if;
+    
+    
     -- Perform the update
     
-    update Members set
-            h_passwd = sha1(newpassword),
+    UPDATE Members
+        SET h_passwd = sha1(newpassword),
             updated  = clock_timestamp(),
             pwstatus = 0
-        where mid = source_mid;
-
+        WHERE mid = target_mid;
         
-    -- Error-checking   
-     
-    get diagnostics nrows = row_count;
-    if (nrows <> 1) then -- Fail
-        perform log_event( source_cid, source_mid, '9040', '', target_cid, target_mid );
-        return -10; end if;
-
         
-    -- Success must be logged according to who made the change ...
-       
-    if (source_isadmin = 1) then -- Admin made change
-        perform log_event( source_cid, source_mid, '1042', '', target_cid, target_mid );        
-    elsif (source_level = 0) then -- Account Owner made change
-        perform log_event( source_cid, source_mid, '1041', '', target_cid, target_mid );        
-    else
-        perform log_event( source_cid, source_mid, '1040', '', target_cid, target_mid );        
+    -- Success
+
+    if (source_mid = target_mid) then  eventcode_out := EC_OK_UPDATED_PASSWORD;
+    elsif (source_isadmin = 1) then    eventcode_out := EC_OK_ADMIN_UPDATED_PASSWORD;
+    elsif (source_level   = 0) then    eventcode_out := EC_OK_OWNER_UPDATED_PASSWORD;        
+    else eventcode_out := EC_OK_UPDATED_PASSWORD;
     end if;
-                
+
+    perform log_event( source_cid, source_mid, eventcode_out, null, target_cid, target_mid );        
     return result;
     
 end
