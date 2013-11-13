@@ -18,6 +18,7 @@
 --       E-mail is forced to lowercase before insert,
 --       Removed unnecessary INSERT sanity check, add success logging
 -- 2013-11-10 dbrown: includes owner e-mail in new success log
+-- 2013-11-12 dbrown: Raises warning on Account Already Exists
 -----------------------------------------------------------------------------
 
 create or replace function add_account(
@@ -61,7 +62,6 @@ begin
     
     _email := lower(_email);
 
-    
     -- Check for any existing Accounts that match this one
 
     select a.status, a.cid, m.mid 
@@ -74,8 +74,9 @@ begin
         return fcid;
     elsif (fcid is not null) then 
         -- Found an active account: Return error
+        raise notice 'Account <%> already exists', _email;
         perform log_event( fcid, fmid, EC_USERERR_ADDING_ACCOUNT, 
-                           'Account "' || _email || '" already exists' );
+                           'Account <'||_email||'> already exists' );
         return RETVAL_ERR_ACCOUNT_EXISTS;
     end if;
    
