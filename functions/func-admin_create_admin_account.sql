@@ -49,17 +49,17 @@ begin
         C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, 
         C_ADMIN_MI, expiration, '', '', '', '', '', '', 'US' );
     if (newcid < RETVAL_SUCCESS) then
-        raise warning "Couldn't create Administrator account! Check eventlog!";
+        raise warning 'Couldn''t create Administrator account! Check eventlog!';
         return;
     end if;
 
     
     -- Mark new account's owner member as the Administrator
     update Members set isadmin = 1 where mid = newmid;    
-    raise notice 'Administrator account [#'||newmid||'] created.';
+    raise notice 'Administrator account [%] created.', newmid;
     
     -- Done
-    return newmid; 
+    return; 
     
 end;
 $$ language plpgsql;
