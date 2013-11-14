@@ -9,6 +9,7 @@
 -- 2013-11-01 dbrown : update eventcodes, remove target-level logging
 -- 2013-11-12 dbrown : update to spec with constants, simplification
 -- 2013-11-13 dbrown : Fixed: was updating source-user instead of target-user
+-- 2013-11-13 dbrown : Fixed: reverse 'password cannot contain spaces' logic
 -----------------------------------------------------------------------------
 
 create or replace function update_password(
@@ -55,7 +56,7 @@ begin
     
     newpassword := coalesce(newpassword, '');
     
-    if (position(' ' in newpassword) < 1) then
+    if (position(' ' in newpassword) > 0) then
         perform log_event( source_cid, source_mid, EC_USERERR_UPDATING_PASSWORD,
              'Password cannot contain spaces', target_cid, target_mid );
         return RETVAL_ERR_ARG_INVALID;
