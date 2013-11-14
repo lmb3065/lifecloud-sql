@@ -28,6 +28,7 @@
 --                     replaced magic numbers and codes with constants
 -- 2013-11-10 dbrown: updated to latest eventcodes, add name to success event
 -- 2013-11-13 dbrown: organized, more information in eventlog details
+-- 2013-11-14 dbrown: TRUSTED (1) should have the same rights as Owner (0)
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -49,6 +50,7 @@ declare
     EVENT_AUTHERR_ADDING_FOLDER   constant varchar := '6070';
     EVENT_DEVERR_ADDING_MEMBER    constant varchar := '9070';
     
+    RETVAL_SUCCESS             constant int :=  1;
     RETVAL_ERR_ARG_INVALID     constant int :=  0;
 --  RETVAL_ERR_MEMBER_NOTFOUND   from member_can_update_member = -11
 --  RETVAL_ERR_MEMBER2_NOTFOUND  from member_can_update_member = -12
@@ -84,7 +86,7 @@ begin
     select allowed, scid, slevel, sisadmin, tcid 
         into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
-    if (result < 1) then 
+    if (result < RETVAL_SUCCESS) then
         perform log_permissions_error( EVENT_AUTHERR_ADDING_FOLDER, result,
                     source_cid, source_mid, target_cid, target_mid );
         return result;
@@ -125,12 +127,13 @@ begin
     
     -- Log if requested
     select last_value into newfolderuid from folders_uid_seq;
-    if (_logsuccess > 0) then
     
+    if (_logsuccess > 0) then
         if (source_mid = target_mid) then eventcode_out := EVENT_OK_ADDED_FOLDER;
         elsif (source_isadmin = 1)   then eventcode_out := EVENT_OK_ADMIN_ADDED_FOLDER;
-        elsif (source_level = 0)     then eventcode_out := EVENT_OK_OWNER_ADDED_FOLDER;
-        else eventcode_out := EVENT_OK_ADDED_FOLDER; end if;
+        elsif (source_level  <= 1)   then eventcode_out := EVENT_OK_OWNER_ADDED_FOLDER;
+        else eventcode_out := EVENT_OK_ADDED_FOLDER;
+        end if;
         
         perform log_event( source_cid, source_mid, eventcode_out,
                     '['||newfolderuid||'] '||_foldername, target_cid, target_mid );

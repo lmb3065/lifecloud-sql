@@ -26,6 +26,7 @@
 -- 2013-11-12 dbrown : add filename to failure event log too, raise notices,
 --                     simplified user-level eventcode logging
 -- 2013-11-13 dbrown : Organization, Exception Handling, More info in events
+-- 2013-11-14 dbrown : Trusted (lvl 1) should have same rights as Owner (lvl 0)
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -45,6 +46,7 @@ declare
     EVENT_AUTHERR_ADDING_FILE      constant varchar := '6080';
     EVENT_DEVERR_ADDING_FILE       constant varchar := '9080';
 
+    RETVAL_SUCCESS              constant int :=   1;
     RETVAL_ERR_ARG_INVALID      constant int :=   0;
     RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
     RETVAL_ERR_FILE_EXISTS      constant int := -26;
@@ -84,7 +86,7 @@ begin
     select allowed, scid, slevel, sisadmin, tcid 
         into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
-    if (result < 1) then 
+    if (result < RETVAL_SUCCESS) then
         perform log_permissions_error( EVENT_AUTHERR_ADDING_FILE, result,
                   source_cid, source_mid, target_cid, target_mid );
         return result;
@@ -129,7 +131,7 @@ begin
 
     if (source_mid = target_mid) then eventcode_out := EC_OK_ADDED_FILE;
     elsif (source_isadmin = 1)   then eventcode_out := EC_OK_ADMIN_ADDED_FILE;
-    elsif (source_level   = 0)   then eventcode_out := EC_OK_OWNER_ADDED_FILE;
+    elsif (source_level  <= 1)   then eventcode_out := EC_OK_OWNER_ADDED_FILE;
     else eventcode_out := EC_OK_ADDED_FILE;
     end if;
     
