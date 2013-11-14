@@ -27,6 +27,7 @@
 --                     removed unnecessary INSERT sanity check
 --                     replaced magic numbers and codes with constants
 -- 2013-11-10 dbrown: updated to latest eventcodes, add name to success event
+-- 2013-11-13 dbrown: organized, more information in eventlog details
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -41,16 +42,19 @@ create or replace function add_folder(
 ) returns int as $$
 
 declare
-    EC_OK_ADDED_FOLDER         constant varchar := '1070';
-    EC_OK_OWNER_ADDED_FOLDER   constant varchar := '1071';
-    EC_OK_ADMIN_ADDED_FOLDER   constant varchar := '1072';
-    EC_USERERR_ADDING_FOLDER   constant varchar := '4070';
-    EC_PERMERR_ADDING_FOLDER   constant varchar := '6070';
-    EC_DEVERR_ADDING_FOLDER    constant varchar := '9070';
+    EVENT_OK_ADDED_FOLDER         constant varchar := '1070';
+    EVENT_OK_OWNER_ADDED_FOLDER   constant varchar := '1071';
+    EVENT_OK_ADMIN_ADDED_FOLDER   constant varchar := '1072';
+    EVENT_USERERR_ADDING_FOLDER   constant varchar := '4070';
+    EVENT_AUTHERR_ADDING_FOLDER   constant varchar := '6070';
+    EVENT_DEVERR_ADDING_MEMBER    constant varchar := '9070';
     
-    RETVAL_ERR_ARG_MISSING     constant int :=  0;
-    RETVAL_ERR_MEMBER_NOTFOUND constant int := -11;
-    RETVAL_ERR_FOLDER_EXISTS   constant int := -26;
+    RETVAL_ERR_ARG_INVALID     constant int :=  0;
+--  RETVAL_ERR_MEMBER_NOTFOUND   from member_can_update_member = -11
+--  RETVAL_ERR_MEMBER2_NOTFOUND  from member_can_update_member = -12
+--  RETVAL_ERR_NOT_ALLOWED       from member_can_update_member = -80
+    RETVAL_ERR_FOLDER_EXISTS   constant int := -25;
+    RETVAL_ERR_EXCEPTION       constant int := -98;
 
     result int;
     newfolderuid int;
@@ -64,57 +68,72 @@ declare
     
 begin
 
-    -- Validate arguments
+
+    -- Check arguments --------------------------------------------------------
+
     
+    -- Ensure we have a Name to give the folder
     if (_foldername is null) or (length(_foldername) = 0) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FOLDER, '_foldername is required' );
-        return RETVAL_ERR_ARG_MISSING;
+        perform log_event( null, source_mid, EVENT_DEVERR_ADDING_FOLDER,
+                    'FolderName is required' );
+        return RETVAL_ERR_ARG_INVALID;
     end if;
 
     
-    -- Check relations between source and target members
-
+    -- Ensure User-Member is allowed to modify Target-Member's Stuff
     select allowed, scid, slevel, sisadmin, tcid 
         into result, source_cid, source_level, source_isadmin, target_cid
         from member_can_update_member(source_mid, target_mid);
-    if (result < 1) then
-        return log_permissions_error( EC_PERMERR_ADDING_FOLDER, result,
-                                      source_cid, source_mid, target_cid, target_mid );
+    if (result < 1) then 
+        perform log_permissions_error( EVENT_AUTHERR_ADDING_FOLDER, result,
+                    source_cid, source_mid, target_cid, target_mid );
+        return result;
     end if;
     
     
-    -- Ensure the member doesn't already have a folder with this name
-    
-    select uid into existing_uid from folders
-        where mid = target_mid
-        and lower(fdecrypt(x_name)) = lower(_foldername);
+    -- Ensure user doesn't already have this folder
+    select uid into existing_uid from folders 
+        where mid = target_mid 
+        and lower(fdecrypt(x_name)) = lower(_foldername); -- case insensitive
     if (existing_uid is not null) then
-        perform log_event( source_cid, source_mid, EC_USERERR_ADDING_FOLDER,
-                           'Member already has folder with that name',
-                           target_cid, target_mid );
+        perform log_event( source_cid, source_mid, EVENT_USERERR_ADDING_FOLDER,
+                    'Member already has folder '||_foldername, target_cid, target_mid );
         return RETVAL_ERR_FOLDER_EXISTS;
     end if;
-    
-    
-    -- Add folder to database --
-    
-    insert into Folders ( mid, cid, x_name, x_desc, itemtype )
-        values ( target_mid, target_cid, fencrypt(_foldername), fencrypt(_description), _itemtype );
-    select last_value into newfolderuid from folders_uid_seq;
 
-    -- Success
     
+    
+    -- Passed tests, add the Folder -------------------------------------------
+    
+    declare errno text; errmsg text; errdetail text;
+    begin    
+        insert into Folders ( mid, cid, x_name, x_desc, itemtype )
+            values ( target_mid, target_cid, fencrypt(_foldername), 
+                        fencrypt(_description), _itemtype );
+    
+    exception when others then
+        -- Couldn't add Folder!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;                
+        perform log_event(_cid, null, EVENT_DEVERR_ADDING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
+
+    
+
+    -- Success ----------------------------------------------------------------    
+
+    
+    -- Log if requested
+    select last_value into newfolderuid from folders_uid_seq;
     if (_logsuccess > 0) then
     
-        if (source_isadmin = 1) then 
-            eventcode_out := EC_OK_ADMIN_ADDED_FOLDER;
-        elsif (source_level = 0) and (source_mid <> target_mid) then
-            eventcode_out := EC_OK_OWNER_ADDED_FOLDER;
-        else
-            eventcode_out := EC_OK_ADDED_FOLDER;
-        end if;    
-        perform log_event( source_cid, source_mid, eventcode_out, _foldername, target_cid, target_mid );
+        if (source_mid = target_mid) then eventcode_out := EVENT_OK_ADDED_FOLDER;
+        elsif (source_isadmin = 1)   then eventcode_out := EVENT_OK_ADMIN_ADDED_FOLDER;
+        elsif (source_level = 0)     then eventcode_out := EVENT_OK_OWNER_ADDED_FOLDER;
+        else eventcode_out := EVENT_OK_ADDED_FOLDER; end if;
         
+        perform log_event( source_cid, source_mid, eventcode_out,
+                    '['||newfolderuid||'] '||_foldername, target_cid, target_mid );
     end if;
     
     return newfolderuid;

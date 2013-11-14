@@ -19,23 +19,21 @@
 --       Removed unnecessary INSERT sanity check, add success logging
 -- 2013-11-10 dbrown: includes owner e-mail in new success log
 -- 2013-11-12 dbrown: Raises warning on error
+-- 2013-11-13 dbrown: Deletes account entry if member-creation failed
+--       Removed RAISE, added exception handling around SQL
+--       Organized, more information in eventlog details
 -----------------------------------------------------------------------------
 
 create or replace function add_account(
 
-    -- All of this data actually goes into the Member object 
-    -- representing the account owner, except where noted.
-
-    -- Required arguments
     _email      varchar(64),
     _passwd     varchar(64),
     _lname      varchar(64),
     _fname      varchar(64),
     
-    -- Optional arguments
     _mi         char(1)      default  '',
-    _expires    timestamp    default  current_date + interval '1 year', -- goes into Account
-    _referrer   varchar(64)  default  '',   -- goes into Account
+    _expires    timestamp    default  current_date + interval '1 year',
+    _referrer   varchar(64)  default  '',
     _address1   varchar(64)  default  '',
     _address2   varchar(64)  default  '',
     _city       varchar(64)  default  '',
@@ -43,64 +41,95 @@ create or replace function add_account(
     _postalcode varchar(16)  default  '',
     _country    char(2)      default  '',
     _phone      varchar(20)  default  '',
-    _status     int          default  0     -- goes into Account
+    _status     int          default  0
 
 ) returns int as $$
     
 declare
-    EC_OK_ADDED_ACCOUNT       constant varchar := '1020';
-    EC_USERERR_ADDING_ACCOUNT constant varchar := '4020';
-    RETVAL_ERR_ACCOUNT_EXISTS constant int := -20;
+    EVENT_OK_ADDED_ACCOUNT       constant char(4) := '1020';
+    EVENT_USERERR_ADDING_ACCOUNT constant char(4) := '4020';
+    EVENT_DEVERR_ADDING_ACCOUNT  constant char(4) := '9020';
+    RETVAL_OK                    constant int :=   1;
+    RETVAL_ERR_ACCOUNT_EXISTS    constant int := -20;
+--  RETVAL_ERR_MEMBER_EXISTS_EMAIL  from add_member = -21
+--  RETVAL_ERR_MEMBER_EXISTS_USERID from add_member = -22
+    RETVAL_ERR_EXCEPTION         constant int := -98;
     
+    result int;
     fstatus int; fcid int; fmid int; -- "found" status, cid, mid
     newcid int; newmid int;
     C_QUOTA constant int := 100000000;
         
 begin
-    -- All e-mails are case insensitive
-    _email := lower(_email);
+    
+    
+    -- Check arguments --------------------------------------------------------
 
-    -- Check for any existing Accounts with this e-mail
+    _email := lower(_email); -- e-mail is case insensitive
 
+    
+    -- Check for existing account with this e-mail address
     SELECT a.status, a.cid, m.mid
         INTO fstatus, fcid, fmid
         FROM Accounts a JOIN Members m on (a.owner_mid = m.mid)
         WHERE _email = fdecrypt(m.x_email);
-        
+
     if (fstatus = 9) then
         -- Found a temp signup account: Return that
         return fcid;
+        
     elsif (fcid is not null) then 
         -- Found an active account: Return error
-        perform log_event( fcid, fmid, EC_USERERR_ADDING_ACCOUNT,
+        perform log_event( fcid, fmid, EVENT_USERERR_ADDING_ACCOUNT,
                     'Account <'||_email||'> already exists' );
-        raise warning 'Account <%> already exists', _email;
         return RETVAL_ERR_ACCOUNT_EXISTS;
+        
     end if;
    
     
-    -- Passed tests, add Accounts record
-    --     (owner_mid will get a real value after the Member 
-    --      is created; for now it is 0, not a valid MID)
 
-    insert into Accounts ( owner_mid, status, quota, referrer, expires )
-        values ( 0, _status, C_QUOTA, _referrer, _expires );
-        
+    -- Passed tests, add the Account ------------------------------------------
+    
+    declare
+        errno  text;
+        errmsg text;
+        errdetail text;
+    begin
+        -- owner_mid = 0 until Owner is successfully created
+        INSERT INTO Accounts ( owner_mid, status, quota, referrer, expires )
+            VALUES ( 0, _status, C_QUOTA, _referrer, _expires );
+            
+    exception when others then
+        -- Couldn't add account!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;                
+        perform log_event(null, null, EVENT_DEVERR_ADDING_ACCOUNT, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
+    
     select last_value into newcid from accounts_cid_seq;
-    perform log_event( newcid, null, EC_OK_ADDED_ACCOUNT, _email );     
+    perform log_event( newcid, null, EVENT_OK_ADDED_ACCOUNT, '['||newcid|| '] '||_email );
+    
 
-
-    -- Create Owner Member record and add it to the account --      
+    
+    -- Add the Member (Owner) -------------------------------------------------
     
     newmid := add_member( newcid, _fname, _lname, _mi, _passwd, _email, _email, null,  
         _address1, _address2, _city, _state, _postalcode, _country, _phone, 
         null, 0, 0, 0, 1 );
+
+    if (newmid < RETVAL_OK) then
+        -- Couldn't add member! Remove the Account we just created!
+        -- (negative newmid contains error code) 
+        delete from Accounts where owner_mid = 0;
+        RETURN newmid;
+    end if;
+
+    -- Link Member to Account as Owner
     update Accounts set owner_mid = newmid where cid = newcid;
 
+    -- Done    
     return newcid;
     
 end;
-$$
-language plpgsql;
-
+$$ language plpgsql;
 

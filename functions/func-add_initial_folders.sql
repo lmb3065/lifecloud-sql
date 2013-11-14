@@ -16,15 +16,16 @@
 --                     Replaced magic retvals and eventcodes with constants
 --                     quits if member already has folders
 -- 2013-11-07 dbrown : changed value of RETVAL_ERR_FOLDER_EXISTS to -26
+-- 2013-11-13 dbrown : Organized, more information in eventlog details
 --------------------------------------------------------------------------------
 
 create or replace function add_initial_folders( _mid int ) 
     returns int as $$
 
 declare
-    RETVAL_SUCCESS           constant int :=   1;
-    RETVAL_ERR_FOLDER_EXISTS constant int := -26;
-    EC_DEVERR_ADDING_FOLDER  constant varchar := '9070';
+    EVENT_DEVERR_ADDING_FOLDER constant char(4) := '9070';
+    RETVAL_SUCCESS             constant int :=   1;
+    RETVAL_ERR_FOLDER_EXISTS   constant int := -25;
 
     nfolders int;
     admin_mid int;
@@ -36,24 +37,20 @@ declare
         
 begin
 
-    -- Bail out if user already has folders;
-    -- we don't want to duplicate them.
-    
-    SELECT count(*) INTO nfolders 
-        FROM Folders 
-        WHERE mid = _mid;
-        
-    if (nfolders > 0) then
-        perform log_event( null, _mid, EC_DEVERR_ADDING_FOLDER, 'User already has folders' );
+    -- Ensure user is new (has no folders)
+    if exists (select UID from Folders WHERE mid = _mid) then
+        perform log_event( null, _mid, EC_DEVERR_ADDING_FOLDER,
+                    'Member ['||mid||'] already has folders' );
         return RETVAL_ERR_FOLDER_EXISTS;
     end if;
 
     
-    -- Copy the folders to their new owner
+    -- Copy folders
     for r in c loop    
         perform add_folder( 1, _mid, r.fname, r.fdesc, 0, 0 );
     end loop;
-    
+
+    -- Success    
     return RETVAL_SUCCESS;
     
 end;
