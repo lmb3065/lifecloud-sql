@@ -13,6 +13,7 @@
 -- 2013-11-01 dbrown : added filtertype 'c' to search by cid
 -- 2013-11-01 dbrown : revised eventcodes
 -- 2013-11-12 dbrown : raises warning on invalid FilterType
+-- 2013-11-14 dbrown : Fixed: attempt to return NULL in func returning table
 ---------------------------------------------------------------------------------
 
 create or replace function get_accounts(
@@ -44,7 +45,7 @@ begin
     if  ( (_lower_filtertype is not null) 
     and   (_lower_filtertype not in ('c','e','f','l','')) ) then
         raise warning 'get_accounts(): invalid FilterType (expected [CEFL ])';
-        return null;
+        return;
     end if;
     
     -- Do our main unpaged query into a temporary table

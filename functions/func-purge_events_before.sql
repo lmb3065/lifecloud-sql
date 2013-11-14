@@ -6,7 +6,7 @@
 -- ======================================================================   
     
 create or replace function purge_events_before( _dt timestamp )
-    returns null as $$
+    returns void as $$
 begin
     delete from events where dt < _dt;
 end;

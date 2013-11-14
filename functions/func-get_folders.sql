@@ -84,7 +84,7 @@ begin
         end if;
     else
         raise warning 'get_folders(): no search criteria supplied';
-        return null;
+        return;
     end if;
 
     

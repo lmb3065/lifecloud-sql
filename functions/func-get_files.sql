@@ -52,7 +52,7 @@ begin
 
     -- Argument processing: Make sure we have at least one
     if (_fileuid is null) and (_folder_uid is null) and (_mid is null) then
-        raise warning 'get_files(): no search criteria supplied' );
+        raise warning 'get_files(): no search criteria supplied';
         return null;
     end if;
     
