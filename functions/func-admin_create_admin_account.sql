@@ -56,7 +56,7 @@ begin
     
     -- Mark new account's owner member as the Administrator
     update Members set isadmin = 1 where mid = newmid;    
-    raise notice 'Administrator account [%] created.', newmid;
+    raise notice 'Administrator account [#%] created.', newmid;
     
     -- Done
     return; 

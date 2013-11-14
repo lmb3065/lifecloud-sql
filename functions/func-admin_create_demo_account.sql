@@ -40,6 +40,7 @@ declare
 begin
 
     -- Add an account.  This automagically creates an Owner member.
+    -- (Dup-checking, logging, etc is done within add_account)
     cid := add_account( A_EMAIL, A_PWORD, A_LNAME, A_FNAME, A_MI, A_EXP );
 
     if (cid < 1) then
@@ -48,6 +49,7 @@ begin
     end if;
 
     -- Add an extra (non-admin) member.  This account now has TWO members.
+    -- (Dup-checking, logging, etc is done within add_member)
     mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
 
     if (mid < 1) then
@@ -56,7 +58,7 @@ begin
     end if;
 
     -- Success
-    raise notice 'Demonstration account created.';
+    raise notice 'Demonstration account [#%] created.', mid;
     return;
 
 end;
