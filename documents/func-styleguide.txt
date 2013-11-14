@@ -2,6 +2,30 @@
 -----------------------------------------------------------------------------
 Event Codes
 
+            0---  (Obsolete eventcodes)
+            1---  OK / Normal notification
+            4---  User's Fault error
+            6---  Authorization Failure
+            9---  Developer Error
+            -00-  Login (unique last-digit codes)
+            -02-  Account
+            -03-  Member
+            -04-  Password
+            -05-  Session
+            -07-  Folder
+            -08-  File
+            -09-  Event
+            ---0  Add/Create
+            ---1  Add/Create by Account Owner
+            ---2  Add/Create by Admin
+            ---3  Update
+            ---4  Update by Account Owner
+            ---5  Update by Admin
+            ---6  Get
+            ---7  Delete
+            ---8  Delete by Account Owner
+            ---9  Delete by Admin  
+
     1020    event_ok_added_account          add_account
     1029    event_ok_admin_deleted_account  admin_delete_account_cascade
     
@@ -22,6 +46,7 @@ Event Codes
     1089    event_ok_admin_deleted_file     delete_file
 
     4020    event_usererr_adding_account    add_account    
+    4026    event_usererr_getting_account   get_account
     4030    event_usererr_adding_member     add_member
     4070    event_usererr_adding_folder     add_folder
     4080    event_usererr_adding_file       add_file
@@ -32,6 +57,7 @@ Event Codes
     6087    event_autherr_deleting_file     delete_file
 
     9020    event_deverr_adding_account     add_account
+    9026    event_deverr_getting_account    get_account
     9030    event_deverr_adding_member      add_member
     9070    event_deverr_adding_folder      add_folder
     9077    event_deverr_deleting_folder    delete_folder
@@ -93,7 +119,8 @@ add_account (email, password, lname, fname, ...)
     admin_create_admin_account ()
       event_deverr_adding_account     void
       event_ok_added_account          void
-   
+    admin_create_demo_account()
+      
             
 add_member (cid, fname, lname, ...)
 
@@ -156,7 +183,16 @@ delete_file(mid1, fileuid)
     event_ok_owner_deleted_file     retval_success
     event_ok_admin_deleted_file     retval_success
 
+    -----------------------------------------------------------------------------
     
+get_account( ?cid, ?email )
+
+    event_deverr_getting_account    null row (no args)
+    event_deverr_getting_account    null row (CID mismatch)
+    none                            row (success)
+
+    
+
 =============================================================================
 RULES
 

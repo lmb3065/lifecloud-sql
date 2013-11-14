@@ -17,32 +17,32 @@ begin
     truncate table ref_eventcodes;
     insert into ref_eventcodes(code, description) values
 
-    /*      1000 = Normal conditions / notifications
-            4000 = User's Fault errors
-            6000 = Permissions Errors
-            9000 = Product / Developer Errors
-        +
-           0 Login
-          20 Account
-          30 Member
-          40 Password
-          50 Session
-          70 Folder
-          80 File
-          90 Event
-       +
-           0 Add/Create
-           1 Add/Create by Account Owner
-           2 Add/Create by Admin
-           3 Update
-           4 Update by Account Owner
-           5 Update by Admin
-           6 Get
-           7 Delete
-           8 Delete by Account Owner
-           9 Delete by Admin       */  
+    /*  How EventCodes are built:
+        
+            0---  (Obsolete eventcodes)
+            1---  OK / Normal notification
+            4---  User's Fault error
+            6---  Authorization Failure
+            9---  Developer Error
+            -00-  Login (unique last-digit codes)
+            -02-  Account
+            -03-  Member
+            -04-  Password
+            -05-  Session
+            -07-  Folder
+            -08-  File
+            -09-  Event
+            ---0  Add/Create
+            ---1  Add/Create by Account Owner
+            ---2  Add/Create by Admin
+            ---3  Update
+            ---4  Update by Account Owner
+            ---5  Update by Admin
+            ---6  Get
+            ---7  Delete
+            ---8  Delete by Account Owner
+            ---9  Delete by Admin */  
     
-     
     -- 1000 - 1999 : Normal conditions / notifications 
     
         ( '1000', 'user logged in' ),
@@ -52,79 +52,80 @@ begin
         ( '1004', 'automatic log-out' ),
         ( '1005', 'userid/password e-mailed' ),
         ( '1006', 'delphi notified' ),
-        ( '1020', 'new account registration' ),         -- EC_OK_ADDED_ACCOUNT
+        
+        ( '1020', 'new account registration' ),                 -- add_account
         ( '1023', 'account updated' ),
-        ( '1029', 'account deleted by Admin' ),         -- EC_OK_ADMIN_DELETED_ACCOUNT
-        ( '1030', 'new member added' ),                 -- EC_OK_ADDED_MEMBER
-        ( '1031', 'new member added by account owner' ),
-        ( '1032', 'new member added by Admin' ),
+        ( '1029', 'account deleted by Admin' ),
+
+        ( '1030', 'new member added' ),                         -- add_member
         ( '1033', 'member updated' ),
         ( '1034', 'member updated by account owner' ),
         ( '1035', 'member updated by Admin' ),
         ( '1037', 'member deleted' ),
         ( '1038', 'member deleted by account owner' ),
         ( '1039', 'member deleted by Admin' ),        
+        
+        ( '1042', 'password changed (obsolete)' ),
         ( '1043', 'password changed' ),
         ( '1044', 'password changed by owner' ),
         ( '1045', 'password changed by Admin' ),
-        ( '1070', 'folder added' ),                 -- EC_OK_ADDED_FOLDER
-        ( '1071', 'folder added by owner' ),        -- EC_OK_OWNER_ADDED_FOLDER
-        ( '1072', 'folder added by Admin' ),        -- EC_OK_ADMIN_ADDED_FOLDER
+
+        ( '1070', 'folder added' ),                             -- add_folder
+        ( '1071', 'folder added by owner' ),                    -- add_folder
+        ( '1072', 'folder added by Admin' ),                    -- add_folder
         ( '1073', 'folder updated' ),                   
         ( '1074', 'folder updated by account owner' ),
         ( '1075', 'folder updated by Admin' ),          
         ( '1077', 'folder deleted' ),
         ( '1078', 'folder deleted by owner' ),
         ( '1079', 'folder deleted by Admin' ),
-        ( '1080', 'file added' ),                   -- EC_OK_ADDED_FILE
-        ( '1081', 'file added by owner' ),          -- EC_OK_OWNER_ADDED_FILE
-        ( '1082', 'file added by Admin' ),          -- EC_OK_ADMIN_ADDED_FILE
-        ( '1087', 'file deleted' ),
-        ( '1088', 'file deleted by owner' ),
-        ( '1089', 'file deleted by Admin' ),
+                                                    
+        ( '1080', 'file added' ),                               -- add_file
+        ( '1081', 'file added by owner' ),                      -- add_file
+        ( '1082', 'file added by Admin' ),                      -- add_file
+        ( '1087', 'file deleted' ),                             -- delete_file          
+        ( '1088', 'file deleted by owner' ),                    -- delete_file
+        ( '1089', 'file deleted by Admin' ),                    -- delete_file
         
     -- 4000 - 4999 : User's Fault errors
     
         ( '4000', 'invalid login attempt' ),
         ( '4006', 'unauthorized page attempt' ),
-        ( '4020', 'user could not add account' ),       -- EC_USERERR_ADDING_ACCOUNT
-        ( '4030', 'user could not add member' ),        -- EC_USERERR_ADDING_MEMBER
+        ( '4020', 'user could not add account' ),               -- add_account
+        ( '4030', 'user could not add member' ),                -- add_member
+        ( '4040', 'user could not update password (obsolete)'),
         ( '4043', 'user could not update password' ),       
-        ( '4070', 'user could not add folder' ),        -- EC_USERERR_ADDING_FOLDER
-        ( '4073', 'user could not update folder' ),
-        ( '4077', 'user could not delete folder' ),
-        ( '4080', 'user could not add file' ),          -- EC_USERERR_ADDING_FILE
-        ( '4087', 'user could not delete file' ),        
+        ( '4070', 'user could not add folder' ),                -- add_folder
+        ( '4073', 'user could not update folder' ),     
+        ( '4077', 'user could not delete folder' ),     
+        ( '4080', 'user could not add file' ),                  -- add_file
+        ( '4087', 'user could not delete file' ),
         
-    -- 6000+ Permissions Errors
+    -- 6000+ Authorization (Permissions) Errors
     
         ( '6000', 'unauthorized login attempt' ),
         ( '6006', 'unauthorized page attempt' ),
-        ( '6020', 'unauthorized attempt to add account' ),
-        ( '6023', 'unauthorized attempt to update account' ),
-        ( '6027', 'unauthorized attempt to delete account' ),
-        ( '6030', 'unauthorized attempt to add member' ),
-        ( '6033', 'unauthorized attempt to update member' ),
-        ( '6037', 'unauthorized attempt to delete member' ),
         ( '6043', 'unauthorized attempt to change password' ),
-        ( '6070', 'unauthorized attempt to add folder' ),       -- EC_PERMERR_ADDING_FOLDER
-        ( '6077', 'unauthorized attempt to delete file' ),
-        ( '6080', 'unauthorized attempt to add file' ),         -- EC_PERMERR_ADDING_FILE
+        ( '6070', 'unauthorized attempt to add folder' ),       -- add_folder
+        ( '6077', 'unauthorized attempt to delete folder' ),
+        ( '6080', 'unauthorized attempt to add file' ),
         ( '6087', 'unauthorized attempt to delete file' ),
            
     -- 9000+ : Database/Developer errors
     
-        ( '9020', 'error adding account' ),                 -- EC_DEVERR_ADDING_ACCOUNT
+        ( '9020', 'error adding account' ),                     -- add_account                     
         ( '9023', 'error updating account' ),
-        ( '9030', 'error adding member' ),                  -- EC_DEVERR_ADDING_MEMBER
+        ( '9026', 'error getting account(s)' ),
+        ( '9030', 'error adding member' ),                      -- add_member
         ( '9033', 'error updating member' ),
+        ( '9036', 'error getting member(s)' ),
         ( '9043', 'error updating password' ),
         ( '9050', 'error updating session'  ),
-        ( '9070', 'error adding folder' ),                  -- EC_DEVERR_ADDING_FOLDER
+        ( '9070', 'error adding folder' ),                      -- add_folder
         ( '9073', 'error updating folder' ),
         ( '9077', 'error deleting folder' ),
-        ( '9080', 'error adding file' ),                    -- EC_DEVERR_ADDING_FILE
-        ( '9085', 'error getting file(s)' ),
+        ( '9080', 'error adding file' ),                        -- add_file
+        ( '9086', 'error getting file(s)' ),
         ( '9087', 'error deleting file' ),
   
     --
@@ -134,14 +135,14 @@ begin
     -- OBSOLETE EventCodes
     -- ---------------------------------------------------------------------------
         
-        ( '0000', 'user logged in (obsolete eventcode)' ),
-        ( '0001', 'user logged out (obsolete eventcode)' ),
-        ( '0002', 'invalid login attempt (obsolete eventcode)' ),
-        ( '0003', 'automatic log-in (obsolete eventcode)' ),
+        ( '0000', 'user logged in (obsolete eventcode, use 1000)' ),
+        ( '0001', 'user logged out (obsolete eventcode, use 1001)' ),
+        ( '0002', 'invalid login attempt (obsolete eventcode, use 4000)' ),
+        ( '0003', 'automatic log-in (obsolete eventcode, use 1003)' ),
         ( '0004', 'userid/password e-mailed (obsolete eventcode)' ),
         ( '0005', 'imaging options notified (obsolete eventcode)' ),
         ( '0006', 'unauthorized page attempt (obsolete eventcode)' ),
-        ( '0007', 'automatic log-out (obsolete eventcode)' ),
+        ( '0007', 'automatic log-out (obsolete eventcode, use 1004)' ),
         
         ( '0010', 'account added by admin (obsolete eventcode)' ),
         ( '0011', 'account deleted by admin (obsolete eventcode)' ),
@@ -190,7 +191,6 @@ begin
         ( '9022', 'error marking folder deleted (obsolete eventcode)'),
         ( '9024', 'error adding file (obsolete eventcode)'),
         ( '9025', 'error updating file (obsolete eventcode)'),
-        ( '9026', 'error deleting file (obsolete eventcode)'),
         ( '9040', 'error uploading image (obsolete eventcode)'),
         ( '9041', 'error adding image (obsolete eventcode)');
     
