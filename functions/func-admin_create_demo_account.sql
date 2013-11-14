@@ -15,7 +15,7 @@
 -- 2013-10-24 dbrown Fixed outdated call to add_member() [h_profilepic]
 -- 2013-11-09 dbrown Updated retvals, eventcodes, replaced magic with constants
 --                   Returns new add_member or add_account result directly
--- 2013-11-10 dbrown Returns void, communicates by RAISE NOTICE
+-- 2013-11-10 dbrown Returns void, communicates by RAISE WARNING
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_demo_account() returns void as $$
@@ -52,14 +52,14 @@ begin
     cid := add_account( A_EMAIL, A_PWORD, A_LNAME, A_FNAME, A_MI, A_EXP );
     
     if (cid < 1) then
-        raise error 'FAILED to create Demonstration account!';
+        raise warning 'FAILED to create Demonstration account!';
         return; end if;
         
     -- Add an extra (non-admin) member.  This account now has TWO members.
     mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
 
     if (mid < 1) then
-        raise error 'FAILED to create Demonstration member!';
+        raise warning 'FAILED to create Demonstration member!';
         return; end if; 
     
     raise notice 'Demonstration account created.';
