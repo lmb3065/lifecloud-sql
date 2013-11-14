@@ -21,11 +21,11 @@ create or replace function delete_file(
 ) returns int as $$
 
 declare
-    EVENT_OK_DELETED_FILE       constant varchar := '1087';
-    EVENT_OK_OWNER_DELETED_FILE constant varchar := '1088';
-    EVENT_OK_ADMIN_DELETED_FILE constant varchar := '1089';
-    EC_PERMERR_DELETING_FILE    constant varchar := '6087';
-    EC_DEVERR_DELETING_FILE     constant varchar := '9087';
+    EVENT_OK_DELETED_FILE       constant char(4) := '1087';
+    EVENT_OK_OWNER_DELETED_FILE constant char(4) := '1088';
+    EVENT_OK_ADMIN_DELETED_FILE constant char(4) := '1089';
+    EVENT_AUTHERR_DELETING_FILE constant char(4) := '6087';
+    EVENT_DEVERR_DELETING_FILE  constant char(4) := '9087';
     eventcode_out varchar;
 
     RETVAL_SUCCESS              constant int :=   1;

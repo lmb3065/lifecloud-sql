@@ -4,6 +4,7 @@
 -----------------------------------------------------------------------------
 -- DELETES ALL TRACE OF AN ACCOUNT.  Use with caution
 -- 2013-11-12 dbrown : Raise exception if CID doesn't exist
+-- 2013-11-14 dbrown : updated to new eventcode constants
 -----------------------------------------------------------------------------
 
 create or replace function admin_delete_account_cascade(
@@ -13,7 +14,7 @@ create or replace function admin_delete_account_cascade(
 ) returns void as $$
 
 declare
-    EC_OK_ADMIN_DELETED_ACCOUNT constant varchar := '1029';
+    EVENT_OK_ADMIN_DELETED_ACCOUNT constant varchar := '1029';
 
 begin
 
@@ -34,7 +35,7 @@ begin
         
     delete from events  where (cid = arg_cid) or (target_cid = arg_cid);
 
-    perform log_event( arg_cid, null, EC_OK_ADMIN_DELETED_ACCOUNT,
+    perform log_event( arg_cid, null, EVENT_OK_ADMIN_DELETED_ACCOUNT,
                 'Nuked via admin_delete_account_cascade()' );
     
     raise warning 'admin_delete_account_cascade(): CID % completely destroyed!', arg_cid;

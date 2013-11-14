@@ -11,6 +11,7 @@
 -- 2013-11-11 dbrown: update retvals and eventcodes, remove magic, 
 --               remove unnecessary sanity check
 --               logs foldername in eventlog (or uid on error)
+-- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- ---------------------------------------------------------------------------
 
 create or replace function delete_folder(
@@ -21,15 +22,16 @@ create or replace function delete_folder(
 ) returns int as $$
 
 declare
-    EC_OK_DELETED_FOLDER       constant varchar := '1077';
-    EC_OK_OWNER_DELETED_FOLDER constant varchar := '1078';
-    EC_OK_ADMIN_DELETED_FOLDER constant varchar := '1079';
-    EC_PERMERR_DELETING_FOLDER constant varchar := '6077';
-    EC_DEVERR_DELETING_FOLDER  constant varchar := '9077';
+    EVENT_OK_DELETED_FOLDER       constant char(4) := '1077';
+    EVENT_OK_OWNER_DELETED_FOLDER constant char(4) := '1078';
+    EVENT_OK_ADMIN_DELETED_FOLDER constant char(4) := '1079';
+    EVENT_AUTHERR_DELETING_FOLDER constant char(4) := '6077';
+    EVENT_DEVERR_DELETING_FOLDER  constant char(4) := '9077';
     eventcode_out varchar;
     
-    RETVAL_SUCCESS         constant int :=   1;
-    RETVAL_FOLDER_NOTFOUND constant int := -13;
+    RETVAL_SUCCESS             constant int :=   1;
+    RETVAL_ERR_FOLDER_NOTFOUND constant int := -13;
+    RETVAL_ERR_EXCEPTION       constant int := -98;
     result int;
     
     source_cid      int; -- Account source_mid belongs to
@@ -41,42 +43,56 @@ declare
     
 begin
 
-    -- Get folder's owner
+    -- Ensure target-folder exists (and get its owner)
     SELECT mid, fdecrypt(x_name) INTO target_mid, folder_name
-        FROM folders
-        WHERE uid = folderid;
-        
-    if (target_mid is null) then
-        perform log_event( source_cid, source_mid, EC_DEVERR_DELETING_FOLDER,
-                    'UID '||folderid||' does not exist');
-        return RETVAL_FOLDER_NOTFOUND;
+        FROM folders WHERE uid = folderid;
+    if (folder_name is null) then
+        perform log_event( source_cid, source_mid, EVENT_DEVERR_DELETING_FOLDER,
+                    'Folder ['||folderid||'] does not exist');
+        return RETVAL_ERR_FOLDER_NOTFOUND;
     end if;
     
 
-    -- Check relations between user and folder's owner
+    -- Check that user is allowed to touch folder-owner's stuff
     SELECT allowed, scid, slevel, sisadmin, tcid 
         INTO result, source_cid, source_ulevel, source_isadmin, target_cid
         FROM member_can_update_member(source_mid, target_mid);
-        
-    if result < 1 then
+    if (result < RETVAL_SUCCESS) then
         perform log_permissions_error( EC_PERMERR_DELETING_FOLDER, result, 
                     source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
 
     
-    -- Delete folder (cascades to files)
-    delete from Folders where uid = folderid;        
+    -- Delete the Folder ----------------------------------------------------------
+    
+    declare
+        errno text;
+        errmsg text;
+        errdetail text;
+    begin
+        delete from Files where folder_uid = folderid;
+        delete from Folders where uid = folderid;
+    
+    exception when others then
+        -- Couldn't delete the Folder!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+        perform log_event(_cid, null, EVENT_DEVERR_DELETING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
+        
     
     
-    -- Success
+    -- Success ---------------------------------------------------------------------
+    
     if (source_mid = target_mid) then eventcode_out := EC_OK_DELETED_FOLDER;
     elsif (source_isadmin = 1)   then eventcode_out := EC_OK_ADMIN_DELETED_FOLDER;
     elsif (source_ulevel <= 1)   then eventcode_out := EC_OK_OWNER_DELETED_FOLDER;
     else                              eventcode_out := EC_OK_DELETED_FOLDER;
     end if;
     
-    perform log_event( source_cid, source_mid, eventcode_out, folder_name, target_cid, target_mid );
+    perform log_event( source_cid, source_mid, eventcode_out, 
+        '['||folderid||'] '||folder_name, target_cid, target_mid );
     return RETVAL_SUCCESS;
 
 end;
