@@ -23,20 +23,20 @@ create or replace function admin_create_demo_account() returns void as $$
 
 declare
     cid int; mid int;
-    
+
     A_EMAIL      varchar := 'demo@lifecloud.info';
     A_PWORD      varchar := 'demo';
     A_FNAME      varchar := 'Demo';
     A_MI         varchar := 'A';
     A_LNAME      varchar := 'Owner';
     A_EXP      timestamp := current_date + interval '1 week';
-    
+
     M_USERID     varchar := 'demo';
     M_EMAIL      varchar := 'user@lifecloud.info';
     M_PWORD      varchar := 'demo';
     M_FNAME      varchar := 'Demo';
     M_LNAME      varchar := 'User';
-    
+
 begin
 
     -- Add an account.  This automagically creates an Owner member.
@@ -46,19 +46,19 @@ begin
         raise warning 'FAILED to create Demonstration account [%]', cid;
         return;
     end if;
-        
+
     -- Add an extra (non-admin) member.  This account now has TWO members.
     mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
 
     if (mid < 1) then
         raise warning 'FAILED to create Demonstration member [%]', mid;
         return;
-    end if; 
-    
+    end if;
+
     -- Success
     raise notice 'Demonstration account created.';
-    return mid;
-    
+    return;
+
 end;
 $$ language plpgsql;
 
