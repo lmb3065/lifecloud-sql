@@ -17,11 +17,13 @@
 --                   Returns new add_member or add_account result directly
 -- 2013-11-10 dbrown Returns void, communicates by RAISE WARNING
 -- 2013-11-14 dbrown More info in eventcodes
+-- 2013-11-14 dbrown Communicates by returning text
 -----------------------------------------------------------------------------
 
-create or replace function admin_create_demo_account() returns void as $$
+create or replace function admin_create_demo_account() returns text as $$
 
 declare
+    RETVAL_SUCCESS constant int := 1;
     cid int; mid int;
 
     A_EMAIL      varchar := 'demo@lifecloud.info';
@@ -43,23 +45,20 @@ begin
     -- (Dup-checking, logging, etc is done within add_account)
     cid := add_account( A_EMAIL, A_PWORD, A_LNAME, A_FNAME, A_MI, A_EXP );
 
-    if (cid < 1) then
-        raise warning 'FAILED to create Demonstration account [%]', cid;
-        return;
+    if (cid < RETVAL_SUCCESS) then
+        return 'FAILED to create Demonstration account! ('||cid||')';
     end if;
 
     -- Add an extra (non-admin) member.  This account now has TWO members.
     -- (Dup-checking, logging, etc is done within add_member)
     mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
 
-    if (mid < 1) then
-        raise warning 'FAILED to create Demonstration member [%]', mid;
-        return;
+    if (mid < RETVAL_SUCCESS) then
+        return 'FAILED to create Demonstration member! ('||mid||')';
     end if;
 
     -- Success
-    raise notice 'Demonstration account [#%] created.', mid;
-    return;
+    return 'Demonstration account [#'||mid||'] created.';
 
 end;
 $$ language plpgsql;

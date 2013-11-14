@@ -8,9 +8,10 @@
 -- 2013-10-08 dbrown: Initial check-in
 -- 2013-11-01 dbrown: Completely Revised
 -- 2013-11-10 dbrown: returns void, communicates via RAISE NOTICE
+-- 2013-11-14 dbrown: communicates by returning text
 -----------------------------------------------------------------------------
 
-create or replace function admin_create_eventcodes() returns void as $$
+create or replace function admin_create_eventcodes() returns text as $$
 declare
     nrows int;
 begin
@@ -194,8 +195,8 @@ begin
         ( '9040', 'error uploading image (obsolete eventcode)'),
         ( '9041', 'error adding image (obsolete eventcode)');
     
-    get diagnostics nrows = row_count;
-    raise notice 'EventCodes reference table loaded: % rows.', nrows;
+    select count(*) into nrows from ref_eventcodes;
+    return 'EventCodes reference table loaded: '||nrows||' rows.';
 end;
 $$ language plpgsql;
 

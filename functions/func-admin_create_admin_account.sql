@@ -11,13 +11,15 @@
 -- 2013-10-24 dbrown: now actually makes the member admin
 -- 2013-11-01 dbrown: revised event codes
 -- 2013-11-13 dbrown: Organized, more information in eventlog
+-- 2013-11-14 dbrown: Communicates by returning text
 -- --------------------------------------------------------------------------
 
-create or replace function admin_create_admin_account( ) returns void as $$
+create or replace function admin_create_admin_account( ) returns text
+as $$
 
 declare
-    EVENT_DEVERR_ADDING_ACCOUNT  constant char := '9020';
-    RETVAL_SUCCESS               constant int := 1;
+    EVENT_DEVERR_ADDING_ACCOUNT  constant char(4) := '9020';
+    RETVAL_SUCCESS               constant int     := 1;
     
     n int;
     
@@ -39,8 +41,7 @@ begin
     if exists( select mid from members where isAdmin = 1) then
         perform log_event( null, null, EVENT_DEVERR_ADDING_ACCOUNT,
             'Admin Account already exists!' );
-        raise warning 'Administrator account already exists!';
-        return;
+        return 'Administrator account already exists!';
     end if;
 
     
@@ -49,17 +50,16 @@ begin
         C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, 
         C_ADMIN_MI, expiration, '', '', '', '', '', '', 'US' );
     if (newcid < RETVAL_SUCCESS) then
-        raise warning 'Couldn''t create Administrator account! Check eventlog!';
-        return;
+        return 'Couldn''t create Administrator account! ('||newcid||')';
     end if;
 
     
     -- Mark new account's owner member as the Administrator
-    update Members set isadmin = 1 where mid = newmid;    
-    raise notice 'Administrator account [#%] created.', newmid;
+    update Members set isadmin = 1 where mid = newmid;
     
     -- Done
-    return; 
+    return 'Administrator account [#'||newmid||'] created.';
+    
     
 end;
 $$ language plpgsql;
