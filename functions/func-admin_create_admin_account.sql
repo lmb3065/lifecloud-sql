@@ -39,20 +39,24 @@ begin
     if exists( select mid from members where isAdmin = 1) then
         perform log_event( null, null, EVENT_DEVERR_ADDING_ACCOUNT,
             'Admin Account already exists!' );
-        return ;
+        raise warning 'Administrator account already exists!';
+        return;
     end if;
-        
+
+    
     -- Create Admin Account
     newcid := add_account(
-        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, C_ADMIN_MI, expiration,
-        '', '', '', '', '', '', 'US' );  -- referrer, addr1, addr2, city, state, postcode, country
+        C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME, 
+        C_ADMIN_MI, expiration, '', '', '', '', '', '', 'US' );
     if (newcid < RETVAL_SUCCESS) then
-        -- newcid < 1 is an error code
-        return newcid;
+        raise warning "Couldn't create Administrator account! Check eventlog!";
+        return;
     end if;
-        
+
+    
     -- Mark new account's owner member as the Administrator
-    update Members set isadmin = 1 where mid = newmid;     
+    update Members set isadmin = 1 where mid = newmid;    
+    raise notice 'Administrator account [#'||newmid||'] created.';
     
     -- Done
     return newmid; 
