@@ -7,7 +7,7 @@
             THIS DOCUMENTATION IS AUTHORITATIVE AND CORRECT, and
             THE CODE IS PROBABLY OUT OF DATE.
 
-revised by dbrown @ 2013-11-12 12:44 PM
+revised by dbrown @ 2013-11-12 8:10 PM
 
 -----------------------------------------------------------------------------
 The admin_... functions don't return anything, they communicate using RAISE
@@ -111,18 +111,18 @@ add_file                -  Success : User added a File to their own Folder
                         -  Success : ADMIN added a File to a Member's Folder                 
                         e  [Filename] already exists in [Target-Folder]
                         e  [Filename] is a required field
-                        i  [User-Member] not allowed to modify [Target-Folder]
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
                         x  [Target-Folder] doesn't exist    
-                        x  [User-Member] doesn't exist
                         
 add_folder              -  Success : User added their own Folder
                         -  Success : Owner added a Folder for a Member
                         -  Success : ADMIN added a Folder for a Member
                         e  [Foldername] already exists for [Target-Member]
                         e  [Foldername] is a required field
-                        i  [User-Member] not allowed to modify [Target-Member]
-                        x  [Target-Member] doesn't exist                       
-                        x  [User-Member] doesn't exist
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist                       
+                        i  [User-Member] doesn't exist
 
 add_initial_folders     -  Success
                         x  [Target-Member] doesn't exist
@@ -139,17 +139,17 @@ add_member              -  Success : Here is your new Member
 delete_file             -  Success : User deleted their own file
                         -  Success : Owner deleted a member's file
                         -  Success : ADMIN deleted a member's file
-                        i  [User-Member] not allowed to modify [Target-File]
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
                         x  [Target-File] doesn't exist
-                        x  [User-Member] doesn't exist
 
 delete_folder           -  Success : User deleted their own folder
                         -  Success : Owner deleted a member's folder
                         -  Success : ADMIN deleted a member's folder
-                        i  [User-Member] not allowed to modify [Target-Folder]
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
                         x  [Target-Folder] doesn't exist
-                        x  [User-Member] doesn't exist
-
+a
 update_account          -  Success
                            (No permissions checking)
                         x  [Target-Account] doesn't exist
@@ -158,17 +158,17 @@ update_folder           -  Success : User updated their own folder
                         -  Success : Owner updated a member's folder
                         -  Success : ADMIN updated a member's folder
                         e  You must supply a field to update
-                        i  [User-Member] not allowed to modify [Target-Folder]
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
                         x  [Target-Folder] doesn't exist
-                        x  [User-Member] doesn't exist
                         
 update_member           -  Success : Member updated themselves
                         -  Success : Owner upated a member
                         -  Success : ADMIN updated a member
                         e  You must supply a field to update
-                        i  [User-Member] not allowed to modify [Target-Member]
-                        x  [Target-Member] doesn't exist
-                        x  [User-Member] doesn't exist
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist
+                        i  [User-Member] doesn't exist
                         
 update_member_apps      -  Success
                            (No permissions checking)
@@ -178,10 +178,9 @@ update_password         -  Success : Member updated their own password
                         -  Success : Owner updated a member's password
                         -  Success : ADMIN updated a member's password
                         e  [New-Password] must not be whitespace or NULL
-                        i  [User-Member] not allowed to modify [Target-Member]
-                        x  [Target-Member] doesn't exist                        
-                        i  [User-Member] not allowed to Update Passwords
-                        x  [User-Member] doesn't exist
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist                        
+                        i  [User-Member] doesn't exist
 
 
 =============================================================================
@@ -222,7 +221,12 @@ return values
 =============================================================================
 TO DO
 
- * General : Remove all stupid 'Oh no we got more than one item by PK' checks
- * update_member: add smarter 'no such member' check
- * update_session: check that MID exists
+ General
+    Remove all stupid 'Oh no we got more than one item by PK' checks
+    Raise Notice on successful database change
+    Raise Warning on UNsuccessful database change
+ 
+ update_* : Make sure you're not updating it to match something else
+    update_member: add smarter 'no such member' check
+    update_session: check that MID exists
  
