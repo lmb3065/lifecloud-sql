@@ -53,7 +53,7 @@ begin
     -- Argument processing: Make sure we have at least one
     if (_fileuid is null) and (_folder_uid is null) and (_mid is null) then
         raise warning 'get_files(): no search criteria supplied';
-        return null;
+        return;
     end if;
     
     -- Argument precedence: fileuid > folderuid > mid
@@ -79,19 +79,19 @@ begin
     if _nrows = 0 then
         if ( _fileuid is not null ) then
             if not exists ( select f.uid from files f where f.uid = _fileuid ) then
-                raise warning 'get_files(): file.uid '||_fileuid||' does not exist';
+                raise warning 'get_files(): file [%] does not exist', _fileuid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'file.uid '||_fileuid||' does not exist' );
             end if;
         elsif ( _folder_uid is not null) then
             if not exists (select f.uid from folders f where f.uid = _folder_uid) then
-                raise warning 'get_files(): folder.uid '||_folder_uid||' does not exist';
+                raise warning 'get_files(): folder [%] does not exist', _folder_uid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'folder.uid '||_folder_uid||' does not exist' );
             end if;
         elsif ( _mid is not null) then
             if not exists (select m.mid from members m where m.mid = _mid) then
-                raise warning 'get_files(): mid '||_mid||' does not exist';
+                raise warning 'get_files(): mid [%] does not exist', _mid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'mid'||_mid||' does not exist' );
             end if;
