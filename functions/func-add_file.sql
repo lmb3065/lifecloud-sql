@@ -27,6 +27,7 @@
 --                     simplified user-level eventcode logging
 -- 2013-11-13 dbrown : Organization, Exception Handling, More info in events
 -- 2013-11-14 dbrown : Trusted (lvl 1) should have same rights as Owner (lvl 0)
+-- 2013-11-14 dbrown : Updated eventcode constants
 -- -----------------------------------------------------------------------------
 
 create or replace function add_file(
@@ -68,7 +69,7 @@ begin
 
     -- Ensure a name was supplied
     if (_name is null) or (length(_name) = 0) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE, 'Name is required' );
+        perform log_event( null, source_mid, EVENT_DEVERR_ADDING_FILE, 'Name is required' );
         return RETVAL_ERR_ARG_INVALID;
     end if;
 
@@ -76,7 +77,7 @@ begin
     -- Ensure destination folder exists (and get its owner)
     select mid into target_mid from folders where uid = parent_folder_uid;
     if (target_mid is null) then
-        perform log_event( null, source_mid, EC_DEVERR_ADDING_FILE,
+        perform log_event( null, source_mid, EVENT_DEVERR_ADDING_FILE,
                     'Folder '||parent_folder_uid||' does not exist' );
         return RETVAL_ERR_FOLDER_NOTFOUND; 
     end if;
@@ -97,7 +98,7 @@ begin
         where folder_uid = parent_folder_uid
         and lower(fdecrypt(x_name)) = lower(_name);
     if (existing_uid is not null) then
-        perform log_event( source_cid, source_mid, EC_USERERR_ADDING_FILE, 'File ['
+        perform log_event( source_cid, source_mid, EVENT_USERERR_ADDING_FILE, 'File ['
             ||existing_uid||'] named "'||_name||'" already exists in folder ['
             ||parent_folder_uid||']', target_cid, target_mid);
         return RETVAL_ERR_FILE_EXISTS;
@@ -129,10 +130,10 @@ begin
     
     select last_value into newfileuid from files_uid_seq;
 
-    if (source_mid = target_mid) then eventcode_out := EC_OK_ADDED_FILE;
-    elsif (source_isadmin = 1)   then eventcode_out := EC_OK_ADMIN_ADDED_FILE;
-    elsif (source_level  <= 1)   then eventcode_out := EC_OK_OWNER_ADDED_FILE;
-    else eventcode_out := EC_OK_ADDED_FILE;
+    if (source_mid = target_mid) then eventcode_out := EVENT_OK_ADDED_FILE;
+    elsif (source_isadmin = 1)   then eventcode_out := EVENT_OK_ADMIN_ADDED_FILE;
+    elsif (source_level  <= 1)   then eventcode_out := EVENT_OK_OWNER_ADDED_FILE;
+    else eventcode_out := EVENT_OK_ADDED_FILE;
     end if;
     
     perform log_event( source_cid, source_mid, eventcode_out, 
