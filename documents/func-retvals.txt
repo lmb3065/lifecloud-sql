@@ -6,6 +6,8 @@
     Where the code and this documentation differ, 
             THIS DOCUMENTATION IS AUTHORITATIVE AND CORRECT, and
             THE CODE IS PROBABLY OUT OF DATE.
+            
+            THIS IS OVERRULED BY FUNC-STYLEGUIDE
 
 revised by dbrown @ 2013-11-12 8:10 PM
 
@@ -182,51 +184,4 @@ update_password         -  Success : Member updated their own password
                         i  [Target-Member] doesn't exist                        
                         i  [User-Member] doesn't exist
 
-
-=============================================================================
-return values
-
-   GENERAL (Inf..-9)
-
-    > 1     Success (typically the UID of whatever you just added)
-      1     Success                                    RETVAL_SUCCESS
-      0     A required argument was NULL               RETVAL_ERR_ARG_MISSING
-     -1     A required argument was invalid            RETVAL_ERR_ARG_INVALID
-
-   MISSING (DIRECTLY REFERENCED) OBJECT (-10..-19)
    
-    -10     Cannot Find Account                        RETVAL_ERR_ACCOUNT_NOTFOUND
-    -11     Cannot Find (Source/User) Member           RETVAL_ERR_MEMBER_NOTFOUND
-    -12     Cannot find Target member                  RETVAL_ERR_TARGET_NOTFOUND
-    -13     Cannot Find Folder                         RETVAL_ERR_FOLDER_NOTFOUND
-    -14     Cannot Find File                           RETVAL_ERR_FILE_NOTFOUND
-   
-   OBJECT ALREADY EXISTS (-20..-39)
-   
-    -20     Account exists (with this e-mail address)  RETVAL_ERR_ACCOUNT_EXISTS
-    -22     Member exists with this e-mail address     RETVAL_ERR_MEMBER_EXISTS_EMAIL
-    -23     Member exists with this UserID             RETVAL_ERR_MEMBER_EXISTS_USERID
-    -24     Member exists with this Name and Account   RETVAL_ERR_MEMBER_EXISTS_NAME
-    -25     Member would exceed maximum members        RETVAL_ERR_MEMBER_EXISTS_FULL
-    -26     Folder already exists for this member      RETVAL_ERR_FOLDER_EXISTS
-    -27     File already exists in this folder         RETVAL_ERR_FILE_EXISTS
-      
-   PERMISSIONS ERRORS (-80..-98)
-   
-    -80  Source member has insufficient permissions    RETVAL_ERR_USERLEVEL
-    -81  Source & Target in different CIDs             RETVAL_ERR_DIFFACCOUNTS
-    -82  Target outranks Source                        RETVAL_ERR_OUTRANKED    
-    -88  Not Allowed! (General Permission Failure)     RETVAL_ERR_NOT_ALLOWED
-    
-=============================================================================
-TO DO
-
- General
-    Remove all stupid 'Oh no we got more than one item by PK' checks
-    Raise Notice on successful database change
-    Raise Warning on UNsuccessful database change
- 
- update_* : Make sure you're not updating it to match something else
-    update_member: add smarter 'no such member' check
-    update_session: check that MID exists
- 
