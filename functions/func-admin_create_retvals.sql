@@ -6,7 +6,7 @@
  create or replace function admin_create_retvals() returns text as $$
  
  declare
- 
+    nrows int;
  begin
     truncate table ref_retvals;
     insert into ref_retvals( retval, msg ) values
@@ -33,6 +33,7 @@
         ( -98, 'Database exception' ),
         ( -99, 'Unanticipated failure type' );
  
+    select count(*) into nrows from ref_retvals;
     return 'RetVALS ref table loaded: '||nrows||' rows';
         
  end
