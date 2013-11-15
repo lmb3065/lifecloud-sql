@@ -64,7 +64,7 @@ begin
     end if;
 
 
-    -- purge any unrelated, unclosed sessions for this user     
+    -- close any unrelated sessions for this user     
     
     update Sessions set dtlogout = clock_timestamp()
         where mid = _mid 
