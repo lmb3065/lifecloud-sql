@@ -18,6 +18,7 @@
 -- 2013-11-01 dbrown: Revised event codes
 -- 2013-11-06 dbrown: added retrieval of column files.modified_by
 -- 2013-11-11 dbrown: replaced eventcodes with constants; dev errors via RAISE
+-- 2013-11-14 dbrown: Organization, no more RAISE
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -50,19 +51,29 @@ declare
 
 begin
 
-    -- Argument processing: Make sure we have at least one
-    if (_fileuid is null) and (_folder_uid is null) and (_mid is null) then
-        raise warning 'get_files(): no search criteria supplied';
+    -- Check arguments -------------------------------------------------------------
+    
+    -- Ensure we have at least one argument
+    if (coalesce(_fileuid, _folder_uid, _mid, 0) = 0) then
+        perform log_event( null, null, EVENT_DEVERR_GETTING_ACCOUNT,
+                    'no arguments supplied');
         return;
     end if;
-    
-    -- Argument precedence: fileuid > folderuid > mid
-    if (_fileuid is not null) then
-        _folder_uid := null; _mid := null; end if;
+   
+    -- Enforce argument precedence: fileuid > folderuid > mid
+    -- NULL out criteria we won't be using
+    if (_fileuid is not null) then 
+        _folder_uid := null;
+        _mid := null;
+    end if;
     if (_folder_uid is not null) then 
-        _mid = null; end if;
+        _mid := null;
+    end if;
 
-    -- Get initial results
+    
+
+    -- Get initial results ---------------------------------------------------------
+    
     create temporary table files_out on commit drop as
         select f.uid, f.folder_uid, f.mid, f.created,
                 fdecrypt(f.x_name) as filename,
@@ -74,24 +85,21 @@ begin
                or ( (_mid is not null)        and (f.mid = _mid) );
 
   
-    -- Count results; if none, log exceptional reasons and exit 
+    -- Count results; if none, log exceptional reasons and exit     
     select count(*) into _nrows from files_out;
     if _nrows = 0 then
         if ( _fileuid is not null ) then
             if not exists ( select f.uid from files f where f.uid = _fileuid ) then
-                raise warning 'get_files(): file [%] does not exist', _fileuid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'file.uid '||_fileuid||' does not exist' );
             end if;
         elsif ( _folder_uid is not null) then
             if not exists (select f.uid from folders f where f.uid = _folder_uid) then
-                raise warning 'get_files(): folder [%] does not exist', _folder_uid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'folder.uid '||_folder_uid||' does not exist' );
             end if;
         elsif ( _mid is not null) then
             if not exists (select m.mid from members m where m.mid = _mid) then
-                raise warning 'get_files(): mid [%] does not exist', _mid;
                 perform log_event( null, null, EC_DEVERR_GETTING_FILE,
                             'mid'||_mid||' does not exist' );
             end if;
@@ -110,7 +118,9 @@ begin
     end if;
     
     
-    -- Output final results
+    
+    -- Output final results --------------------------------------------------------
+    
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.created, 
             fo.filename, fo.description, fo.modified_by, _nrows, _npages
