@@ -3,7 +3,7 @@
 --  get_files()
 -- -----------------------------------------------------------------------------
 --  Retrieves row(s) from Files based on the FIRST criterion provided.
---   _fileuid        : Simple index lookup for one file. 
+--   _fileuid        : Simple index lookup for one file.
 --   _folder_uid      : Retrieves all files in the specified folder.
 --   _mid            : Retrieves all files owned by the specified member.
 --   _pagesize _page : Standard pagination arguments
@@ -19,6 +19,7 @@
 -- 2013-11-06 dbrown: added retrieval of column files.modified_by
 -- 2013-11-11 dbrown: replaced eventcodes with constants; dev errors via RAISE
 -- 2013-11-14 dbrown: Organization, no more RAISE
+-- 2013-11-16 dbrown: New (output) columm content_type
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -28,21 +29,22 @@ create or replace function get_files(
     _mid        int    default null, --  /
     _pagesize   int    default null, --  \  Pagination
     _page       int    default 0     --  /    Options
-    
+
 ) returns table (
 
-    uid         int, 
-    fid         int, 
-    mid         int, 
-    created     timestamp, 
-    filename    text,
-    description text,
-    modified_by int,
-    nrows       int,
-    npages      int
-    
+    uid          int,
+    fid          int,
+    mid          int,
+    created      timestamp,
+    filename     text,
+    description  text,
+    content_type varchar,
+    modified_by  int,
+    nrows        int,
+    npages       int
+
 ) as $$
-    
+
 declare
     EC_DEVERR_GETTING_FILE constant char(4) := '9086';
 
@@ -52,40 +54,41 @@ declare
 begin
 
     -- Check arguments -------------------------------------------------------------
-    
+
     -- Ensure we have at least one argument
     if (coalesce(_fileuid, _folder_uid, _mid, 0) = 0) then
         perform log_event( null, null, EVENT_DEVERR_GETTING_ACCOUNT,
                     'no arguments supplied');
         return;
     end if;
-   
+
     -- Enforce argument precedence: fileuid > folderuid > mid
     -- NULL out criteria we won't be using
-    if (_fileuid is not null) then 
+    if (_fileuid is not null) then
         _folder_uid := null;
         _mid := null;
     end if;
-    if (_folder_uid is not null) then 
+    if (_folder_uid is not null) then
         _mid := null;
     end if;
 
-    
+
 
     -- Get initial results ---------------------------------------------------------
-    
+
     create temporary table files_out on commit drop as
         select f.uid, f.folder_uid, f.mid, f.created,
                 fdecrypt(f.x_name) as filename,
-                fdecrypt(f.x_desc) as description ,
+                fdecrypt(f.x_desc) as description,
+                f.content_type,
                 f.modified_by
-            from files f 
+            from files f
             where ( (_fileuid is not null)    and (f.uid = _fileuid) )
                or ( (_folder_uid is not null) and (f.folder_uid = _folder_uid) )
                or ( (_mid is not null)        and (f.mid = _mid) );
 
-  
-    -- Count results; if none, log exceptional reasons and exit     
+
+    -- Count results; if none, log exceptional reasons and exit
     select count(*) into _nrows from files_out;
     if _nrows = 0 then
         if ( _fileuid is not null ) then
@@ -106,8 +109,8 @@ begin
         end if;
         return;
     end if;
-    
-    
+
+
     -- Calculate output paging ...
     if (coalesce(_pagesize, 0) > 0) then
         _npages := _nrows / _pagesize;
@@ -116,21 +119,20 @@ begin
         _pagesize := null;
         _npages := 1;
     end if;
-    
-    
-    
+
+
+
     -- Output final results --------------------------------------------------------
-    
+
     return query
-        select fo.uid, fo.folder_uid, fo.mid, fo.created, 
-            fo.filename, fo.description, fo.modified_by, _nrows, _npages
+        select fo.uid, fo.folder_uid, fo.mid, fo.created,
+            fo.filename, fo.description, fo.content_type, fo.modified_by,
+            _nrows, _npages
         from files_out fo
         order by created desc
         limit _pagesize offset (_page * _pagesize);
-    
+
     return;
-    
+
 end
 $$ language plpgsql;
-
-
