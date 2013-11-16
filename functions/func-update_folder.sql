@@ -2,16 +2,11 @@
 -- =============================================================================
 -- update_folder()
 -- ----------------------------------------------------------------------------
--- returns 1 if successful
--- returns 0 if folder doesn't exist
--- returns -1...-9 from member_can_update_member() on permissions error
--- returns -10 if no changes specified (_name and _desc both empty)
--- returns -11 under database inconsistency condition (>1 folder updated)
--- ----------------------------------------------------------------------------
 -- 2013-10-29 dbrown: created, based on stripped-down update_member()
 -- 2013-10-29 dbrown: Fixed eventcodes, removed level-dependent logging/retval
 -- 2013-11-01 dbrown: Update eventcodes
 -- 2013-11-01 dbrown: change folder.fid to folder.uid
+-- 2013-11-15 dbrown: Organization, eventcodes, retvals, more arg checking
 -- -----------------------------------------------------------------------------
 
 create or replace function update_folder(
@@ -20,62 +15,110 @@ create or replace function update_folder(
     _folder_uid   int,                       -- Folder being changed
     _name         varchar(64)  default null, -- Fields of the member record
     _desc         varchar      default null  --  that can be updated
-    
+
 ) returns integer as $$
 
 declare
+    EVENT_OK_UPDATED_FOLDER         constant char(4) := '1073';
+    EVENT_OK_OWNER_UPDATED_FOLDER   constant char(4) := '1074';
+    EVENT_OK_ADMIN_UPDATED_FOLDER   constant char(4) := '1075';
+    EVENT_USERERR_UPDATING_FOLDER   constant char(4) := '4073';
+    EVENT_AUTHERR_UPDATING_FOLDER   constant char(4) := '6073';
+    EVENT_DEVERR_UPDATING_FOLDER    constant char(4) := '9073';
+    event_out char(4);
 
+    RETVAL_SUCCESS              constant int := 1;
+    RETVAL_ERR_ARGUMENTS        constant int := 0;
+    RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
+    RETVAL_ERR_FOLDER_EXISTS    constant int := -25;
+    RETVAL_ERR_EXCEPTION        constant int := -98;
     result int;
-    owner_mid int;
+
     source_cid int;
-    target_cid int;    
+    source_level int;
+    source_isadmin int;
+    target_cid int;
     target_mid int;
-    x_new_name       bytea = null; -- Encrypted (x) versions
-    x_new_desc       bytea = null; --   of new-data fields
+    x_new_name bytea = null; -- Encrypted (x) versions
+    x_new_desc bytea = null; --   of new-data fields
     nrows int;
-    
-    
+
+
 begin
 
-    -- Nothing to change? Don't waste our time doing anything
-    if ( length(_name) = 0 and length(_desc) = 0 ) then return -10; end if;
+    -- Check Arguments -------------------------------------------------------
 
-    -- Get folder's owner    
-    select mid into target_mid from folders where uid = _folder_uid;
-    if (target_mid is null) then -- 9021 = 'error updating folder'
-        perform log_event( source_cid, source_mid, '9073',
-                    'No such folder', target_cid, target_mid );
-        return 0; 
+    if coalesce(_name, _desc) is null then
+        -- no arguments; nothing to do
+        return RETVAL_ERR_ARGUMENTS;
     end if;
-    
-    -- Check relations between user and folder's owner
-    select allowed, scid, tcid into result, source_cid, target_cid 
-        from member_can_update_member(source_mid, target_mid);
-        
-    if (result < 1) then 
-        perform log_permissions_error( '4073', result, 
-                source_cid, source_mid, target_cid, target_mid ); 
+
+    -- Ensure target folder exists (and get its owner)
+    SELECT mid INTO target_mid FROM folders WHERE uid = _folder_uid;
+    if (target_mid is null) then
+        perform log_event( source_mid, null, EVENT_DEVERR_UPDATING_FOLDER,
+                    'Folder UID ['||_folder_uid||'] does not exist' );
+        return RETVAL_ERR_FOLDER_NOTFOUND;
+    end if;
+
+    -- Ensure we're not going to duplicate an existing foldername
+    if exists ( SELECT uid FROM folders WHERE mid = target_mid
+                    and lower(fdecrypt(x_name)) = lower(_name) ) then
+        perform log_event( source_mid, target_mid, EVENT_USERERR_UPDATING_FOLDER,
+                    'Member already has a folder named '||_name );
+        return RETVAL_ERR_FOLDER_EXISTS;
+    end if;
+
+    -- Encrypt any arguments we have
+    if (_name is not null) then x_new_name := fencrypt(_name); end if;
+    if (_desc is not null) then x_new_desc := fencrypt(_desc); end if;
+
+
+    -- Check Authorization ---------------------------------------------------
+
+    SELECT allowed, scid, slevel, sisadmin, tcid
+        INTO result, source_cid, source_level, source_isadmin, target_cid
+        FROM member_can_update_member(source_mid, target_mid);
+
+    if (result < RETVAL_SUCCESS) then
+        perform log_permissions_error( EVENT_AUTHERR_UPDATING_FOLDER, result,
+                source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
-    
-    -- Hash / Encrypt any data we might have
-    if (_name is not null) then x_new_name := fencrypt(_name); end if;
-    if (_desc is not null) then x_new_desc := fencrypt(_desc); end if;    
 
-    
-    -- Perform the update, only touching columns    
-    -- where our argument is NOT NULL
-    update Folders set
-        x_name  = coalesce(x_new_name, folders.x_name),
-        x_desc  = coalesce(x_new_desc, folders.x_desc),
-        updated = clock_timestamp()
-    where uid = _folder_uid;
-    
-        
-    -- Success    
-    perform log_event( source_cid, source_mid, '1073', '', target_cid, target_mid );
-    return 1;
-    
+
+    -- Perform Update --------------------------------------------------------
+
+    declare
+        errno text;
+        errmsg text;
+        errdetail text;
+    begin
+        update Folders
+        set x_name  = coalesce(x_new_name, folders.x_name),
+            x_desc  = coalesce(x_new_desc, folders.x_desc),
+            updated = clock_timestamp()
+        where uid = _folder_uid;
+
+    exception when others then
+        -- Couldn't update Folder!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+        perform log_event(_cid, null, EVENT_DEVERR_UPDATING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
+
+
+    -- Success
+
+    if (source_mid = target_mid) then event_out := EVENT_OK_UPDATED_FOLDER;
+    elsif (source_isadmin = 1)   then event_out := EVENT_OK_ADMIN_UPDATED_FOLDER;
+    elsif (source_level <= 1)    then event_out := EVENT_OK_OWNER_UPDATED_FOLDER;
+    else event_out := EVENT_OK_UPDATED_FOLDER;
+    end if;
+
+    perform log_event( source_cid, source_mid, event_out, null, target_cid, target_mid );
+    return RETVAL_SUCCESS;
+
 end;
 $$ language plpgsql;
 

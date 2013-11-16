@@ -22,21 +22,36 @@ create or replace function update_account
 declare
     EVENT_OK_UPDATED_ACCOUNT       constant char(4) := '1023';
     EVENT_DEVERR_UPDATING_ACCOUNT  constant char(4) := '9023';
-    RETVAL_SUCCESS        constant int :=   1;
-    RETVAL_ERR_EXCEPTION  constant int := -98;
+    event_out char(4);
+
+    RETVAL_SUCCESS                 constant int :=   1;
+    RETVAL_ERR_ARGUMENTS           constant int :=   0;
+    RETVAL_ERR_ACCOUNT_NOTFOUND    constant int := -10;
+    RETVAL_ERR_EXCEPTION           constant int := -98;
+    result int;
 
     nrows integer;
 
 begin
 
-    -- Ensure target Account exists
+    -- Check Arguments ---------------------------------------------------
+
+
+    if coalesce(_status, _quota, _referrer, _expires) is null then
+        -- no arguments; nothing to do
+        return RETVAL_ERR_ARGUMENTS;
+    end if;
+
     if not exists(select cid from Accounts where cid = _cid) then
+        -- target Account doesn't exist
         perform log_event(null, null, EVENT_DEVERR_UPDATING_ACCOUNT,
                     'CID '||_cid||' does not exist' );
         return RETVAL_ERR_ACCOUNT_NOTFOUND;
     end if;
 
-    -- Perform the update
+
+    -- Perform the update ------------------------------------------------
+
     declare
         errno text;
         errmsg text;
@@ -57,7 +72,9 @@ begin
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 
-    -- Done
+
+    -- Done --------------------------------------------------------------
+
     perform log_event( _cid, null, EVENT_OK_UPDATED_ACCOUNT );
     return RETVAL_SUCCESS;
 end;
