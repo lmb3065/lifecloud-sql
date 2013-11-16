@@ -1,4 +1,3 @@
-
 -- ==============================================================================================
 -- log_permissions_error()
 -- ----------------------------------------------------------------------------------------------
@@ -8,6 +7,7 @@
 -- 2013-10-16 dbrown returns void now
 -- 2013-11-06 dbrown Updated result code meanings, function now returns result code
 -- 2013-11-12 dbrown Replaced specific retvals with NOT_ALLOWED
+-- 2013-11-15 dbrown Corrected RETVAL_ERR_NOT_ALLOWED, added message for Success
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function log_permissions_error(
@@ -18,20 +18,22 @@ create or replace function log_permissions_error(
     smid int,
     tcid int,
     tmid int
-    
+
 ) returns int as $$
 
 declare
-    RETVAL_ERR_ARG_MISSING      constant int := 0;
+    RETVAL_SUCCESS              constant int :=   1;
+    RETVAL_ERR_ARG_MISSING      constant int :=   0;
     RETVAL_ERR_MEMBER_NOTFOUND  constant int := -11;
     RETVAL_ERR_TARGET_NOTFOUND  constant int := -12;
-    RETVAL_ERR_NOT_ALLOWED      constant int := -88;
-   
+    RETVAL_ERR_NOT_ALLOWED      constant int := -80;
+
     msg text;
-    
+
 begin
 
     case result
+        when RETVAL_SUCCESS             then msg := 'Success';
         when RETVAL_ERR_ARG_MISSING     then msg := 'A required argument was null';
         when RETVAL_ERR_MEMBER_NOTFOUND then msg := 'Source Member does not exist';
         when RETVAL_ERR_TARGET_NOTFOUND then msg := 'Target Member does not exist';
@@ -43,4 +45,3 @@ begin
     return result;
 end;
 $$ language plpgsql;
-
