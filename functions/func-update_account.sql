@@ -6,6 +6,7 @@
 -- -----------------------------------------------------------------------------
 -- 2013-10-04 dbrown created
 -- 2013-11-15 dbrown revised event codes, exception handling, retvals
+-- 2013-11-15 dbrown Handle non-existent account cleanly
 -- -----------------------------------------------------------------------------
 
 create or replace function update_account
@@ -28,6 +29,14 @@ declare
 
 begin
 
+    -- Ensure target Account exists
+    if not exists(select cid from Accounts where cid = _cid) then
+        perform log_event(null, null, EVENT_DEVERR_UPDATING_ACCOUNT,
+                    'CID '||_cid||' does not exist' );
+        return RETVAL_ERR_ACCOUNT_NOTFOUND;
+    end if;
+
+    -- Perform the update
     declare
         errno text;
         errmsg text;
@@ -48,7 +57,7 @@ begin
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 
-
+    -- Done
     perform log_event( _cid, null, EVENT_OK_UPDATED_ACCOUNT );
     return RETVAL_SUCCESS;
 end;
