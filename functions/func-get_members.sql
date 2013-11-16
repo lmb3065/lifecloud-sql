@@ -1,4 +1,3 @@
-
 -- =============================================================================
 --  function get_members()
 -- -----------------------------------------------------------------------------
@@ -19,6 +18,7 @@
 --  2013-10-31 dbrown : Rewritten to incorporate get_member() and member_t
 --  2013-11-01 dbrown : Simplified by removing temporary table
 --  2013-11-01 dbrown : Stricter argument processing
+--  2013-11-15 dbrown : fix typo
 -- -----------------------------------------------------------------------------
 
 create or replace function get_members(
@@ -42,7 +42,7 @@ begin
     -- Enforce one-criterion Precedence
     if (arg_mid is not null) then arg_email := null; arg_cid := null; end if;
     if (arg_email is not null) then arg_cid := null; end if;
-    arg_email := lower(arg_email));
+    arg_email := lower(arg_email);
 
     -- Execute query
     return query select mid, cid,
