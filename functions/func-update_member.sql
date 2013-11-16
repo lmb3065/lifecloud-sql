@@ -12,20 +12,22 @@
 -- 2013-10-16 dbrown : forced lowercase (insensitive) on userid and email
 -- 2013-10-18 dbrown : new column 'profilepic', reordered args
 -- 2013-11-01 dbrown : revised eventcodes
+-- 2013-11-15 dbrown : EventCodes, RetVals, UserID preserved but insensitive,
+--                     detects and prevents email/userid/name collisions
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
 (
     source_mid    int,     -- Member making the change
     target_mid    int,     -- Member being changed
-    
+
     _fname        varchar(64)  default null, -- Fields of the member record
     _lname        varchar(64)  default null, --    that can be updated.  NULL
     _mi           varchar(4)   default null, --    is interpreted as "leave this
 
     _passwd       varchar(64)  default null, --    field alone".
     _userid       varchar(64)  default null,
-    _email        varchar(64)  default null, 
+    _email        varchar(64)  default null,
     _h_profilepic varchar(64)  default null,
 
     _address1     varchar(64)  default null,
@@ -44,11 +46,39 @@ create or replace function update_member
     returns integer as $$
 
 declare
+    EVENT_OK_UPDATED_MEMBER        char(4) := '1033';
+    EVENT_OK_OWNER_UPDATED_MEMBER  char(4) := '1034';
+    EVENT_OK_ADMIN_UPDATED_MEMBER  char(4) := '1035';
+    EVENT_USERERR_UPDATING_MEMBER  char(4) := '4033';
+    EVENT_AUTHERR_UPDATING_MEMBER  char(4) := '6033';
+    EVENT_DEVERR_UPDATING_MEMBER   char(4) := '9033';
+    event_out char(4);
+    event_msg text;
 
+    RETVAL_SUCCESS                  constant int := 1;
+    RETVAL_ERR_ARGUMENTS            constant int := 0;
+--  RETVAL_ERR_MEMBER_NOTFOUND      = -11; -- (from member_can_update_member)
+--  RETVAL_ERR_MEMBER2_NOTFOUND     = -12; -- (from member_can_update_member)
+    RETVAL_ERR_MEMBER_EXISTS_EMAIL  constant int := -21;
+    RETVAL_ERR_MEMBER_EXISTS_USERID constant int := -22;
+    RETVAL_ERR_MEMBER_EXISTS_NAME   constant int := -23;
+--  RETVAL_ERR_NOT_ALLOWED          = -80; -- (from member_can_update_member)
+    RETVAL_ERR_EXCEPTION            constant int := -98;
     result int;
+
+    proposed_fname text;
+    proposed_mi text;
+    proposed_lname text;
+    existing_mid text;
     source_cid int;
+    source_level int;
+    source_isadmin int;
+
     target_cid int;
-    
+    target_fname text;
+    target_mi text;
+    target_lname text;
+
     h_new_passwd     text;  -- Hashed (h) and encrypted (x) versions
     x_new_userid     bytea; --   of new-data fields
     x_new_email      bytea;
@@ -61,32 +91,91 @@ declare
     x_new_state      bytea;
     x_new_postalcode bytea;
     x_new_country    bytea;
-    x_new_phone      bytea;    
+    x_new_phone      bytea;
     nrows int;
-    
-    
-begin -----------------------------------------------------------------------------
 
-    -- Check permissions
 
-    select allowed, scid, tcid
-        into result, source_cid, target_cid 
-        from member_can_update_member(source_mid, target_mid);
-        
-    if (result < 1) then -- 9004 = 'error updating member'
-        perform log_permissions_error( '9004', result, source_cid, source_mid, target_cid, target_mid ); 
+begin
+
+    -- Check arguments -------------------------------------------------------
+
+    -- Ensure Source-Member is allowed to update Target-Member
+    SELECT allowed, scid, slevel, sisadmin, tcid
+        INTO result, source_cid, source_level, source_isadmin, target_cid
+        FROM member_can_update_member(source_mid, target_mid);
+    if (result < RETVAL_SUCCESS) then
+        event_out := EVENT_AUTHERR_UPDATING_MEMBER;
+        perform log_permissions_error( event_out, result, source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
-    
-    
+
+    -- If E-mail is changing, ensure new one is unique
+    _email := lower(_email); -- Smash all e-mails to lowercase
+    if ((_email is not null) and exists (
+        SELECT mid FROM members WHERE fdecrypt(x_email) = _email)
+    ) then
+        event_out := EVENT_USERERR_UPDATING_MEMBER;
+        event_msg := 'E-mail <'||_email||'> is already in use';
+        perform log_event( source_mid, target_mid, event_out, event_msg );
+        return RETVAL_ERR_MEMBER_EXISTS_EMAIL;
+    end if;
+
+    -- If UserID is changing, ensure new one is unique
+    if (_userid is not null) and exists (
+        SELECT mid FROM members WHERE lower(fdecrypt(x_userid)) = lower(_userid)
+    ) then
+        event_out := EVENT_USERERR_UPDATING_MEMBER;
+        event_msg := 'UserID "'||_userid||'" is already in use';
+        perform log_event( source_mid, target_mid, event_out, event_msg );
+        return RETVAL_ERR_MEMBER_EXISTS_USERID;
+    end if;
+
+
+    -- If Name fields are changing, ensure new Name is unique to the Account
+    if coalesce(_fname, _mi, _lname) is not null then
+
+        -- Grab the target member's existing name ...
+        --   (All names are smashed to uppercase in this block
+        --    to make comparisons case-Insensitive)
+        select upper(fdecrypt(x_fname)),
+               upper(fdecrypt(x_mi)),
+               upper(fdecrypt(x_lname)) from members
+        into proposed_fname, proposed_mi, proposed_lname
+        where mid = target_mid;
+
+        -- ... patch in the desired changes ...
+        if _fname is not null then proposed_fname := upper(_fname); end if;
+        if _mi    is not null then proposed_mi    := upper(_mi);    end if;
+        if _lname is not null then proposed_lname := upper(_lname); end if;
+
+        -- ... and search for the resulting "proposed" name
+        select mid into existing_mid from members
+        where cid = target_cid
+            and (_fname is null or (upper(fdecrypt(x_fname)) = proposed_fname))
+            and (_mi    is null or (upper(fdecrypt(x_mi))    = proposed_mi))
+            and (_lname is null or (upper(fdecrypt(x_lname)) = proposed_lname))
+        limit 1;
+
+        if (existing_mid is not null) then
+            -- Found an existing member with the proposed name
+            event_out := EVENT_USERERR_UPDATING_MEMBER;
+            event_msg := initcap(_fname)||' '||initcap(target_mi)||' '||initcap(_lname)
+                         ||' is already in this account';
+            perform log_event( source_mid, target_mid, event_out, event_msg );
+            return RETVAL_ERR_MEMBER_EXISTS_NAME;
+        end if;
+
+    end if;
+
+
     -- Hash / Encrypt any data we might have
-    
+
     if (_fname      is not null) then x_new_fname      := fencrypt(_fname);      end if;
     if (_lname      is not null) then x_new_lname      := fencrypt(_lname);      end if;
     if (_mi         is not null) then x_new_mi         := fencrypt(_mi);         end if;
     if (_passwd     is not null) then h_new_passwd     := sha1(_passwd);         end if;
-    if (_userid     is not null) then x_new_userid     := fencrypt(lower(_userid));     end if;
-    if (_email      is not null) then x_new_email      := fencrypt(lower(_email));      end if;
+    if (_userid     is not null) then x_new_userid     := fencrypt(_userid);     end if;
+    if (_email      is not null) then x_new_email      := fencrypt(_email);      end if;
     if (_address1   is not null) then x_new_address1   := fencrypt(_address1);   end if;
     if (_address2   is not null) then x_new_address2   := fencrypt(_address2);   end if;
     if (_city       is not null) then x_new_city       := fencrypt(_city);       end if;
@@ -94,9 +183,9 @@ begin --------------------------------------------------------------------------
     if (_postalcode is not null) then x_new_postalcode := fencrypt(_postalcode); end if;
     if (_country    is not null) then x_new_country    := fencrypt(_country);    end if;
     if (_phone      is not null) then x_new_phone      := fencrypt(_phone);      end if;
-    
 
-    -- Perform the update, only touching columns    
+
+    -- Perform the update, only touching columns
     -- where our argument is NOT NULL
 
     update Members m set
@@ -114,27 +203,27 @@ begin --------------------------------------------------------------------------
         x_postalcode= coalesce(x_new_postalcode, m.x_postalcode),
         x_country   = coalesce(x_new_country,    m.x_country),
         x_phone     = coalesce(x_new_phone,      m.x_phone),
-        status      = coalesce(_status,         m.status),
+        status      = coalesce(_status,          m.status),
         pwstatus    = coalesce(_pwstatus,        m.pwstatus),
         userlevel   = coalesce(_userlevel,       m.userlevel),
         tooltips    = coalesce(_tooltips,        m.tooltips),
         updated     = clock_timestamp()
     where mid = target_mid;
-    
-    
+
+
     -- Error checking
-    
+
     get diagnostics nrows = row_count;
     if (nrows <> 1) then -- You had permission but something went wrong
         perform log_event( source_cid, source_mid, '9032', '', target_cid, target_mid );
         return -10; end if;
 
-        
+
     -- Success
-    
+
     perform log_event( source_cid, source_mid, '1032', '', target_cid, target_mid );
     return result;
-    
+
 end;
 $$ language plpgsql;
 
