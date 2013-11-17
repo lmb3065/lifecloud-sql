@@ -51,7 +51,7 @@ begin
 
     -- Add an extra (non-admin) member.  This account now has TWO members.
     -- (Dup-checking, logging, etc is done within add_member)
-    mid := add_member( cid, M_FNAME, M_LNAME, M_MI, M_PWORD, M_USERID, M_EMAIL, null );
+    mid := add_member( cid, M_FNAME, M_LNAME, null, M_PWORD, M_USERID, M_EMAIL, null );
 
     if (mid < RETVAL_SUCCESS) then
         return 'FAILED to create Demonstration member! ('||mid||')';
