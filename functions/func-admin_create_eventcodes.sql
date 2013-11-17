@@ -1,9 +1,8 @@
-
 -- =============================================================================
 -- admin_create_eventcodes()
 -- -----------------------------------------------------------------------------
 -- The event codes are defined here.
--- This function is run automatically by the database installation script. 
+-- This function is run automatically by the database installation script.
 -- =============================================================================
 -- 2013-10-08 dbrown: Initial check-in
 -- 2013-11-01 dbrown: Completely Revised
@@ -19,7 +18,7 @@ begin
     insert into ref_eventcodes(code, description) values
 
     /*  How EventCodes are built:
-        
+
             0---  (Obsolete eventcodes)
             1---  OK / Normal notification
             4---  User's Fault error
@@ -42,10 +41,14 @@ begin
             ---6  Get
             ---7  Delete
             ---8  Delete by Account Owner
-            ---9  Delete by Admin */  
-    
-    -- 1000 - 1999 : Normal conditions / notifications 
-    
+            ---9  Delete by Admin */
+
+    -- 0000 - 0000 : Obsolete eventcodes still in use
+
+        ( '0007', 'automatic log-out' ),
+
+    -- 1000 - 1999 : Normal conditions / notifications
+
         ( '1000', 'user logged in' ),
         ( '1001', 'user logged out' ),
         ( '1002', 'invalid login attempt' ),
@@ -53,19 +56,19 @@ begin
         ( '1004', 'automatic log-out' ),
         ( '1005', 'userid/password e-mailed' ),
         ( '1006', 'delphi notified' ),
-        
+
         ( '1020', 'new account registration' ),                 -- add_account
-        ( '1023', 'account updated' ),
+        ( '1023', 'account updated' ),                          -- update_account
         ( '1029', 'account deleted by Admin' ),
 
         ( '1030', 'new member added' ),                         -- add_member
-        ( '1033', 'member updated' ),
+        ( '1033', 'member updated' ),                           -- update_member
         ( '1034', 'member updated by account owner' ),
         ( '1035', 'member updated by Admin' ),
         ( '1037', 'member deleted' ),
         ( '1038', 'member deleted by account owner' ),
-        ( '1039', 'member deleted by Admin' ),        
-        
+        ( '1039', 'member deleted by Admin' ),
+
         ( '1042', 'password changed (obsolete)' ),
         ( '1043', 'password changed' ),
         ( '1044', 'password changed by owner' ),
@@ -74,36 +77,36 @@ begin
         ( '1070', 'folder added' ),                             -- add_folder
         ( '1071', 'folder added by owner' ),                    -- add_folder
         ( '1072', 'folder added by Admin' ),                    -- add_folder
-        ( '1073', 'folder updated' ),                   
+        ( '1073', 'folder updated' ),
         ( '1074', 'folder updated by account owner' ),
-        ( '1075', 'folder updated by Admin' ),          
+        ( '1075', 'folder updated by Admin' ),
         ( '1077', 'folder deleted' ),
         ( '1078', 'folder deleted by owner' ),
         ( '1079', 'folder deleted by Admin' ),
-                                                    
+
         ( '1080', 'file added' ),                               -- add_file
         ( '1081', 'file added by owner' ),                      -- add_file
         ( '1082', 'file added by Admin' ),                      -- add_file
-        ( '1087', 'file deleted' ),                             -- delete_file          
+        ( '1087', 'file deleted' ),                             -- delete_file
         ( '1088', 'file deleted by owner' ),                    -- delete_file
         ( '1089', 'file deleted by Admin' ),                    -- delete_file
-        
+
     -- 4000 - 4999 : User's Fault errors
-    
+
         ( '4000', 'invalid login attempt' ),
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),               -- add_account
         ( '4030', 'user could not add member' ),                -- add_member
         ( '4040', 'user could not update password (obsolete)'),
-        ( '4043', 'user could not update password' ),       
+        ( '4043', 'user could not update password' ),
         ( '4070', 'user could not add folder' ),                -- add_folder
-        ( '4073', 'user could not update folder' ),     
-        ( '4077', 'user could not delete folder' ),     
+        ( '4073', 'user could not update folder' ),
+        ( '4077', 'user could not delete folder' ),
         ( '4080', 'user could not add file' ),                  -- add_file
         ( '4087', 'user could not delete file' ),
-        
+
     -- 6000+ Authorization (Permissions) Errors
-    
+
         ( '6000', 'unauthorized login attempt' ),
         ( '6006', 'unauthorized page attempt' ),
         ( '6043', 'unauthorized attempt to change password' ),
@@ -111,11 +114,11 @@ begin
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6087', 'unauthorized attempt to delete file' ),
-           
+
     -- 9000+ : Database/Developer errors
-    
-        ( '9020', 'error adding account' ),                     -- add_account                     
-        ( '9023', 'error updating account' ),
+
+        ( '9020', 'error adding account' ),                     -- add_account
+        ( '9023', 'error updating account' ),                   -- update_account
         ( '9026', 'error getting account(s)' ),
         ( '9030', 'error adding member' ),                      -- add_member
         ( '9033', 'error updating member' ),
@@ -128,14 +131,14 @@ begin
         ( '9080', 'error adding file' ),                        -- add_file
         ( '9086', 'error getting file(s)' ),
         ( '9087', 'error deleting file' ),
-  
+
     --
         ( '9999', 'general ASSERT failure'),
-        
+
     -- ---------------------------------------------------------------------------
     -- OBSOLETE EventCodes
     -- ---------------------------------------------------------------------------
-        
+
         ( '0000', 'user logged in (obsolete eventcode, use 1000)' ),
         ( '0001', 'user logged out (obsolete eventcode, use 1001)' ),
         ( '0002', 'invalid login attempt (obsolete eventcode, use 4000)' ),
@@ -143,8 +146,7 @@ begin
         ( '0004', 'userid/password e-mailed (obsolete eventcode)' ),
         ( '0005', 'imaging options notified (obsolete eventcode)' ),
         ( '0006', 'unauthorized page attempt (obsolete eventcode)' ),
-        ( '0007', 'automatic log-out (obsolete eventcode, use 1004)' ),
-        
+
         ( '0010', 'account added by admin (obsolete eventcode)' ),
         ( '0011', 'account deleted by admin (obsolete eventcode)' ),
         ( '0012', 'new account registration (obsolete eventcode)' ),
@@ -153,7 +155,7 @@ begin
         ( '0015', 'account updated (obsolete eventcode)' ),
         ( '0016', 'member updated (obsolete eventcode)' ),
         ( '0017', 'member password reset (obsolete eventcode)' ),
-        
+
         ( '0020', 'folder added (obsolete eventcode)' ),
         ( '0021', 'folder updated (obsolete eventcode)' ),
         ( '0022', 'folder deleted (obsolete eventcode)' ),
@@ -186,7 +188,7 @@ begin
         ( '9013', 'i/o notification error (obsolete eventcode)'),
         ( '9014', 'error generating password (obsolete eventcode)'),
         ( '9015', 'mail error on lost password (obsolete eventcode)'),
-        ( '9016', 'error adding promocode (obsolete eventcode)'), 
+        ( '9016', 'error adding promocode (obsolete eventcode)'),
         ( '9017', 'error updating promocode (obsolete eventcode)'),
         ( '9021', 'error updating folder (obsolete eventcode)'),
         ( '9022', 'error marking folder deleted (obsolete eventcode)'),
@@ -194,10 +196,8 @@ begin
         ( '9025', 'error updating file (obsolete eventcode)'),
         ( '9040', 'error uploading image (obsolete eventcode)'),
         ( '9041', 'error adding image (obsolete eventcode)');
-    
+
     select count(*) into nrows from ref_eventcodes;
     return 'EventCodes reference table loaded: '||nrows||' rows.';
 end;
 $$ language plpgsql;
-
-
