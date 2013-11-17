@@ -23,6 +23,7 @@
 --                     made name-dup check independent of userid-dup check
 -- 2013-11-13 dbrown : Organized, more info in eventlog details
 -- 2013-11-16 dbrown : Preserve case of UserID (but keep insensitive)
+-- 2013-11-16 dbrown : Shortened error output
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -145,7 +146,7 @@ begin
     exception when others then
         -- Couldn't add Member!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        perform log_event(_cid, null, EVENT_DEVERR_ADDING_MEMBER, '['||errno||'] '||errmsg||' : '||errdetail);
+        perform log_event(_cid, null, EVENT_DEVERR_ADDING_MEMBER, '['||errno||'] '||errmsg||;
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 
