@@ -16,6 +16,7 @@
 --                     detects and prevents email/userid/name collisions
 -- 2013-11-16 dbrown : Exempt target user from name/userid/email change scanning
 --                     (fix error when updating values to what they already are)
+-- 2013-11-16 dbrown : Logs different eventcodes by source-member role
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
@@ -112,7 +113,7 @@ begin
     end if;
 
     -- If E-mail is changing, ensure new one is unique
-    if (_email is not null) then
+    if (_email is not null) and (length(_email) > 0) then
         _email := lower(_email); -- Smash all e-mails to lowercase
 
         if exists (
@@ -127,7 +128,7 @@ begin
     end if;
 
     -- If UserID is changing, ensure new one is unique
-    if (_userid is not null) then
+    if (_userid is not null) and (length(_userid) > 0) then
         if exists (
             SELECT mid FROM members
                 WHERE mid <> target_mid and lower(fdecrypt(x_userid)) = lower(_userid)
@@ -221,17 +222,14 @@ begin
     where mid = target_mid;
 
 
-    -- Error checking
-
-    get diagnostics nrows = row_count;
-    if (nrows <> 1) then -- You had permission but something went wrong
-        perform log_event( source_cid, source_mid, '9032', '', target_cid, target_mid );
-        return -10; end if;
-
-
     -- Success
+    if (source_mid = target_mid) then event_out := EVENT_OK_UPDATED_MEMBER;
+    elsif (source_isadmin = 1) then   event_out := EVENT_OK_ADMIN_UPDATED_MEMBER;
+    elsif (source_level <= 1) then    event_out := EVENT_OK_OWNER_UPDATED_MEMBER;
+    else event_out := EVENT_OK_UPDATED_MEMBER;
+    end if;
 
-    perform log_event( source_cid, source_mid, '1032', '', target_cid, target_mid );
+    perform log_event( source_cid, source_mid, event_out, null, target_cid, target_mid );
     return result;
 
 end;
