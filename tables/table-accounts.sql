@@ -10,18 +10,19 @@
 -- ----------------------------------------------------------------------------------------------
 -- 2013-09-25 dbrown Encrypted fields moved to Members; owner_mid added; removed autorenew
 -- 2013-10-02 dbrown added "referrer"
+-- 2013-11-13 dbrown removed redundant (interfering?) NOT NULLs
 -- ----------------------------------------------------------------------------------------------
 
 create table Accounts
 (
-    cid           serial      not null  primary key, -- Customer ID
-    owner_mid     integer     not null, -- references Members(MID),
+    cid           serial      primary key, -- Customer ID
+    owner_mid     integer     not null,
     status        int         not null,
     quota         bigint      not null,
     referrer      varchar(64),
-    created       timestamp   not null  default now(),
-    updated       timestamp   not null  default now(),
-    expires       timestamp   not null  default current_date + interval '1 year'
+    created       timestamp   default now(),
+    updated       timestamp   default now(),
+    expires       timestamp   default current_date + interval '1 year'
 );
 alter table Accounts owner to pgsql;
 

@@ -6,9 +6,6 @@
 --     _pagesize int   : [optional] # of rows that define a "page"
 --     _page int = 0   : [optional] which "page" to return (0 is first)
 -- ----------------------------------------------------------------------
--- example:
---     select * from get_events( null, null, 10, 0 ) ;
--- ----------------------------------------------------------------------
 -- Returns a table of all events befween _from and _to
 --   sorted by date descending
 --   optionally divide into _pagesize-row pages and return page _page
@@ -18,6 +15,9 @@
 -- 2013-10-11 dbrown : New pagination technique using temporary table
 -- 2013-10-12 dbrown : Can now be called with no arguments at all
 -- 2013-10-30 dbrown : Integrated event_t into the function definition
+-- 2013-11-10 dbrown : ref_EventCodes is now a Left Outer Join in case we
+--                have typoed eventCodes or missing entries 
+--                reordered output columns
 -----------------------------------------------------------------------------
 
 create or replace function get_events(
@@ -32,12 +32,12 @@ create or replace function get_events(
     eid int, 
     dt timestamp,
     code char(4),
+    descrip varchar,
+    event varchar,
     cid int,
     mid int,
     tcid int,
     tmid int,
-    descrip varchar,
-    event varchar,
     nrows int,
     npages int
 
@@ -54,11 +54,12 @@ begin
     if (_to   is null) then _to   := now();                   end if;
 
     -- Perform initial (unpaged) query into a temp table.    
-    create temporary table events_out on commit drop as
-        select e.eid, e.dt, e.code, e.cid, e.mid, e.target_cid, e.target_mid,
+    CREATE TEMPORARY TABLE events_out ON COMMIT DROP AS
+        SELECT e.eid, e.dt, e.code, re.description,
             cast(fdecrypt(e.x_data) as varchar) as event,
-            re.description, 0 as nrows, 0 as npages
-        from Events e join ref_EventCodes re on (e.code = re.code) 
+            e.cid, e.mid, e.target_cid, e.target_mid,
+            0 as nrows, 0 as npages
+        from Events e left outer join ref_EventCodes re on (e.code = re.code) 
         where e.dt between _from and _to;
         
     -- Calculate pages from the temp table

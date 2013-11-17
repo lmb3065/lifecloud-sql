@@ -1,0 +1,187 @@
+
+ 
+=============================================================================
+
+    The behavior of a database should be completely defined.
+    Where the code and this documentation differ, 
+            THIS DOCUMENTATION IS AUTHORITATIVE AND CORRECT, and
+            THE CODE IS PROBABLY OUT OF DATE.
+            
+            THIS IS OVERRULED BY FUNC-STYLEGUIDE
+
+revised by dbrown @ 2013-11-12 8:10 PM
+
+-----------------------------------------------------------------------------
+The admin_... functions don't return anything, they communicate using RAISE
+
+    admin_create_admin_account      N/A (communicates to shell via RAISE)
+    admin_create_applist            N/A (communicates to shell via RAISE)
+    admin_create_defaultfolders     N/A (communicates to shell via RAISE)
+    admin_create_demo_account       N/A (communicates to shell via RAISE)
+    admin_create_eventcodes         N/A (communicates to shell via RAISE)
+    admin_delete_account_cascade    N/A (communicates to shell via RAISE)
+
+-----------------------------------------------------------------------------
+Some utility functions don't throw any sane errors
+    
+    log_event                  N/A (no error possible)
+    log_permissions_error      N/A (no error possible)
+    member_can_update_member   N/A (no error possible)
+    
+        checks for errors in this order:
+        
+          Get source-member info
+            source-member does not exist          : -> No
+            source-member is view-only            : -> No
+            source-member is target-member (self) : -> OK
+            
+          Get target-member info
+            target-member does not exist             : -> No
+            source-member is admin                   : -> OK        
+            source-member is Owner, target is in CID : -> OK            
+            source-member is Proxy, target is non-Owner in CID : -> OK
+            done (default) : -> No
+    
+    purge_events_before        N/A (no error possible)
+    purge_sessions_before      N/A (no error possible)
+        
+-----------------------------------------------------------------------------
+These functions all return tables. No-Results is always? a possibility.
+All warnings are logged as Developer errors ('x' as described below)
+                              
+    get_account             No-Results is ok
+                                 warn/log if No-Criteria-Supplied
+    get_accounts            No-Results is ok
+                                 warn/log if Invalid-Filtertype                   
+    get_apps                N/A (no error possible)              
+    get_events              N/A (no error possible)
+    get_files               No-Results is ok
+                                 warn/log if [Target-File] does not exist
+                                 warn/log if [Target-Folder] does not exist
+                                 warn/log if [Target-Member] does not exist
+    get_folders             No-Results is ok
+                                 warn/log if No-Criteria-Supplied                         
+    get_member_apps         No-Results is ok (return space-string)
+                                 warn/log if [Target-Member] does not exist
+    get_members             No-Results is ok
+                                 warn/log if No-Criteria-Supplied
+                                 warn/log if [Target-Member] does not exist
+                                 warn/log if [Target-Account] does not exist
+    update_session          N/A (no error possible)
+                                 warn/log if [User-Member] does not exist
+
+-----------------------------------------------------------------------------
+The 'validate' security functions are unique
+
+    validate_login          Logs success/failure, returns get_members(mid)
+    validate_session        Returns success/failure
+    
+    
+=============================================================================
+THE REST OF THE FUNCTIONS
+
+    The results/tests for each function are applied from the BOTTOM UP,
+        with success LAST at the top after all tests are passed.
+    
+    there are FOUR levels of failure, from minor to severe:    
+ 
+      -  No Problem : Notable success
+            1000-series EventCode
+            in general, anything that changes data is logged
+     
+      e  User Error : Problem with user input
+            4000-series EventCode
+            e.g. Data from args collided / was missing
+    
+      i  User isn't authorized to do that!
+            6000-series event code
+            In general, this is more severe than User Error because
+              the UI should have (in theory) made this query impossible.
+            
+      x  Developer Error
+            9000-series event code
+            e.g. Direct request for nonexistent item
+        
+-----------------------------------------------------------------------------
+
+add_account             -  Success : Here is your new Account
+                        e  Account already exists with this E-mail
+                           (No permissions checking)
+
+add_file                -  Success : User added a File to their own Folder
+                        -  Success : Owner added a File to a Member's Folder
+                        -  Success : ADMIN added a File to a Member's Folder                 
+                        e  [Filename] already exists in [Target-Folder]
+                        e  [Filename] is a required field
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
+                        x  [Target-Folder] doesn't exist    
+                        
+add_folder              -  Success : User added their own Folder
+                        -  Success : Owner added a Folder for a Member
+                        -  Success : ADMIN added a Folder for a Member
+                        e  [Foldername] already exists for [Target-Member]
+                        e  [Foldername] is a required field
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist                       
+                        i  [User-Member] doesn't exist
+
+add_initial_folders     -  Success
+                        x  [Target-Member] doesn't exist
+                           (No permissions checking)
+      
+add_member              -  Success : Here is your new Member
+                        e  Member with [Name] already exists in [Target-Account]
+                        e  Member with [UserID] already exists
+                        e  Member with [E-mail] already exists
+                        e  Member would give [Target-Account] more than [MaxLogins] members
+                        x  [Target-Account] doesn't exist
+                           (No permissions checking)
+
+delete_file             -  Success : User deleted their own file
+                        -  Success : Owner deleted a member's file
+                        -  Success : ADMIN deleted a member's file
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
+                        x  [Target-File] doesn't exist
+
+delete_folder           -  Success : User deleted their own folder
+                        -  Success : Owner deleted a member's folder
+                        -  Success : ADMIN deleted a member's folder
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
+                        x  [Target-Folder] doesn't exist
+a
+update_account          -  Success
+                           (No permissions checking)
+                        x  [Target-Account] doesn't exist
+
+update_folder           -  Success : User updated their own folder
+                        -  Success : Owner updated a member's folder
+                        -  Success : ADMIN updated a member's folder
+                        e  You must supply a field to update
+                        i  [User-Member] not allowed to do this
+                        i  [User-Member] doesn't exist
+                        x  [Target-Folder] doesn't exist
+                        
+update_member           -  Success : Member updated themselves
+                        -  Success : Owner upated a member
+                        -  Success : ADMIN updated a member
+                        e  You must supply a field to update
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist
+                        i  [User-Member] doesn't exist
+                        
+update_member_apps      -  Success
+                           (No permissions checking)
+                        x  [Target-Member] doesn't exist
+
+update_password         -  Success : Member updated their own password
+                        -  Success : Owner updated a member's password
+                        -  Success : ADMIN updated a member's password
+                        e  [New-Password] must not be whitespace or NULL
+                        i  [User-Member] not allowed to do this
+                        i  [Target-Member] doesn't exist                        
+                        i  [User-Member] doesn't exist
+
+   

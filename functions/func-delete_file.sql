@@ -2,7 +2,15 @@
 -- -----------------------------------------------------------------------------
 --  delete_file
 -- -----------------------------------------------------------------------------
+--  returns:
+--      1  : Success
+--    -14  : File not found
+-- -----------------------------------------------------------------------------
 -- 2013-11-01 dbrown: update event codes, changed all "item" to "file"
+-- 2013-11-10 dbrown: update retvals, replace magic with constants,
+--               removed unnecessary sanity check, source-level eventcodes
+-- 2013-11-11 dbrown: logs filename (or uid on error)
+-- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- -----------------------------------------------------------------------------
 
 create or replace function delete_file(
@@ -13,46 +21,75 @@ create or replace function delete_file(
 ) returns int as $$
 
 declare
+    EVENT_OK_DELETED_FILE       constant char(4) := '1087';
+    EVENT_OK_OWNER_DELETED_FILE constant char(4) := '1088';
+    EVENT_OK_ADMIN_DELETED_FILE constant char(4) := '1089';
+    EVENT_AUTHERR_DELETING_FILE constant char(4) := '6087';
+    EVENT_DEVERR_DELETING_FILE  constant char(4) := '9087';
+    eventcode_out varchar;
+
+    RETVAL_SUCCESS              constant int :=   1;
+    RETVAL_ERR_FILE_NOTFOUND    constant int := -14;
+    RETVAL_ERR_EXCEPTION        constant int := -98;
     result int;
-    source_cid int = NULL;
-    target_mid int = NULL;
-    target_cid int = NULL;
-    nrows int;
+    
+    source_cid      int;
+    source_ulevel   int; 
+    source_isadmin  int;
+    target_mid      int;
+    target_cid      int;
+    file_name       text;
 
 begin
 
-    -- Get target file's owner
-    select mid into target_mid from files f where f.uid = file_uid;
-    if (target_mid is null) then -- 9026 = "error deleting item"
-        perform log_event( source_cid, source_mid, '9089', 'no such file' );
-        return 0;
+    -- Ensure target-file exists (and get its owner)
+    SELECT mid, fdecrypt(x_name) INTO target_mid, file_name 
+        FROM files WHERE uid = file_uid;
+    if (file_name is null) then
+        perform log_event( source_cid, source_mid, EVENT_DEVERR_DELETING_FILE,
+                    'File ['||file_uid||'] does not exist' );
+        return RETVAL_FILE_NOTFOUND;
     end if;
     
-    -- Check relation between user and file's owner
-    select allowed, scid, tcid into result, source_cid, target_cid
-        from member_can_update_member(source_mid, target_mid);
-
-    if (result < 1) then 
-        perform log_permissions_error( '4088', result,
+    -- Check that user is allowed to touch file-owner's stuff
+    SELECT allowed, scid, slevel, sisadmin, tcid 
+        INTO result, source_cid, source_ulevel, source_isadmin, target_cid
+        FROM member_can_update_member(source_mid, target_mid);
+    if (result < RETVAL_SUCCESS) then
+        perform log_permissions_error( EVENT_AUTHERR_DELETING_FILE, result,
                     source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
     
     
-    -- Delete the file
-    delete from files where files.uid = file_uid;
+    -- Delete the file -------------------------------------------------------------
     
-    -- Error checking
-    get diagnostics nrows = row_count;
-    if (nrows = 0) then
-        perform log_event( source_cid, source_mid, '9089', 'No such file',
-                    target_cid, target_mid );
-        return 0;
+    declare
+        errno text;
+        errmsg text;
+        errdetail text;
+    begin
+        delete from Files where uid = file_uid;
+    
+    exception when others then
+        -- Couldn't delete File!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+        perform log_event(_cid, null, EVENT_DEVERR_DELETING_FILE, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
+    
+    
+    -- Success ---------------------------------------------------------------------
+    
+    if (source_mid = target_mid) then eventcode_out := EVENT_OK_DELETED_FILE;
+    elsif (source_isadmin = 1)   then eventcode_out := EVENT_OK_ADMIN_DELETED_FILE;
+    elsif (source_ulevel <= 1)   then eventcode_out := EVENT_OK_OWNER_DELETED_FILE;
+    else                              eventcode_out := EVENT_OK_DELETED_FILE;
     end if;
     
-    -- Success
-    perform log_event( source_cid, source_mid, '1088', '', target_cid, target_mid);
-    return 1;
+    perform log_event( source_cid, source_mid, eventcode_out, 
+        '['||file_uid||'] '||file_name, target_cid, target_mid);
+    return RETVAL_SUCCESS;
         
 end;
 $$ language plpgsql;

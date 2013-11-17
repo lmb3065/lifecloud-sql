@@ -42,7 +42,7 @@ begin
 
     if (_mid is null) then    
         -- No match / Auth failed : 4000 = 'failed login attempt'
-        perform log_event( 0, null, '4000', _userid_c );
+        perform log_event( null, null, '4000', _userid_c );
         return null; 
     end if;
     

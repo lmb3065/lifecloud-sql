@@ -1,4 +1,3 @@
-
 -- ==============================================================================================
 -- log_permissions_error()
 -- ----------------------------------------------------------------------------------------------
@@ -6,7 +5,10 @@
 -- ----------------------------------------------------------------------------------------------
 -- 2013-10-13 dbrown Created
 -- 2013-10-16 dbrown returns void now
--- 2013-10-29 dbrown Revised -2 to be more precise
+-- 2013-11-06 dbrown Updated result code meanings, function now returns result code
+-- 2013-11-12 dbrown Replaced specific retvals with NOT_ALLOWED
+-- 2013-11-15 dbrown Corrected RETVAL_ERR_NOT_ALLOWED, added message for Success
+-- 2013-11-16 dbrown Unrecognized now outputs the offending return value
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function log_permissions_error(
@@ -17,28 +19,30 @@ create or replace function log_permissions_error(
     smid int,
     tcid int,
     tmid int
-    
-) returns void as $$
+
+) returns int as $$
 
 declare
-    message text;
-    
+    RETVAL_SUCCESS              constant int :=   1;
+    RETVAL_ERR_ARG_MISSING      constant int :=   0;
+    RETVAL_ERR_MEMBER_NOTFOUND  constant int := -11;
+    RETVAL_ERR_TARGET_NOTFOUND  constant int := -12;
+    RETVAL_ERR_NOT_ALLOWED      constant int := -80;
+
+    msg text;
+
 begin
 
-    case result    
-        when  0 then message := 'A required argument was NULL';
-        when -1 then message := 'source Member could not be found';
-        when -2 then message := 'source Member userlevel > maxuserlevel';
-        when -3 then message := 'target Member could not be found';
-        when -4 then message := 'source and target Members in different Accounts';
-        when -5 then message := 'target Member is an Account Owner (and not Self or Admin)';
-        when -6 then message := 'target Member outranks source Member';
-        else         message := 'Unknown permissions error value : ' || cast(result as text); 
+    case result
+        when RETVAL_SUCCESS             then msg := 'Success';
+        when RETVAL_ERR_ARG_MISSING     then msg := 'A required argument was null';
+        when RETVAL_ERR_MEMBER_NOTFOUND then msg := 'Source Member does not exist';
+        when RETVAL_ERR_TARGET_NOTFOUND then msg := 'Target Member does not exist';
+        when RETVAL_ERR_NOT_ALLOWED     then msg := 'Source Member is not allowed to do that';
+        else                                 msg := 'Unrecognized permissions error code: '||result;
     end case;
 
-    perform log_event( scid, smid, code, message, tcid, tmid );
-    return;
-    
+    perform log_event( scid, smid, code, msg, tcid, tmid );
+    return result;
 end;
 $$ language plpgsql;
-

@@ -2,17 +2,16 @@
 -- ===========================================================================
 --  delete_folder
 -- ---------------------------------------------------------------------------
---  Returns 1 on success
---  Returns 0 if the folder didn't exist
---  Returns a value from member_can_update_member on permissions error
---  Returns -10 under database inconsistency condition (>1 folder deleted)
--- ---------------------------------------------------------------------------
 -- 2013-10-13 dbrown: created
 -- 2013-10-29 dbrown: Simply deletes rows instead of marking them deleted
 -- 2013-10-29 dbrown: folderid must be owned by target_mid
 -- 2013-10-29 dbrown: target_mid no longer accepted
--- 2013-11-01 dbrown: revised event codes, added source-level logging
+-- 2013-11-01 dbrown: revised event codes, added source-level eventcodes
 -- 2013-11-01 dbrown: changed folder.fid to folder.uid
+-- 2013-11-11 dbrown: update retvals and eventcodes, remove magic, 
+--               remove unnecessary sanity check
+--               logs foldername in eventlog (or uid on error)
+-- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- ---------------------------------------------------------------------------
 
 create or replace function delete_folder(
@@ -23,54 +22,78 @@ create or replace function delete_folder(
 ) returns int as $$
 
 declare
-
+    EVENT_OK_DELETED_FOLDER       constant char(4) := '1077';
+    EVENT_OK_OWNER_DELETED_FOLDER constant char(4) := '1078';
+    EVENT_OK_ADMIN_DELETED_FOLDER constant char(4) := '1079';
+    EVENT_AUTHERR_DELETING_FOLDER constant char(4) := '6077';
+    EVENT_DEVERR_DELETING_FOLDER  constant char(4) := '9077';
+    eventcode_out varchar;
+    
+    RETVAL_SUCCESS             constant int :=   1;
+    RETVAL_ERR_FOLDER_NOTFOUND constant int := -13;
+    RETVAL_ERR_EXCEPTION       constant int := -98;
     result int;
-    source_cid int = null; -- Account source_mid belongs to
-    source_level int = null;
-    source_isadmin int = null;
-    target_mid int = null; -- User who actually owns targeted Folder
-    target_cid int = null; -- Account target_mid belongs to
-    nrows int; -- Rows affected by database command. OK iff == 1.
+    
+    source_cid      int; -- Account source_mid belongs to
+    source_ulevel   int;
+    source_isadmin  int;
+    target_mid      int; -- User who actually owns targeted Folder
+    target_cid      int; -- Account target_mid belongs to
+    folder_name     text;
     
 begin
 
-    -- Get folder's owner
-    select mid into target_mid from folders where uid = folderid;
+    -- Ensure target-folder exists (and get its owner)
+    SELECT mid, fdecrypt(x_name) INTO target_mid, folder_name
+        FROM folders WHERE uid = folderid;
+    if (folder_name is null) then
+        perform log_event( source_cid, source_mid, EVENT_DEVERR_DELETING_FOLDER,
+                    'Folder ['||folderid||'] does not exist');
+        return RETVAL_ERR_FOLDER_NOTFOUND;
+    end if;
+    
 
-    -- Check relations between user and folder's owner
-    select allowed, scid, slevel, sisadmin, tcid 
-        into result, source_cid, source_level, source_isadmin, target_cid
-        from member_can_update_member(source_mid, target_mid);
-        
-    if result < 1 then -- 9022 = 'error marking folder deleted'
-        perform log_permissions_error( '4078', result, 
+    -- Check that user is allowed to touch folder-owner's stuff
+    SELECT allowed, scid, slevel, sisadmin, tcid 
+        INTO result, source_cid, source_ulevel, source_isadmin, target_cid
+        FROM member_can_update_member(source_mid, target_mid);
+    if (result < RETVAL_SUCCESS) then
+        perform log_permissions_error( EC_PERMERR_DELETING_FOLDER, result, 
                     source_cid, source_mid, target_cid, target_mid );
         return result;
     end if;
 
     
-    -- Delete folder (cascades to files)
-    delete from Folders cascade where uid = folderid;        
+    -- Delete the Folder ----------------------------------------------------------
     
+    declare
+        errno text;
+        errmsg text;
+        errdetail text;
+    begin
+        delete from Files where folder_uid = folderid;
+        delete from Folders where uid = folderid;
     
-    -- Error checking
-    get diagnostics nrows = row_count;
-    if (nrows = 0) then -- 9023 = 'error purging deleted folder'
-        perform log_event( source_cid, source_mid, '9079',
-                    'No such folder', target_cid, target_mid );
-        return 0;
-    end if;
+    exception when others then
+        -- Couldn't delete the Folder!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+        perform log_event(_cid, null, EVENT_DEVERR_DELETING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+    end;
         
-    -- Success : 1078-9 Folder deleted
-    if (source_isadmin = 1) then
-        perform log_event( source_cid, source_mid, '1079', '', target_cid, target_mid );
-    elsif (source_level <= 1) then
-        perform log_event( source_cid, source_mid, '1078', '', target_cid, target_mid );
-    else
-        perform log_event( source_cid, source_mid, '1077', '', target_cid, target_mid );
+    
+    
+    -- Success ---------------------------------------------------------------------
+    
+    if (source_mid = target_mid) then eventcode_out := EC_OK_DELETED_FOLDER;
+    elsif (source_isadmin = 1)   then eventcode_out := EC_OK_ADMIN_DELETED_FOLDER;
+    elsif (source_ulevel <= 1)   then eventcode_out := EC_OK_OWNER_DELETED_FOLDER;
+    else                              eventcode_out := EC_OK_DELETED_FOLDER;
     end if;
     
-    return 1;
+    perform log_event( source_cid, source_mid, eventcode_out, 
+        '['||folderid||'] '||folder_name, target_cid, target_mid );
+    return RETVAL_SUCCESS;
 
 end;
 $$ language plpgsql;

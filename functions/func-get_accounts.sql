@@ -11,8 +11,9 @@
 -- 2013-10-11 dbrown : fixed case-sensitive ordering
 -- 2013-10-16 dbrown : added column member_count
 -- 2013-11-01 dbrown : added filtertype 'c' to search by cid
--- 2013-11-01 dbrown : added logging of bad filtertype argument
 -- 2013-11-01 dbrown : revised eventcodes
+-- 2013-11-12 dbrown : raises warning on invalid FilterType
+-- 2013-11-14 dbrown : Fixed: attempt to return NULL in func returning table
 ---------------------------------------------------------------------------------
 
 create or replace function get_accounts(
@@ -39,11 +40,11 @@ begin
         _cid := null;
     end;
 
-    -- Log and bail out if the filtertype doesn't make sense
+    -- Raise error if filtertype doesn't make sense
     
     if  ( (_lower_filtertype is not null) 
     and   (_lower_filtertype not in ('c','e','f','l','')) ) then
-        perform log_event( _cid, null, '9501', 'filtertype not in (C, E, F, L)' );
+        raise warning 'get_accounts(): invalid FilterType (expected [CEFL ])';
         return;
     end if;
     

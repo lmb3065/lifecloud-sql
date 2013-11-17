@@ -6,10 +6,13 @@
 --  This function is only run once during initial database setup
 -- -----------------------------------------------------------------------------
 --  2013-11-05 dbrown: created
+--  2013-11-10 dbrown: returns void; communicates via RAISE
+--  2013-11-14 dbrown: Communicates by returning TEXT
 -- -----------------------------------------------------------------------------
 
-create or replace function admin_create_applist() returns integer as $$
-
+create or replace function admin_create_applist() returns text as $$
+declare
+    nrows int;
 begin
                                                                                          
  truncate table ref_apps;                                                                              
@@ -58,7 +61,9 @@ begin
      ( 'vim',             'Delphi VIM',               'vim.gif'           ),
      ( 'reminder',        'Reminder',                 'reminder.gif'      ),             
      ( 'reminder',        'Review<br/>Reminders',     'reminders.gif'     );             
- return 1;                                                                               
+
+    select count(*) into nrows from ref_apps;
+    return 'AppList reference table loaded: '||nrows||' rows.';                                                                               
 
 end
 $$ language plpgsql;
