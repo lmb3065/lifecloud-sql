@@ -7,10 +7,10 @@
 ##  the SQL source files, then runs some initializing functions to populate it
 ##  with essential data
 ## -----------------------------------------------------------------------------
-##    This file is part of the LifeCloud Database installation package.  You 
-##  should have already run "transfer.sh" to copy this package to the 
-##  destination.  Run this script, "install.sh", in the root directory of the 
-##  installation package.  Afterward, the "lc" database should be completely 
+##    This file is part of the LifeCloud Database installation package.  You
+##  should have already run "transfer.sh" to copy this package to the
+##  destination.  Run this script, "install.sh", in the root directory of the
+##  installation package.  Afterward, the "lc" database should be completely
 ##  installed and ready to use.
 ## -----------------------------------------------------------------------------
 ## 2013-10-11 dbrown : Unrolled table loading loop -- the tables were being
@@ -45,6 +45,7 @@ echo 5/8 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_retvals.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
