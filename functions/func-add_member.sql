@@ -62,6 +62,7 @@ declare
     RETVAL_ERR_MEMBER_EXISTS_USERID constant int := -22;
     RETVAL_ERR_MEMBER_EXISTS_NAME   constant int := -23;
     RETVAL_ERR_MEMBER_EXISTS_FULL   constant int := -24;
+    RETVAL_ERR_EXCEPTION            constant int := -98;
 
     nrows       int;
     newmid      int;
@@ -162,4 +163,3 @@ begin
 
  end;
  $$ language plpgsql;
-
