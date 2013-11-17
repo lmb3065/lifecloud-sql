@@ -146,7 +146,7 @@ begin
     exception when others then
         -- Couldn't add Member!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        perform log_event(_cid, null, EVENT_DEVERR_ADDING_MEMBER, '['||errno||'] '||errmsg||;
+        perform log_event(_cid, null, EVENT_DEVERR_ADDING_MEMBER, '['||errno||'] '||errmsg);
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 
