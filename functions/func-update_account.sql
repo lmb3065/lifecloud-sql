@@ -36,12 +36,6 @@ begin
 
     -- Check Arguments ---------------------------------------------------
 
-
-    if coalesce(_status, _quota, _referrer, _expires) is null then
-        -- no arguments; nothing to do
-        return RETVAL_ERR_ARGUMENTS;
-    end if;
-
     if not exists(select cid from Accounts where cid = _cid) then
         -- target Account doesn't exist
         perform log_event(null, null, EVENT_DEVERR_UPDATING_ACCOUNT,
