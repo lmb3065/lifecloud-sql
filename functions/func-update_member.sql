@@ -14,6 +14,8 @@
 -- 2013-11-01 dbrown : revised eventcodes
 -- 2013-11-15 dbrown : EventCodes, RetVals, UserID preserved but insensitive,
 --                     detects and prevents email/userid/name collisions
+-- 2013-11-16 dbrown : Exempt target user from name/userid/email change scanning
+--                     (fix error when updating values to what they already are)
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
@@ -110,28 +112,36 @@ begin
     end if;
 
     -- If E-mail is changing, ensure new one is unique
-    _email := lower(_email); -- Smash all e-mails to lowercase
-    if ((_email is not null) and exists (
-        SELECT mid FROM members WHERE fdecrypt(x_email) = _email)
-    ) then
-        event_out := EVENT_USERERR_UPDATING_MEMBER;
-        event_msg := 'E-mail <'||_email||'> is already in use';
-        perform log_event( source_mid, target_mid, event_out, event_msg );
-        return RETVAL_ERR_MEMBER_EXISTS_EMAIL;
+    if (_email is not null) then
+        _email := lower(_email); -- Smash all e-mails to lowercase
+
+        if exists (
+            SELECT mid FROM members
+            WHERE (mid <> target_mid) and (fdecrypt(x_email) = _email)
+        ) then
+                event_out := EVENT_USERERR_UPDATING_MEMBER;
+                event_msg := 'E-mail <'||_email||'> is already in use';
+                perform log_event( source_mid, target_mid, event_out, event_msg );
+                return RETVAL_ERR_MEMBER_EXISTS_EMAIL;
+        end if;
     end if;
 
     -- If UserID is changing, ensure new one is unique
-    if (_userid is not null) and exists (
-        SELECT mid FROM members WHERE lower(fdecrypt(x_userid)) = lower(_userid)
-    ) then
-        event_out := EVENT_USERERR_UPDATING_MEMBER;
-        event_msg := 'UserID "'||_userid||'" is already in use';
-        perform log_event( source_mid, target_mid, event_out, event_msg );
-        return RETVAL_ERR_MEMBER_EXISTS_USERID;
+    if (_userid is not null) then
+        if exists (
+            SELECT mid FROM members
+                WHERE mid <> target_mid and lower(fdecrypt(x_userid)) = lower(_userid)
+        ) then
+            event_out := EVENT_USERERR_UPDATING_MEMBER;
+            event_msg := 'UserID "'||_userid||'" is already in use';
+            perform log_event( source_mid, target_mid, event_out, event_msg );
+            return RETVAL_ERR_MEMBER_EXISTS_USERID;
+        end if;
     end if;
 
 
     -- If Name fields are changing, ensure new Name is unique to the Account
+    existing_mid := NULL;
     if coalesce(_fname, _mi, _lname) is not null then
 
         -- Grab the target member's existing name ...
@@ -150,7 +160,7 @@ begin
 
         -- ... and search for the resulting "proposed" name
         select mid into existing_mid from members
-        where cid = target_cid
+        where cid = target_cid and mid <> target_mid
             and (_fname is null or (upper(fdecrypt(x_fname)) = proposed_fname))
             and (_mi    is null or (upper(fdecrypt(x_mi))    = proposed_mi))
             and (_lname is null or (upper(fdecrypt(x_lname)) = proposed_lname))
