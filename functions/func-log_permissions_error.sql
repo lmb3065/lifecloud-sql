@@ -8,6 +8,7 @@
 -- 2013-11-06 dbrown Updated result code meanings, function now returns result code
 -- 2013-11-12 dbrown Replaced specific retvals with NOT_ALLOWED
 -- 2013-11-15 dbrown Corrected RETVAL_ERR_NOT_ALLOWED, added message for Success
+-- 2013-11-16 dbrown Unrecognized now outputs the offending return value
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function log_permissions_error(
@@ -38,7 +39,7 @@ begin
         when RETVAL_ERR_MEMBER_NOTFOUND then msg := 'Source Member does not exist';
         when RETVAL_ERR_TARGET_NOTFOUND then msg := 'Target Member does not exist';
         when RETVAL_ERR_NOT_ALLOWED     then msg := 'Source Member is not allowed to do that';
-        else                                 msg := '(Unrecognized permissions error code!)';
+        else                                 msg := 'Unrecognized permissions error code: '||result;
     end case;
 
     perform log_event( scid, smid, code, msg, tcid, tmid );
