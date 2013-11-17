@@ -97,6 +97,7 @@ begin
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),               -- add_account
         ( '4030', 'user could not add member' ),                -- add_member
+        ( '4033', 'user could not update member' ),             -- update_member
         ( '4040', 'user could not update password (obsolete)'),
         ( '4043', 'user could not update password' ),
         ( '4070', 'user could not add folder' ),                -- add_folder

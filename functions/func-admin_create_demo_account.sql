@@ -24,7 +24,7 @@ create or replace function admin_create_demo_account() returns text as $$
 
 declare
     RETVAL_SUCCESS constant int := 1;
-    cid int; mid int;
+    cid int; mid1 int; mid2 int;
 
     A_EMAIL      varchar := 'demo@lifecloud.info';
     A_PWORD      varchar := 'demo';
@@ -49,16 +49,17 @@ begin
         return 'FAILED to create Demonstration account! ('||cid||')';
     end if;
 
+    select last_value into mid1 from members_mid_seq;
+
     -- Add an extra (non-admin) member.  This account now has TWO members.
     -- (Dup-checking, logging, etc is done within add_member)
-    mid := add_member( cid, M_FNAME, M_LNAME, '', M_PWORD, M_USERID, M_EMAIL, null );
-
-    if (mid < RETVAL_SUCCESS) then
-        return 'FAILED to create Demonstration member! ('||mid||')';
+    mid2 := add_member( cid, M_FNAME, M_LNAME, '', M_PWORD, M_USERID, M_EMAIL, null );
+    if (mid2 < RETVAL_SUCCESS) then
+        return 'FAILED to create Demonstration member! ('||mid2||')';
     end if;
 
     -- Success
-    return 'Demonstration account [#'||mid||'] created.';
+    return 'Demonstration account [#'||cid||'] and logins [#'||mid1||'] [#'||mid2||'] created.';
 
 end;
 $$ language plpgsql;

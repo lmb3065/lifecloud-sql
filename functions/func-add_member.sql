@@ -24,6 +24,7 @@
 -- 2013-11-13 dbrown : Organized, more info in eventlog details
 -- 2013-11-16 dbrown : Preserve case of UserID (but keep insensitive)
 -- 2013-11-16 dbrown : Shortened error output
+-- 2013-11-16 dbrown : TODO: Prevent NULLS from getting through and crashing table
 -------------------------------------------------------------------------------
 
 create or replace function add_member
