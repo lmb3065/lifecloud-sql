@@ -134,7 +134,9 @@ begin
     -----------------------------------------------------------------------------
 
     else -- Not allowed
-        return query select RETVAL_ERR_NOT_ALLOWED, nil, nil, nil, nil, nil, nil;
+        return query select RETVAL_ERR_NOT_ALLOWED,
+                source_cid, source_ulevel, source_isadmin,
+                target_cid, target_ulevel, target_isadmin;
 
     end if;
 
