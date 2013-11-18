@@ -8,14 +8,13 @@
 -- 2013-11-01 dbrown: Completely Revised
 -- 2013-11-10 dbrown: returns void, communicates via RAISE NOTICE
 -- 2013-11-14 dbrown: communicates by returning text
+-- 2013-11-17 dbrown: cleanup
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
 declare
     nrows int;
 begin
-    truncate table ref_eventcodes;
-    insert into ref_eventcodes(code, description) values
 
     /*  How EventCodes are built:
 
@@ -43,6 +42,9 @@ begin
             ---8  Delete by Account Owner
             ---9  Delete by Admin */
 
+    truncate table ref_eventcodes;
+    insert into ref_eventcodes(code, description) values
+
     -- 0000 - 0000 : Obsolete eventcodes still in use
 
         ( '0007', 'automatic log-out' ),
@@ -56,54 +58,49 @@ begin
         ( '1004', 'automatic log-out' ),
         ( '1005', 'userid/password e-mailed' ),
         ( '1006', 'delphi notified' ),
-
-        ( '1020', 'new account registration' ),                 -- add_account
-        ( '1023', 'account updated' ),                          -- update_account
+        ( '1020', 'new account registration' ),
+        ( '1023', 'account updated' ),
         ( '1029', 'account deleted by Admin' ),
-
-        ( '1030', 'new member added' ),                         -- add_member
-        ( '1033', 'member updated' ),                           -- update_member
+        ( '1030', 'new member added' ),
+        ( '1033', 'member updated' ),
         ( '1034', 'member updated by account owner' ),
         ( '1035', 'member updated by Admin' ),
         ( '1037', 'member deleted' ),
         ( '1038', 'member deleted by account owner' ),
         ( '1039', 'member deleted by Admin' ),
-
         ( '1042', 'password changed (obsolete)' ),
         ( '1043', 'password changed' ),
         ( '1044', 'password changed by owner' ),
         ( '1045', 'password changed by Admin' ),
-
-        ( '1070', 'folder added' ),                             -- add_folder
-        ( '1071', 'folder added by owner' ),                    -- add_folder
-        ( '1072', 'folder added by Admin' ),                    -- add_folder
+        ( '1070', 'folder added' ),
+        ( '1071', 'folder added by owner' ),
+        ( '1072', 'folder added by Admin' ),
         ( '1073', 'folder updated' ),
         ( '1074', 'folder updated by account owner' ),
         ( '1075', 'folder updated by Admin' ),
         ( '1077', 'folder deleted' ),
         ( '1078', 'folder deleted by owner' ),
         ( '1079', 'folder deleted by Admin' ),
-
-        ( '1080', 'file added' ),                               -- add_file
-        ( '1081', 'file added by owner' ),                      -- add_file
-        ( '1082', 'file added by Admin' ),                      -- add_file
-        ( '1087', 'file deleted' ),                             -- delete_file
-        ( '1088', 'file deleted by owner' ),                    -- delete_file
-        ( '1089', 'file deleted by Admin' ),                    -- delete_file
+        ( '1080', 'file added' ),
+        ( '1081', 'file added by owner' ),
+        ( '1082', 'file added by Admin' ),
+        ( '1087', 'file deleted' ),
+        ( '1088', 'file deleted by owner' ),
+        ( '1089', 'file deleted by Admin' ),
 
     -- 4000 - 4999 : User's Fault errors
 
         ( '4000', 'invalid login attempt' ),
         ( '4006', 'unauthorized page attempt' ),
-        ( '4020', 'user could not add account' ),               -- add_account
-        ( '4030', 'user could not add member' ),                -- add_member
-        ( '4033', 'user could not update member' ),             -- update_member
+        ( '4020', 'user could not add account' ),
+        ( '4030', 'user could not add member' ),
+        ( '4033', 'user could not update member' ),
         ( '4040', 'user could not update password (obsolete)'),
         ( '4043', 'user could not update password' ),
-        ( '4070', 'user could not add folder' ),                -- add_folder
+        ( '4070', 'user could not add folder' ),
         ( '4073', 'user could not update folder' ),
         ( '4077', 'user could not delete folder' ),
-        ( '4080', 'user could not add file' ),                  -- add_file
+        ( '4080', 'user could not add file' ),
         ( '4087', 'user could not delete file' ),
 
     -- 6000+ Authorization (Permissions) Errors
@@ -111,25 +108,25 @@ begin
         ( '6000', 'unauthorized login attempt' ),
         ( '6006', 'unauthorized page attempt' ),
         ( '6043', 'unauthorized attempt to change password' ),
-        ( '6070', 'unauthorized attempt to add folder' ),       -- add_folder
+        ( '6070', 'unauthorized attempt to add folder' ),
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6087', 'unauthorized attempt to delete file' ),
 
     -- 9000+ : Database/Developer errors
 
-        ( '9020', 'error adding account' ),                     -- add_account
-        ( '9023', 'error updating account' ),                   -- update_account
+        ( '9020', 'error adding account' ),
+        ( '9023', 'error updating account' ),
         ( '9026', 'error getting account(s)' ),
-        ( '9030', 'error adding member' ),                      -- add_member
+        ( '9030', 'error adding member' ),
         ( '9033', 'error updating member' ),
         ( '9036', 'error getting member(s)' ),
         ( '9043', 'error updating password' ),
         ( '9050', 'error updating session'  ),
-        ( '9070', 'error adding folder' ),                      -- add_folder
+        ( '9070', 'error adding folder' ),
         ( '9073', 'error updating folder' ),
         ( '9077', 'error deleting folder' ),
-        ( '9080', 'error adding file' ),                        -- add_file
+        ( '9080', 'error adding file' ),
         ( '9086', 'error getting file(s)' ),
         ( '9087', 'error deleting file' ),
 
