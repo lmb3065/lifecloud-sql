@@ -16,31 +16,29 @@ declare
     nrows int;
 begin
 
-    /*  How EventCodes are built:
-
-            0---  (Obsolete eventcodes)
-            1---  OK / Normal notification
-            4---  User's Fault error
-            6---  Authorization Failure
-            9---  Developer Error
-            -00-  Login (unique last-digit codes)
-            -02-  Account
-            -03-  Member
-            -04-  Password
-            -05-  Session
-            -07-  Folder
-            -08-  File
-            -09-  Event
-            ---0  Add/Create
-            ---1  Add/Create by Account Owner
-            ---2  Add/Create by Admin
-            ---3  Update
-            ---4  Update by Account Owner
-            ---5  Update by Admin
-            ---6  Get
-            ---7  Delete
-            ---8  Delete by Account Owner
-            ---9  Delete by Admin */
+    /*  0---  (Obsolete eventcodes)
+        1---  OK / Normal notification
+        4---  User's Fault error
+        6---  Authorization Failure
+        9---  Developer Error
+        -00-  Login (unique last-digit codes)
+        -02-  Account
+        -03-  Member
+        -04-  Password
+        -05-  Session
+        -07-  Folder
+        -08-  File
+        -09-  Event
+        ---0  Add/Create
+        ---1  Add/Create by Account Owner
+        ---2  Add/Create by Admin
+        ---3  Update
+        ---4  Update by Account Owner
+        ---5  Update by Admin
+        ---6  Get
+        ---7  Delete
+        ---8  Delete by Account Owner
+        ---9  Delete by Admin */
 
     truncate table ref_eventcodes;
     insert into ref_eventcodes(code, description) values
@@ -136,7 +134,7 @@ begin
     -- ---------------------------------------------------------------------------
     -- OBSOLETE EventCodes
     -- ---------------------------------------------------------------------------
-
+/*
         ( '0000', 'user logged in (obsolete eventcode, use 1000)' ),
         ( '0001', 'user logged out (obsolete eventcode, use 1001)' ),
         ( '0002', 'invalid login attempt (obsolete eventcode, use 4000)' ),
@@ -194,7 +192,7 @@ begin
         ( '9025', 'error updating file (obsolete eventcode)'),
         ( '9040', 'error uploading image (obsolete eventcode)'),
         ( '9041', 'error adding image (obsolete eventcode)');
-
+*/
     select count(*) into nrows from ref_eventcodes;
     return 'EventCodes reference table loaded: '||nrows||' rows.';
 end;
