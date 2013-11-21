@@ -47,6 +47,7 @@ psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_default
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_retvals.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_forms.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-events.sql
@@ -72,6 +73,7 @@ psql -d lc -U pgsql -t -c 'select admin_create_eventcodes();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_retvals();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_defaultfolders();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_applist();' | grep '.'
+psql -d lc -U pgsql -t -c 'select admin_create_forms();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_admin_account();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_demo_account();' | grep '.'
 
