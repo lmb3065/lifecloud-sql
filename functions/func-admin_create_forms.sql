@@ -7,7 +7,7 @@ declare
 begin
 
     truncate table ref_forms;
-    insert into ref_forms( title, filename ) values
+    insert into ref_forms( filename, title ) values
         ('24hrTracking_Sheet.pdf',          '24 Hour Tracking Sheet'),
         ('CommunicationTrackingForm.pdf',   'Communication Tracking Form'),
         ('EmergencyPreparedness.pdf',       'Emergency Preparedness'),
