@@ -1,20 +1,19 @@
-
--- ==============================================================================
+-- ============================================================================
 -- get_accounts()
--- ------------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
 -- for administrator use only!  returns data on the specified accounts.
 -- 'filter' is a string to find, 'filtertype' indicates where to look for it:
 --      'e'=e-mail 'f'=firstname 'l'=lastname
 -- if no filter is supplied, returns ALL THE ACCOUNTS
--- ------------------------------------------------------------------------------
--- 2013-10-11 dbrown : returns paging stats (nrows, npages); new query structure
+-- ----------------------------------------------------------------------------
+-- 2013-10-11 dbrown : returns paging stats (rows, pages); new query structure
 -- 2013-10-11 dbrown : fixed case-sensitive ordering
 -- 2013-10-16 dbrown : added column member_count
 -- 2013-11-01 dbrown : added filtertype 'c' to search by cid
 -- 2013-11-01 dbrown : revised eventcodes
 -- 2013-11-12 dbrown : raises warning on invalid FilterType
 -- 2013-11-14 dbrown : Fixed: attempt to return NULL in func returning table
----------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 create or replace function get_accounts(
 
@@ -23,17 +22,18 @@ create or replace function get_accounts(
     _page     int         default 0,
     _filtertype char      default ''
 
-) returns table(account account_ext_t) as $$
+) returns table ( account account_ext_t ) as $$
 
 declare
     _nrows int;
     _npages int;
-    _cid int; 
-    _lower_filter     text = lower(_filter);
-    _lower_filtertype text = lower(_filtertype);
-    
+    _cid int;
+
 begin
-    
+
+    _filter = lower(_filter);
+    _filtertype = lower(_filtertype);
+
     begin
         _cid := cast(_filter as int);
     exception when others then
@@ -41,13 +41,13 @@ begin
     end;
 
     -- Raise error if filtertype doesn't make sense
-    
-    if  ( (_lower_filtertype is not null) 
-    and   (_lower_filtertype not in ('c','e','f','l','')) ) then
+
+    if  ( (_filtertype is not null)
+    and   (_filtertype not in ('c','e','f','l','')) ) then
         raise warning 'get_accounts(): invalid FilterType (expected [CEFL ])';
         return;
     end if;
-    
+
     -- Do our main unpaged query into a temporary table
 
     create temporary table accounts_out on commit drop as
@@ -59,15 +59,15 @@ begin
         a.updated               as account_updated,
         a.expires               as account_expires,
         -1                      as member_count,
-        m.mid                   as owner_mid, 
-        fdecrypt(x_userid)      as userid, 
-        fdecrypt(x_email)       as email, 
+        m.mid                   as owner_mid,
+        fdecrypt(x_userid)      as userid,
+        fdecrypt(x_email)       as email,
         fdecrypt(x_fname)       as fname,
         fdecrypt(x_mi)          as mi,
         fdecrypt(x_lname)       as lname,
         fdecrypt(x_address1)    as address1,
         fdecrypt(x_address2)    as address2,
-        fdecrypt(x_city)        as city, 
+        fdecrypt(x_city)        as city,
         fdecrypt(x_state)       as state,
         fdecrypt(x_postalcode)  as postalcode,
         fdecrypt(x_country)     as country,
@@ -83,32 +83,33 @@ begin
         0                       as nrows,
         0                       as npages
     from Accounts a join Members m on (a.owner_mid = m.mid)
-    
-    -- Apply filters
-    where ((_lower_filtertype = 'c')  and  (a.cid = _cid ))
-       or ((_lower_filtertype = 'e')  and  (lower(fdecrypt(x_email)) like _lower_filter || '%'))
-       or ((_lower_filtertype = 'f')  and  (lower(fdecrypt(x_fname)) like _lower_filter || '%'))
-       or ((_lower_filtertype = 'l')  and  (lower(fdecrypt(x_lname)) like _lower_filter || '%'))
-    
+
+    where ((_filtertype = 'c') and (a.cid = _cid ))
+       or ((_filtertype = 'e') and (fdecrypt(x_email) like _filter || '%'))
+       or ((_filtertype = 'f') and (lower(fdecrypt(x_fname)) like _filter || '%'))
+       or ((_filtertype = 'l') and (lower(fdecrypt(x_lname)) like _filter || '%'))
+
        or (coalesce(length(_filter)    , 0) = 0)  -- No filter? Return all
        or (coalesce(length(_filtertype), 0) = 0); -- No filtertype? Return all
 
-    --- Count results, exit if none
+
+    --- Count results, exit now if none
     select count(*) into _nrows from accounts_out;
-    if _nrows = 0 then return; end if;
-    
-    --- Update each account in the temp table ...    
+    if _nrows = 0 then
+        return;
+    end if;
+
+    --- Update each account in the temp table with its member count
     declare c cursor for select distinct cid from accounts_out;
     begin
         for r in c loop
-            -- with a count of its members 
             update accounts_out set member_count =
                     (select count(*) from Members where cid = r.cid)
                 where cid = r.cid;
         end loop;
-    end;      
-       
-    -- Calculate output paging values ...
+    end;
+
+    -- Calculate output paging values and add them to the temp table
     if (coalesce(_pagesize, 0) > 0) then
         _npages := _nrows / _pagesize;
         if (_nrows % _pagesize > 0) then _npages := _npages + 1; end if;
@@ -116,15 +117,14 @@ begin
         _pagesize := null;
         _npages := 1;
     end if;
-    --- ... and add them to the temp table
     update accounts_out set nrows = _nrows, npages = _npages;
-    
-    
+
+
     -- Output final results --
     return query select * from accounts_out
         order by upper(email) asc
         limit _pagesize offset (_page * _pagesize);
-    
+
 end;
 $$ language plpgsql;
 

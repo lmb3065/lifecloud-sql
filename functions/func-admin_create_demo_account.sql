@@ -1,4 +1,3 @@
-
 -- =============================================================================
 -- admin_create_demo_account()
 -- -----------------------------------------------------------------------------
@@ -40,19 +39,15 @@ declare
     M_LNAME      varchar := 'User';
 
 begin
-
     -- Add an account.  This automagically creates an Owner member.
-    -- (Dup-checking, logging, etc is done within add_account)
     cid := add_account( A_EMAIL, A_PWORD, A_LNAME, A_FNAME, A_MI, A_EXP );
-
     if (cid < RETVAL_SUCCESS) then
         return 'FAILED to create Demonstration account! ('||cid||')';
     end if;
 
     select last_value into mid1 from members_mid_seq;
 
-    -- Add an extra (non-admin) member.  This account now has TWO members.
-    -- (Dup-checking, logging, etc is done within add_member)
+    -- Add an extra (non-admin) member.
     mid2 := add_member( cid, M_FNAME, M_LNAME, '', M_PWORD, M_USERID, M_EMAIL, null );
     if (mid2 < RETVAL_SUCCESS) then
         return 'FAILED to create Demonstration member! ('||mid2||')';
@@ -63,5 +58,3 @@ begin
 
 end;
 $$ language plpgsql;
-
-
