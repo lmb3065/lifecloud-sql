@@ -1,14 +1,7 @@
-
 -- ==========================================================================
--- function add_member
--- --------------------------------------------------------------------------
--- Returns:
---    > 1: MemberID of the newly added member.
---    -10: Can't find Account by given CID
---    -22: Member already exists with this e-mail address
---    -23: Member already exists with this UserID
---    -24: Member already exists with this Name in the Account
---    -25: Adding Member would exceed MAXLOGINS Members in the Account
+--  function add_member
+-- -----------------------------------------------------------------------------
+--  Add a Member to an Account
 -- -----------------------------------------------------------------------------
 -- 2013-09-25 dbrown : Members/Accounts refactor, added members.userid
 -- 2013-10-08 dbrown : added CID/Name dup-check as alt to UserID dup-check
@@ -30,7 +23,6 @@
 create or replace function add_member
 (
     _cid          int,
-
     _fname        varchar(64),
     _lname        varchar(64),
 
@@ -50,9 +42,10 @@ create or replace function add_member
     _maxlogins    int  default 32767,
     _status       int  default 0,
     _pwstatus     int  default 0,
-    _userlevel    int  default 4,  -- Lowest access level
-    _tooltips     int  default 1 )
-    returns int as $$
+    _userlevel    int  default 4,
+    _tooltips     int  default 1
+
+) returns int as $$
 
 declare
     EVENT_OK_ADDED_MEMBER           constant varchar := '1030';
@@ -71,9 +64,6 @@ declare
 
 begin
 
-    -- Check arguments --------------------------------------------------------
-
-
     -- Ensure destination account exists
     if not exists (SELECT cid FROM Accounts WHERE cid = _cid) then
         perform log_event( _cid, null, EVENT_DEVERR_ADDING_MEMBER,
@@ -81,17 +71,15 @@ begin
         return RETVAL_ERR_ACCOUNT_NOTFOUND;
     end if;
 
-
     -- Ensure email address is unique
-    _email := lower(_email);
+    _email := lower(_email); -- Case insensitive
     if (length(_email) > 0) then
-        if exists (SELECT mid FROM Members WHERE lower(fdecrypt(x_email)) = _email) then
+        if exists (SELECT mid FROM Members WHERE fdecrypt(x_email)) = _email) then
             perform log_event( _cid, null, EVENT_USERERR_ADDING_MEMBER,
                         'E-mail <'||_email||'> is already in use');
             return RETVAL_ERR_MEMBER_EXISTS_EMAIL;
         end if;
     end if;
-
 
     -- Ensure UserID is unique if provided
     if (length(_userid) > 0) then
@@ -101,7 +89,6 @@ begin
             return RETVAL_ERR_MEMBER_EXISTS_USERID;
         end if;
     end if;
-
 
     -- Ensure full name is unique within its account
     if exists (
@@ -116,7 +103,6 @@ begin
         return RETVAL_ERR_MEMBER_EXISTS_NAME;
     end if;
 
-
     -- Ensure we won't create more than MaxLogins members
     SELECT count(*) INTO nrows FROM Members WHERE cid = _cid;
     if (nrows >= _maxlogins) then
@@ -126,8 +112,7 @@ begin
     end if;
 
 
-
-    -- Passed tests, add the Member -------------------------------------------
+    -- Add the Member record
 
     declare
         errno  text;
@@ -143,6 +128,7 @@ begin
             fencrypt(_address1), fencrypt(_address2), fencrypt(_city),
             fencrypt(_state), fencrypt(_postalcode), fencrypt(_country),
             fencrypt(_phone), _status, _pwstatus, _userlevel, _tooltips, 0 );
+        select last_value into newmid from members_mid_seq;
 
     exception when others then
         -- Couldn't add Member!
@@ -152,16 +138,13 @@ begin
     end;
 
 
-    -- Success ----------------------------------------------------------------
+    -- Success
 
-    -- Add the starting folders to the new Member
-    SELECT last_value into newmid from members_mid_seq;
     perform add_initial_folders( newmid );
 
-    -- Log it
     perform log_event( _cid, newmid, EVENT_OK_ADDED_MEMBER,
         '['||newmid||'] '||_fname||' '||_lname|| ' <' ||_email||'>');
     return newmid;
 
- end;
- $$ language plpgsql;
+end
+$$ language plpgsql;

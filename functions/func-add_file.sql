@@ -1,15 +1,8 @@
-
--- -----------------------------------------------------------------------------
+-- ===========================================================================
 --  add_file()
--- -----------------------------------------------------------------------------
---  returns  > 0 : SUCCESS.  UID of new file created
---  returns    0 : A required argument (_name) was NULL
---  returns  -11 : Source Member does not exist
---  returns  -13 : Destination folder does not exist
---  returns  -27 : Filename already exists in that folder
---  returns  -80 : Source Member has insufficient permissions
---  returns  -82 : Source outranked by Target
------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+--  Add a File to a Folder
+-- ---------------------------------------------------------------------------
 -- 2013-10-29 dbrown: created
 -- 2013-10-30 dbrown: new Name and Description fields
 -- 2013-11-01 dbrown: update event codes, disallow dup filenames in a folder
@@ -29,10 +22,10 @@
 -- 2013-11-14 dbrown : Trusted (lvl 1) should have same rights as Owner (lvl 0)
 -- 2013-11-14 dbrown : Updated eventcode constants
 -- 2013-11-16 dbrown : Added argument/field _content_type varchar
--- -----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
 
-create or replace function add_file(
-
+create or replace function add_file
+(
     source_mid        int, -- Member making the change
     parent_folder_uid int, -- Parent folder which will own the file
     _name         varchar, -- \
@@ -48,25 +41,20 @@ declare
     EVENT_USERERR_ADDING_FILE      constant varchar := '4080';
     EVENT_AUTHERR_ADDING_FILE      constant varchar := '6080';
     EVENT_DEVERR_ADDING_FILE       constant varchar := '9080';
+    eventcode_out   varchar;
 
     RETVAL_SUCCESS              constant int :=   1;
     RETVAL_ERR_ARG_INVALID      constant int :=   0;
     RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
     RETVAL_ERR_FILE_EXISTS      constant int := -26;
-
     result          int;
-    source_cid      int;
-    source_level    int;
-    source_isadmin  int;
-    target_mid      int;
-    target_cid      int;
-    existing_uid    int;
-    newfileuid      int;
-    eventcode_out   varchar;
+
+    source_cid int; source_level int; source_isadmin int;
+    target_mid int; target_cid int;
+    existing_uid int;
+    newfileuid int;
 
 begin
-
-    -- Check arguments -------------------------------------------------------------
 
     -- Ensure a name was supplied
     if (_name is null) or (length(_name) = 0) then
@@ -94,6 +82,7 @@ begin
         return result;
     end if;
 
+
     -- Ensure folder doesn't already contain this file
     select uid into existing_uid from Files
         where folder_uid = parent_folder_uid
@@ -107,29 +96,32 @@ begin
 
 
 
-    -- Add file to database --------------------------------------------------------
+    -- Add file to database
 
     declare
         errno text;
         errmsg text;
         errdetail text;
+
     begin
-        insert into Files ( folder_uid, mid, x_name, x_desc, content_type, modified_by )
-        values ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc),
+
+        INSERT INTO Files ( folder_uid, mid, x_name, x_desc, content_type, modified_by )
+        VALUES ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc),
             _content_type, source_mid );
+        select last_value into newfileuid from files_uid_seq;
 
     exception when others then
+
         -- Couldn't add File!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
         perform log_event(_cid, null, EVENT_DEVERR_ADDING_FILE, '['||errno||'] '||errmsg||' : '||errdetail);
         RETURN RETVAL_ERR_EXCEPTION;
+
     end;
 
 
 
-    -- Success ---------------------------------------------------------------------
-
-    select last_value into newfileuid from files_uid_seq;
+    -- Success
 
     if (source_mid = target_mid) then eventcode_out := EVENT_OK_ADDED_FILE;
     elsif (source_isadmin = 1)   then eventcode_out := EVENT_OK_ADMIN_ADDED_FILE;
