@@ -105,6 +105,7 @@ begin
 
         ( '6000', 'unauthorized login attempt' ),
         ( '6006', 'unauthorized page attempt' ),
+        ( '6033', 'unauthorized attempt to update member' ),
         ( '6043', 'unauthorized attempt to change password' ),
         ( '6070', 'unauthorized attempt to add folder' ),
         ( '6077', 'unauthorized attempt to delete folder' ),
