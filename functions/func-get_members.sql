@@ -19,6 +19,7 @@
 --  2013-11-01 dbrown : Simplified by removing temporary table
 --  2013-11-01 dbrown : Stricter argument processing
 --  2013-11-15 dbrown : fix typo
+--  2013-11-24 dbrown : remove scope-mangling local variable
 -- -----------------------------------------------------------------------------
 
 create or replace function get_members(
@@ -28,9 +29,6 @@ create or replace function get_members(
     arg_cid        int          default null  -- Get N members by Account CID
 
 ) returns table ( member member_t ) as $$
-
-declare
-    lower_arg_email text;
 
 begin
 
@@ -56,7 +54,7 @@ begin
     from Members
     where ((arg_mid   is not null) and (mid = arg_mid))
        or ((arg_cid   is not null) and (cid = arg_cid))
-       or ((arg_email is not null) and (fdecrypt(x_email) = lower_arg_email))
+       or ((arg_email is not null) and (fdecrypt(x_email) = arg_email))
     order by fdecrypt(x_fname);
 
 end
