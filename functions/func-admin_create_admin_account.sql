@@ -4,17 +4,14 @@
 -- Creates the GOD ACCOUNT.  If it detects that one already exists,
 --      it will delete it using admin_remove_account_cascade().
 -- This function is run automatically by the database installation script.
---      Returns information via RAISE instead of return value.
 -- --------------------------------------------------------------------------
--- 2013-10-15 dbrown: now checks and whacks ALL MEMBERS with the admin flag
---                      before creating a new one
 -- 2013-10-24 dbrown: now actually makes the member admin
 -- 2013-11-01 dbrown: revised event codes
 -- 2013-11-13 dbrown: Organized, more information in eventlog
 -- 2013-11-14 dbrown: Communicates by returning text
 -- --------------------------------------------------------------------------
 
-create or replace function admin_create_admin_account( ) returns text
+create or replace function admin_create_admin_account() returns text
 as $$
 
 declare
@@ -23,10 +20,8 @@ declare
 
     n int;
 
-    _cid int;
-    _mid int;
-    newcid int;
-    newmid int;
+    _cid int; _mid int;
+    newcid int; newmid int;
     expiration  timestamp := current_date + interval '5 years';
 
     C_ADMIN_EMAIL constant varchar := 'admin@lifecloud.info';
@@ -44,7 +39,6 @@ begin
         return 'Administrator account already exists!';
     end if;
 
-
     -- Create Admin Account
     newcid := add_account(
         C_ADMIN_EMAIL, C_ADMIN_PWORD, C_ADMIN_LNAME, C_ADMIN_FNAME,
@@ -60,8 +54,5 @@ begin
     -- Done
     return 'Administrator account [#'||newcid||'] and login [#'||newmid||'] created.';
 
-
 end;
 $$ language plpgsql;
-
-

@@ -1,7 +1,6 @@
-
 -- =============================================================================
 -- function add_initial_folders--
---   adds starting folders to a member using default_folders as template
+--   Adds starting folders to a member using default_folders as template
 -- -----------------------------------------------------------------------------
 -- ARGUMENT _mid integer : member_mid that will own the created folders
 -- -----------------------------------------------------------------------------
@@ -19,7 +18,7 @@
 -- 2013-11-13 dbrown : Organized, more information in eventlog details
 --------------------------------------------------------------------------------
 
-create or replace function add_initial_folders( _mid int ) 
+create or replace function add_initial_folders( _mid int )
     returns int as $$
 
 declare
@@ -34,7 +33,7 @@ declare
         SELECT fdecrypt(x_name) AS fname,
                fdecrypt(x_desc) AS fdesc
             FROM ref_defaultfolders;
-        
+
 begin
 
     -- Ensure user is new (has no folders)
@@ -44,15 +43,14 @@ begin
         return RETVAL_ERR_FOLDER_EXISTS;
     end if;
 
-    
+
     -- Copy folders
-    for r in c loop    
+    for r in c loop
         perform add_folder( 1, _mid, r.fname, r.fdesc, 0, 0 );
     end loop;
 
-    -- Success    
+    -- Success
     return RETVAL_SUCCESS;
-    
-end;
-$$ language plpgsql;
 
+end
+$$ language plpgsql;

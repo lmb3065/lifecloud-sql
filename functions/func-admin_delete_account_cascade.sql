@@ -1,4 +1,3 @@
-
 -----------------------------------------------------------------------------
 -- function admin_delete_account_cascade
 -----------------------------------------------------------------------------
@@ -19,7 +18,7 @@ declare
 begin
 
     if not exists (select cid from accounts where cid = arg_cid) then
-        raise 'Account CID [%] does not exist!';
+        raise 'Account CID [%] does not exist!', arg_cid;
     end if;
 
     create temporary table account_members on commit drop as

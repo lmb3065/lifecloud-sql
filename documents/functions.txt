@@ -1,0 +1,83 @@
+Functions and Results
+-------------------------------------------------------------------------------
+    Event Logged                    Value Returned
+-------------------------------------------------------------------------------
+
+add_account (email, password, lname, fname, ...)
+
+    (no security)
+    event_usererr_adding_account    retval_err_account_exists
+    event_deverr_adding_account     retval_err_exception
+    event_usererr_adding_member     retval_err_member_exists_email
+    event_usererr_adding_member     retval_err_member_exists_userid
+    event_deverr_adding_member      retval_err_exception
+    event_ok_added_account          cid
+
+add_member (cid, fname, lname, ...)
+
+    (no security)
+    EVENT_DEVERR_ADDING_MEMBER      RETVAL_ERR_ACCOUNT_NOTFOUND
+    EVENT_USERERR_ADDING_MEMBER     RETVAL_ERR_MEMBER_EXISTS_EMAIL
+    EVENT_USERERR_ADDING_MEMBER     RETVAL_ERR_MEMBER_EXISTS_USERID
+    EVENT_USERERR_ADDING_MEMBER     RETVAL_ERR_MEMBER_EXISTS_NAME
+    EVENT_USERERR_ADDING_MEMBER     RETVAL_ERR_MEMBER_EXISTS_FULL
+    EVENT_DEVERR_ADDING_MEMBER      RETVAL_ERR_EXCEPTION
+    EVENT_OK_ADDED_MEMBER           MID
+
+add_folder (mid1, mid2, name, desc, ...)
+
+    event_usererr_adding_folder     retval_err_arg_invalid (foldername)
+    event_autherr_adding_folder     retval_err_member_notfound
+    event_autherr_adding_folder     retval_err_member2_notfound
+    event_autherr_adding_folder     retval_err_not_allowed
+    event_usererr_adding_folder     retval_err_folder_exists
+    event_deverr_adding_folder      retval_err_exception
+    event_ok_added_folder           uid
+    event_ok_owner_added_folder     uid
+    event_ok_admin_added_folder     uid
+
+    add_initial_folders (mid)
+      event_deverr_adding_folder      any err from add_folder()
+      none                            retval_success
+
+add_file (mid1, folderuid, name, desc)
+
+    event_usererr_adding_file       retval_err_arg_invalid (filename)
+    event_deverr_adding_file        retval_err_folder_notfound
+    event_autherr_adding_file       retval_err_member_notfound
+    event_autherr_adding_file       retval_err_not_allowed
+    event_usererr_adding_file       retval_err_file_exists
+    event_deverr_adding_file        retval_err_exception
+    event_ok_added_file             uid
+    event_ok_owner_added_file       uid
+    event_ok_admin_added_file       uid
+
+    ------------------------------------------------------------------------
+
+delete_folder(mid1, folderuid)
+
+    event_deverr_deleting_folder    retval_err_folder_notfound
+    event_autherr_deleting_folder   retval_err_member_notfound
+    event_autherr_deleting_folder   retval_err_not_allowed
+    event_deverr_deleting_folder    retval_err_exception
+    event_ok_deleted_folder         retval_success
+    event_ok_owner_deleted_folder   retval_success
+    event_ok_admin_deleted_folder   retval_success
+
+delete_file(mid1, fileuid)
+
+    event_deverr_deleting_file      retval_err_file_notfound
+    event_autherr_deleting_file     retval_err_member_notfound
+    event_autherr_deleting_file     retval_err_not_allowed
+    event_deverr_deleting_file      retval_err_exception
+    event_ok_deleted_file           retval_success
+    event_ok_owner_deleted_file     retval_success
+    event_ok_admin_deleted_file     retval_success
+
+    -----------------------------------------------------------------------------
+
+get_account( ?cid, ?email )
+
+    event_deverr_getting_account    null row (no args)
+    event_deverr_getting_account    null row (CID mismatch)
+    none                            row (success)
