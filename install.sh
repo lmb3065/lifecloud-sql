@@ -16,6 +16,8 @@
 ## 2013-10-11 dbrown : Unrolled table loading loop -- the tables were being
 ##                     created in a sequence that caused dependency errors
 ## 2013-11-05 dbrown : removed pg_ctl, added ref_apps and admin_create_applist
+## 2013-11-24 dbrown : adds tables ref_categories, ref_forms
+##                     runs new admin_create_categories(), admin_create_forms()
 ## -----------------------------------------------------------------------------
 
 lcdir=.
@@ -43,11 +45,12 @@ done
 
 echo 5/8 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_categories.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_retvals.sql
-psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_defaultfolders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_forms.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_apps.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-accounts.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-events.sql
@@ -69,14 +72,14 @@ done
 
 echo 8/8 Running Setup Functions
 ## psql emits a blank line, grep eats it
+psql -d lc -U pgsql -t -c 'select admin_create_categories();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_eventcodes();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_retvals();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_defaultfolders();' | grep '.'
-psql -d lc -U pgsql -t -c 'select admin_create_applist();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_forms();' | grep '.'
+psql -d lc -U pgsql -t -c 'select admin_create_applist();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_admin_account();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_demo_account();' | grep '.'
 
 echo Finished.
 echo
-
