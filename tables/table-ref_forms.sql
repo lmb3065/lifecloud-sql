@@ -8,7 +8,6 @@
 --  2013-11-22 dbrown: added column Category
 -- ---------------------------------------------------------------------------
 
-drop table if exists ref_forms;
 create table ref_forms
 (
     title        text    not null,

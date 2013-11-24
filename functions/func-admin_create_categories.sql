@@ -11,7 +11,7 @@ declare
 
 begin
 
-    truncate table ref_categories restart identity;
+    truncate table ref_categories restart identity cascade;
     insert into ref_categories (name) values
         ('Personal'),
         ('Home'),

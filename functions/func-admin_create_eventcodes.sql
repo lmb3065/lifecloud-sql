@@ -40,7 +40,7 @@ begin
         ---8  Delete by Account Owner
         ---9  Delete by Admin */
 
-    truncate table ref_eventcodes;
+    truncate table ref_eventcodes cascade;
     insert into ref_eventcodes(code, description) values
 
     -- 0000 - 0000 : Obsolete eventcodes still in use
@@ -129,7 +129,7 @@ begin
         ( '9087', 'error deleting file' ),
 
     --
-        ( '9999', 'general ASSERT failure'),
+        ( '9999', 'general ASSERT failure');
 
     -- ---------------------------------------------------------------------------
     -- OBSOLETE EventCodes

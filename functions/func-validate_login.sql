@@ -25,8 +25,8 @@ create or replace function validate_login(
 ) returns member_t as $$
 
 declare
-    EVENT_LOGIN         := '1000';
-    EVENT_INVALID_LOGIN := '4000';
+    EVENT_LOGIN          char(4) := '1000';
+    EVENT_INVALID_LOGIN  char(4) := '4000';
 
     _userid_c varchar(64) := lower(arg_userid);
     _passwd_h text        := sha1( arg_passwd );

@@ -16,7 +16,7 @@ declare
     i int;
 begin
 
-    truncate table ref_forms;
+    truncate table ref_forms cascade;
 
     select cat.uid into i from ref_categories cat where name = 'Personal';
     insert into ref_forms( category, filename, title ) values

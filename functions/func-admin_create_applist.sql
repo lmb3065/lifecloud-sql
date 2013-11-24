@@ -15,7 +15,7 @@ declare
     nrows int;
 begin
 
- truncate table ref_apps restart identity;
+ truncate table ref_apps restart identity cascade;
 
  insert into ref_apps( app_url, app_name, app_icon) values
      ( 'activities',      'Activities',               'activities.gif'    ),

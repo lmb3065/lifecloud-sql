@@ -12,6 +12,7 @@
 ##  destination.  Run this script, "install.sh", in the root directory of the
 ##  installation package.  Afterward, the "lc" database should be completely
 ##  installed and ready to use.
+##     You may need to say : pg_ctl restart -D /opt/pgsql/data/ -m fast
 ## -----------------------------------------------------------------------------
 ## 2013-10-11 dbrown : Unrolled table loading loop -- the tables were being
 ##                     created in a sequence that caused dependency errors

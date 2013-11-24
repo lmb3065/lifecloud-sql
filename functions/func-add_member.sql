@@ -74,7 +74,7 @@ begin
     -- Ensure email address is unique
     _email := lower(_email); -- Case insensitive
     if (length(_email) > 0) then
-        if exists (SELECT mid FROM Members WHERE fdecrypt(x_email)) = _email) then
+        if exists (SELECT mid FROM Members WHERE fdecrypt(x_email) = _email) then
             perform log_event( _cid, null, EVENT_USERERR_ADDING_MEMBER,
                         'E-mail <'||_email||'> is already in use');
             return RETVAL_ERR_MEMBER_EXISTS_EMAIL;
