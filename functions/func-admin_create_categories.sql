@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------------------------
 --  function admin_create_categories
 -- ---------------------------------------------------------------------------
---  Runs once at installation to populate the Forms reference table
+--  Runs once at installation to populate the Categories reference table
 -- ---------------------------------------------------------------------------
 
 create or replace function admin_create_categories() returns text as $$

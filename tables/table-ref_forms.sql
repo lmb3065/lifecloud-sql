@@ -12,6 +12,6 @@ create table ref_forms
 (
     title        text    not null,
     filename     text    not null,
-    category     int     references ref_categories(uid)
+    category     int     not null   ----> categories.uid
 );
 alter table ref_forms owner to pgsql;
