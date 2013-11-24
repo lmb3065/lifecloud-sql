@@ -20,6 +20,8 @@
 -- 2013-11-14 dbrown: Organization, no more RAISE
 -- 2013-11-16 dbrown: New (output) columm content_type
 -- 2013-11-23 dbrown: Fixed outdated eventcodes
+-- 2013-11-23 dbrown: Changes for Forms: added columns isForm and category;
+--              extracted output def'n into a type so get_forms can use it too
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -30,20 +32,7 @@ create or replace function get_files(
     _pagesize   int    default null, --  \  Pagination
     _page       int    default 0     --  /    Options
 
-) returns table (
-
-    uid          int,
-    fid          int,
-    mid          int,
-    created      timestamp,
-    filename     text,
-    description  text,
-    content_type varchar,
-    modified_by  int,
-    nrows        int,
-    npages       int
-
-) as $$
+) returns table ( filerec file_t ) as $$
 
 declare
     EVENT_DEVERR_GETTING_FILE constant char(4) := '9086';
@@ -81,6 +70,7 @@ begin
                 fdecrypt(f.x_name) as filename,
                 fdecrypt(f.x_desc) as description,
                 f.content_type,
+                f.isform, f.category,
                 f.modified_by
             from files f
             where ( (_fileuid is not null)    and (f.uid = _fileuid) )
@@ -126,7 +116,8 @@ begin
 
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.created,
-            fo.filename, fo.description, fo.content_type, fo.modified_by,
+            fo.filename, fo.description, fo.content_type, fo.isform,
+            fo.category, fo.modified_by,
             _nrows, _npages
         from files_out fo
         order by created desc

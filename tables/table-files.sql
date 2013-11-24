@@ -1,4 +1,3 @@
-
 -- -----------------------------------------------------------------------------
 --  FILES                                                                 Table
 -- -----------------------------------------------------------------------------
@@ -7,6 +6,7 @@
 -- 2013-11-01 dbrown: changed fid to folder_uid
 -- 2013-11-06 dbrown: added column modified_by
 -- 2013-11-16 dbrown: added column content_type
+-- 2013-11-23 dbrown: added columns isForm, category
 -- -----------------------------------------------------------------------------
 
 create table Files
@@ -17,7 +17,10 @@ create table Files
     x_name       bytea       not null,
     x_desc       bytea       not null,
     content_type varchar,
-    modified_by  int,              -- references Members
+    isform       int         default 0,
+    category     int,       -- reference to ref_Categories(UID)
+                            -- Only meaningful if isForm=1.
+    modified_by  int,       -- reference to Members(MID)
     created      timestamp   not null default now()
 );
 alter table Files owner to pgsql;
