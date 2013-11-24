@@ -22,6 +22,7 @@
 -- 2013-11-14 dbrown : Trusted (lvl 1) should have same rights as Owner (lvl 0)
 -- 2013-11-14 dbrown : Updated eventcode constants
 -- 2013-11-16 dbrown : Added argument/field _content_type varchar
+-- 2013-11-24 dbrown : Removed eventlog noise
 -- ---------------------------------------------------------------------------
 
 create or replace function add_file
@@ -129,8 +130,7 @@ begin
     else eventcode_out := EVENT_OK_ADDED_FILE;
     end if;
 
-    perform log_event( source_cid, source_mid, eventcode_out,
-                '['||newfileuid||'] '||_name, target_cid, target_mid );
+    perform log_event( source_cid, source_mid, eventcode_out, null, target_cid, target_mid );
     return newfileuid;
 
 end

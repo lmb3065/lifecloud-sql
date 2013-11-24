@@ -18,6 +18,7 @@
 -- 2013-11-16 dbrown : Preserve case of UserID (but keep insensitive)
 -- 2013-11-16 dbrown : Shortened error output
 -- 2013-11-16 dbrown : TODO: Prevent NULLS from getting through and crashing table
+-- 2013-11-24 dbrown : removed eventlog noise
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -142,8 +143,7 @@ begin
 
     perform add_initial_folders( newmid );
 
-    perform log_event( _cid, newmid, EVENT_OK_ADDED_MEMBER,
-        '['||newmid||'] '||_fname||' '||_lname|| ' <' ||_email||'>');
+    perform log_event( _cid, newmid, EVENT_OK_ADDED_MEMBER, null );
     return newmid;
 
 end

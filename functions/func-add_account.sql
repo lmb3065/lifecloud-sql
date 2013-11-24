@@ -18,6 +18,7 @@
 -- 2013-11-13 dbrown: Deletes account entry if member-creation failed
 --       Removed RAISE, added exception handling around SQL
 --       Organized, more information in eventlog details
+-- 2013-11-24 dbrown: removed eventlog noise
 -- ---------------------------------------------------------------------------
 
 create or replace function add_account
@@ -93,7 +94,7 @@ begin
     end;
 
     select last_value into new_cid from accounts_cid_seq;
-    perform log_event( new_cid, null, EVENT_OK_ADDED_ACCOUNT, '['||new_cid|| '] '||_email );
+    perform log_event( new_cid, null, EVENT_OK_ADDED_ACCOUNT, null );
 
 
     -- Add the Member (Owner)
