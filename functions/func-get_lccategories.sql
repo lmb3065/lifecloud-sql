@@ -10,7 +10,8 @@ create or replace function get_lccategories ()
 returns table (uid int, name text) as $$
 begin
 
-    select uid, name from ref_categories;
+    return query
+    select cat.uid, cat.name from ref_categories cat;
 
 end
 $$ language plpgsql;
