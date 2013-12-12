@@ -4,6 +4,7 @@
 --  File output type common to get_files and get_forms
 -- ---------------------------------------------------------------------------
 --  2013-11-23 dbrown: created
+--  2013-12-12 dbrown: added item_uid
 -- ---------------------------------------------------------------------------
 
 create type file_t as (
@@ -11,6 +12,7 @@ create type file_t as (
     uid          int,
     fid          int,
     mid          int,
+    item_uid     int,
     created      timestamp,
     filename     text,
     description  text,

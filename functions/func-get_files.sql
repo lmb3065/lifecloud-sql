@@ -22,6 +22,7 @@
 -- 2013-11-23 dbrown: Fixed outdated eventcodes
 -- 2013-11-23 dbrown: Changes for Forms: added columns isForm and category;
 --              extracted output def'n into a type so get_forms can use it too
+-- 2013-12-12 dbrown: added item_uid
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -66,7 +67,7 @@ begin
     -- Get initial results ---------------------------------------------------------
 
     create temporary table files_out on commit drop as
-        select f.uid, f.folder_uid, f.mid, f.created,
+        select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
                 fdecrypt(f.x_name) as filename,
                 fdecrypt(f.x_desc) as description,
                 f.content_type,
@@ -115,7 +116,7 @@ begin
     -- Output final results --------------------------------------------------------
 
     return query
-        select fo.uid, fo.folder_uid, fo.mid, fo.created,
+        select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isform,
             fo.category, fo.modified_by,
             _nrows, _npages

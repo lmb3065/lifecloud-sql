@@ -23,6 +23,7 @@
 -- 2013-11-14 dbrown : Updated eventcode constants
 -- 2013-11-16 dbrown : Added argument/field _content_type varchar
 -- 2013-11-24 dbrown : Removed eventlog noise
+-- 2013-12-12 dbrown : added item_uid
 -- ---------------------------------------------------------------------------
 
 create or replace function add_file
@@ -31,7 +32,8 @@ create or replace function add_file
     parent_folder_uid int, -- Parent folder which will own the file
     _name         varchar, -- \
     _desc         varchar, --  >  Attributes of the new file
-    _content_type varchar  -- /
+    _content_type varchar, -- /
+    _item_uid         int default null
 
 ) returns int as $$
 
@@ -106,8 +108,8 @@ begin
 
     begin
 
-        INSERT INTO Files ( folder_uid, mid, x_name, x_desc, content_type, modified_by )
-        VALUES ( parent_folder_uid, target_mid, fencrypt(_name), fencrypt(_desc),
+        INSERT INTO Files ( folder_uid, mid, item_uid, x_name, x_desc, content_type, modified_by )
+        VALUES ( parent_folder_uid, target_mid, _item_uid, fencrypt(_name), fencrypt(_desc),
             _content_type, source_mid );
         select last_value into newfileuid from files_uid_seq;
 
