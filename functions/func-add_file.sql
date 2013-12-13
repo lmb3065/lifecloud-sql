@@ -50,6 +50,7 @@ declare
     RETVAL_ERR_ARG_INVALID      constant int :=   0;
     RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
     RETVAL_ERR_FILE_EXISTS      constant int := -26;
+    RETVAL_ERR_EXCEPTION        constant int := -98;
     result          int;
 
     source_cid int; source_level int; source_isadmin int;
