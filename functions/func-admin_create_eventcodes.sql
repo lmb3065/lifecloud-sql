@@ -9,6 +9,7 @@
 -- 2013-11-10 dbrown: returns void, communicates via RAISE NOTICE
 -- 2013-11-14 dbrown: communicates by returning text
 -- 2013-11-17 dbrown: cleanup
+-- 2013-12-12 dbrown: Added eventcodes for [Item] data type (x10x)
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -29,6 +30,7 @@ begin
         -07-  Folder
         -08-  File
         -09-  Event
+        -10-  Item
         ---0  Add/Create
         ---1  Add/Create by Account Owner
         ---2  Add/Create by Admin
@@ -61,10 +63,10 @@ begin
         ( '1029', 'account deleted by Admin' ),
         ( '1030', 'new member added' ),
         ( '1033', 'member updated' ),
-        ( '1034', 'member updated by account owner' ),
+        ( '1034', 'member updated by owner' ),
         ( '1035', 'member updated by Admin' ),
         ( '1037', 'member deleted' ),
-        ( '1038', 'member deleted by account owner' ),
+        ( '1038', 'member deleted by owner' ),
         ( '1039', 'member deleted by Admin' ),
         ( '1042', 'password changed (obsolete)' ),
         ( '1043', 'password changed' ),
@@ -74,7 +76,7 @@ begin
         ( '1071', 'folder added by owner' ),
         ( '1072', 'folder added by Admin' ),
         ( '1073', 'folder updated' ),
-        ( '1074', 'folder updated by account owner' ),
+        ( '1074', 'folder updated by owner' ),
         ( '1075', 'folder updated by Admin' ),
         ( '1077', 'folder deleted' ),
         ( '1078', 'folder deleted by owner' ),
@@ -85,6 +87,15 @@ begin
         ( '1087', 'file deleted' ),
         ( '1088', 'file deleted by owner' ),
         ( '1089', 'file deleted by Admin' ),
+        ( '1100', 'item added'),
+        ( '1101', 'item added by owner'),
+        ( '1102', 'item added by Admin'),
+        ( '1103', 'item updated'),
+        ( '1104', 'item updated by owner'),
+        ( '1105', 'item updated by Admin'),
+        ( '1107', 'item deleted'),
+        ( '1108', 'item deleted by owner'),
+        ( '1109', 'item deleted by Admin'),
 
     -- 4000 - 4999 : User's Fault errors
 
@@ -100,6 +111,9 @@ begin
         ( '4077', 'user could not delete folder' ),
         ( '4080', 'user could not add file' ),
         ( '4087', 'user could not delete file' ),
+        ( '4100', 'user could not add item' ),
+        ( '4103', 'user could not update item' ),
+        ( '4107', 'user could not delete item' ),
 
     -- 6000+ Authorization (Permissions) Errors
 
@@ -111,6 +125,9 @@ begin
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6087', 'unauthorized attempt to delete file' ),
+        ( '6100', 'unauthorized attempt to add item' ),
+        ( '6103', 'unauthorized attempt to update item' ),
+        ( '6107', 'unauthorized attempt to delete item' ),
 
     -- 9000+ : Database/Developer errors
 
@@ -128,9 +145,12 @@ begin
         ( '9080', 'error adding file' ),
         ( '9086', 'error getting file(s)' ),
         ( '9087', 'error deleting file' ),
+        ( '9100', 'error adding item' ),
+        ( '9103', 'error updating item' ),
+        ( '9106', 'error getting item(s)' ),
+        ( '9107', 'error deleting item' ),
 
-    --
-        ( '9999', 'general ASSERT failure');
+        ( '9999', 'ASSERT failure');
 
     -- ---------------------------------------------------------------------------
     -- OBSOLETE EventCodes

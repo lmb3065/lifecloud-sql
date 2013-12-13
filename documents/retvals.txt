@@ -23,6 +23,7 @@ Lifecloud Database Function Return Values
       -24   Member would exceed maximum Members         retval_err_member_exists_full
       -25   Folder already exists for this member       retval_err_folder_exists
       -26   File already exists in this folder          retval_err_file_exists
+      -27   Item already exists in this folder          retval_err_item_exists
 
     PERMISSIONS ERRORS
 
