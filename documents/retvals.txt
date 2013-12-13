@@ -2,17 +2,18 @@ Lifecloud Database Function Return Values
 ---------------------------------------------------------------------------
 
       > 1   Success (new UID)
-        1   Success                                     retval_success
-        0   A required argument was invalid             retval_err_arg_invalid
+*       1   Success                                     retval_success
+*       0   A required argument was invalid             retval_err_arg_invalid
               (e.g. NULL, garbage, unusable)
 
     MISSING (directly referenced) OBJECT
 
       -10   Account does not exist                      retval_err_account_notfound
-      -11   (Source) Member does not exist              retval_err_member_notfound
-      -12   Target Member does not exist                retval_err_member2_notfound
+*     -11   (Source) Member does not exist              retval_err_member_notfound
+*     -12   Target Member does not exist                retval_err_member2_notfound
       -13   Folder does not exist                       retval_err_folder_notfound
       -14   File does not exist                         retval_err_file_notfound
+      -15   Item does not exist                         retval_err_item_notfound
 
     OBJECT ALREADY EXISTS
 
@@ -27,9 +28,11 @@ Lifecloud Database Function Return Values
 
     PERMISSIONS ERRORS
 
-      -80   Action not allowed                          retval_err_not_allowed
+*     -88   Action not allowed                          retval_err_not_allowed
 
     OTHER
 
       -98   Database exception (see eventlog)           retval_err_exception
       -99   Unanticipated failure type                  retval_err_unknown
+
+* Only these values can be returned by member_can_update_member()
