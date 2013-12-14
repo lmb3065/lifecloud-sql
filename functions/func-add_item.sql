@@ -4,6 +4,7 @@
 --  add an Item.  Returns UID of the item created (+), or an error code (-).
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
+--  2013-12-14 dbrown: fixed typo
 -- ---------------------------------------------------------------------------
 
 create or replace function add_item(
@@ -75,7 +76,7 @@ begin
     if (existing_uid is not null) then
         perform log_event( source_cid, source_mid, EVENT_USERERR_ADDING_ITEM, 'Item ['
             ||existing_uid||'] named "'||_item_name||'" already exists in folder ['
-            ||folder_uid||']', target_cid, target_mid );
+            ||_folder_uid||']', target_cid, target_mid );
         return RETVAL_ERR_ITEM_EXISTS;
     end if;
 
