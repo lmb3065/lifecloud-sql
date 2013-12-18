@@ -5,6 +5,8 @@
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
 --  2013-12-14 dbrown: fixed typo
+--  2013-12-17 dbrown: fixed bug where source_mid would always own new Items
+--  2013-12-17 dbrown: added column modified_by
 -- ---------------------------------------------------------------------------
 
 create or replace function add_item(
@@ -86,9 +88,9 @@ begin
     declare errno text; errmsg text; errdetail text;
     begin
 
-        INSERT INTO Items( mid, cid, folder_uid, app_uid, x_name, x_desc )
-        VALUES ( source_mid, source_cid, _folder_uid, _app_uid,
-                    fencrypt(_item_name), fencrypt(_item_desc));
+        INSERT INTO Items( mid, cid, folder_uid, app_uid, x_name, x_desc, modified_by )
+        VALUES ( target_mid, target_cid, _folder_uid, _app_uid,
+                    fencrypt(_item_name), fencrypt(_item_desc), source_mid );
         select last_value into newuid from items_uid_seq;
 
     exception when others then

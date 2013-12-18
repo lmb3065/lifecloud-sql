@@ -5,6 +5,7 @@
 --   files.item_uid points to items.uid.
 -- -------------------------------------------------------------------------
 --  2013-12-11 dbrown Created
+--  2013-12-17 dbrown Added column modified_by
 -- -------------------------------------------------------------------------
 
 create table items
@@ -18,5 +19,6 @@ create table items
     x_desc      bytea       not null,
     created     timestamp   not null default now(),
     updated     timestamp   not null default now()
+    modified_by int         -- optional reference to members(MID)
 );
 alter table Items owner to pgsql;

@@ -8,6 +8,7 @@
 --                    (If member is Owner, retrieve all files in account.)
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
+--  2013-12-17 dbrown: added column modified_by
 -- ---------------------------------------------------------------------------
 
 create or replace function get_items(
@@ -30,6 +31,7 @@ create or replace function get_items(
     item_desc   text,
     created     timestamp,
     updated     timestamp,
+    modified_by int,
     nrows       int,
     npages      int
 
@@ -62,7 +64,7 @@ begin
         select i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
             fdecrypt(i.x_name) as item_name,
             fdecrypt(i.x_desc) as item_desc,
-            i.created, i.updated
+            i.created, i.updated, i.modified_by
         from items i
         where (( _item_uid   is not null) and (i.uid = _item_uid ))
            or (( _folder_uid is not null) and (i.folder_uid = _folder_uid ))
@@ -105,7 +107,7 @@ begin
     -- Output final results
     return query
         select io.uid, io.mid, io.cid, io.folder_uid, io.app_uid,
-                io.item_name, io.item_desc, io.created, io.updated,
+                io.item_name, io.item_desc, io.created, io.updated, io.modified_by,
                 _nrows, _npages
         from items_out io
         order by created desc
