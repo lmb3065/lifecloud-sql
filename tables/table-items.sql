@@ -18,7 +18,7 @@ create table items
     x_name      bytea       not null,
     x_desc      bytea       not null,
     created     timestamp   not null default now(),
-    updated     timestamp   not null default now()
+    updated     timestamp   not null default now(),
     modified_by int         -- optional reference to members(MID)
 );
 alter table Items owner to pgsql;
