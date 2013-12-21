@@ -40,8 +40,10 @@ begin
 
     select mid into target_mid from files where uid = _file_uid;
     if (target_mid is null) then
-        perform log_event( null, source_mid, EVENT_DEVERR_UPDATING_FILE, 'File ['||_file_uid||'] does not exist' );
-        return RETVAL_ERR_FILE_NOTFOUND;
+        event_out := EVENT_DEVERR_UPDATING_FILE;
+        result    := RETVAL_ERR_FILE_NOTFOUND;
+        perform log_event( null, source_mid, event_out, 'File ['||_file_uid||'] does not exist' );
+        return result;
     end if;
 
     -- Ensure user is allower to touch target's stuff
@@ -68,8 +70,10 @@ begin
 
         -- Couldn't update file!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        perform log_event(source_cid, source_mid, EVENT_DEVERR_UPDATING_FILE, '['||errno||'] '||errmsg||' : '||errdetail);
-        RETURN RETVAL_ERR_EXCEPTION;
+        event_out := EVENT_DEVERR_UPDATING_FILE;
+        result    := RETVAL_ERR_EXCEPTION;
+        perform log_event(source_cid, source_mid, event_out, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN result;
 
     end;
 
