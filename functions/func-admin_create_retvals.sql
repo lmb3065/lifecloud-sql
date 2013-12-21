@@ -1,6 +1,7 @@
-
  -- -----------------------------------------------------------------------------
  --  admin_create_retvals.sql
+ -- ---------------------------------------------------------------------------
+ --  2013-12-20 dbrown: added -15, -27 (items)
  -- -----------------------------------------------------------------------------
 
  create or replace function admin_create_retvals() returns text as $$
@@ -19,6 +20,7 @@
         ( -12, 'Target Member does not exist' ),
         ( -13, 'Folder does not exist' ),
         ( -14, 'File does not exist' ),
+        ( -15, 'Item does not exist' ),
 
         ( -20, 'Account exists with this e-mail address' ),
         ( -21, 'Member exists with this e-mail address' ),
@@ -27,6 +29,7 @@
         ( -24, 'Account would exceed maximum Members' ),
         ( -25, 'Member already has this folder' ),
         ( -26, 'Folder already contains this file' ),
+        ( -27, 'Folder already contains this item' ),
 
         ( -80, 'Action not authorized' ),
 
@@ -38,5 +41,3 @@
 
  end
  $$ language plpgsql;
-
-
