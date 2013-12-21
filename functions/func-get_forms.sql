@@ -8,6 +8,7 @@
 -- ---------------------------------------------------------------------------
 --  2013-11-23 dbrown: created
 --  2013-12-12 dbrown: added item_uid
+--  2013-12-20 dbrown: added updated
 -- ---------------------------------------------------------------------------
 
 create or replace function get_forms (
@@ -35,7 +36,8 @@ begin
         select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
             fdecrypt(f.x_name) as filename,
             fdecrypt(f.x_desc) as description,
-            f.content_type, f.isform, f.category, f.modified_by
+            f.content_type, f.isform, f.category,
+            f.modified_by, f.updated
         from files f
         where f.mid = _mid
           and (_formuid is null or _formuid = f.uid)
@@ -57,7 +59,8 @@ begin
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isform,
-            fo.category, fo.modified_by, _nrows, _npages
+            fo.category, fo.modified_by, fo.updated,
+            _nrows, _npages
         from forms_out fo
         order by created desc
         limit _pagesize offset (_page * _pagesize);
