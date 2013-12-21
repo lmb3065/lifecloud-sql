@@ -2,6 +2,7 @@
 --  function delete_item
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
+--  2013-12-20 dbrown: fix missing || operator in does-not-exist err message
 -- ---------------------------------------------------------------------------
 
 create or replace function delete_item(
@@ -37,7 +38,7 @@ begin
 
     if (target_mid is null) then
         perform log_event( null, source_mid, EVENT_DEVERR_DELETING_ITEM,
-                    'Item.UID ['||item_uid'] does not exist' );
+                    'Item.UID ['||item_uid||'] does not exist' );
         return RETVAL_ERR_ITEM_NOTFOUND;
     end if;
 
