@@ -8,6 +8,7 @@
 -- 2013-11-16 dbrown: added column content_type
 -- 2013-11-23 dbrown: added columns isForm, category
 -- 2013-12-11 dbrown: added item_uid
+-- 2013-12-20 dbrown: added updated
 -- -----------------------------------------------------------------------------
 
 create table Files
@@ -23,6 +24,7 @@ create table Files
     category     int,           -- reference to ref_Categories(UID)
                                 -- Only meaningful if isForm=1.
     modified_by  int,           -- reference to Members(MID)
-    created      timestamp   not null default now()
+    created      timestamp   not null default now(),
+    updated      timestamp   not null default now()
 );
 alter table Files owner to pgsql;

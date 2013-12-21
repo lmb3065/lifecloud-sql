@@ -5,6 +5,7 @@
 -- ---------------------------------------------------------------------------
 --  2013-11-23 dbrown: created
 --  2013-12-12 dbrown: added item_uid
+--  2013-12-20 dbrown: added updated
 -- ---------------------------------------------------------------------------
 
 create type file_t as (
@@ -20,6 +21,7 @@ create type file_t as (
     isform       int,
     category     int,
     modified_by  int,
+    updated      timestamp,
     nrows        int,
     npages       int
 

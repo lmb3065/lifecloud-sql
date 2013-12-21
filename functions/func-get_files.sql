@@ -23,6 +23,7 @@
 -- 2013-11-23 dbrown: Changes for Forms: added columns isForm and category;
 --              extracted output def'n into a type so get_forms can use it too
 -- 2013-12-12 dbrown: added item_uid
+-- 2013-12-20 dbrown: added updated
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -70,9 +71,8 @@ begin
         select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
                 fdecrypt(f.x_name) as filename,
                 fdecrypt(f.x_desc) as description,
-                f.content_type,
-                f.isform, f.category,
-                f.modified_by
+                f.content_type, f.isform, f.category,
+                f.modified_by, f.updated
             from files f
             where ( (_fileuid is not null)    and (f.uid = _fileuid) )
                or ( (_folder_uid is not null) and (f.folder_uid = _folder_uid) )
@@ -118,7 +118,7 @@ begin
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isform,
-            fo.category, fo.modified_by,
+            fo.category, fo.modified_by, fo.updated,
             _nrows, _npages
         from files_out fo
         order by created desc
