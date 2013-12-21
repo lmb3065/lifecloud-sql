@@ -21,6 +21,7 @@
 -- 2013-11-10 dbrown: updated to latest eventcodes, add name to success event
 -- 2013-11-13 dbrown: organized, more information in eventlog details
 -- 2013-11-14 dbrown: TRUSTED (1) should have the same rights as Owner (0)
+-- 2013-12-11 dbrown: replaced itemtype with app_uid
 -----------------------------------------------------------------------------
 
 create or replace function add_folder(
@@ -29,7 +30,7 @@ create or replace function add_folder(
     target_mid     int,                 -- Owner of the new folder
     _foldername    varchar,             -- \
     _description   varchar,             --  > Attributes of the new folder
-    _itemtype      int      default 0,  -- /
+    _app_uid       int,                 -- /
     _logsuccess    int      default 1   -- Add successes to the eventlog?
 
 ) returns int as $$
@@ -98,9 +99,9 @@ begin
 
     declare errno text; errmsg text; errdetail text;
     begin
-        insert into Folders ( mid, cid, x_name, x_desc, itemtype )
+        insert into Folders ( mid, cid, x_name, x_desc, app_uid )
             values ( target_mid, target_cid, fencrypt(_foldername),
-                        fencrypt(_description), _itemtype );
+                        fencrypt(_description), _app_uid );
 
     exception when others then
         -- Couldn't add Folder!

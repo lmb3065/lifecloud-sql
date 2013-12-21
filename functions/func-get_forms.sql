@@ -7,6 +7,8 @@
 --  get_forms( NUL, mid, category ) -> returns all forms for MID+Category
 -- ---------------------------------------------------------------------------
 --  2013-11-23 dbrown: created
+--  2013-12-12 dbrown: added item_uid
+--  2013-12-20 dbrown: added updated
 -- ---------------------------------------------------------------------------
 
 create or replace function get_forms (
@@ -31,10 +33,11 @@ begin
 
     -- Get initial results
     create temporary table forms_out on commit drop as
-        select f.uid, f.folder_uid, f.mid, f.created,
+        select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
             fdecrypt(f.x_name) as filename,
             fdecrypt(f.x_desc) as description,
-            f.content_type, f.isform, f.category, f.modified_by
+            f.content_type, f.isform, f.category,
+            f.modified_by, f.updated
         from files f
         where f.mid = _mid
           and (_formuid is null or _formuid = f.uid)
@@ -54,9 +57,10 @@ begin
 
     -- Output results
     return query
-        select fo.uid, fo.folder_uid, fo.mid, fo.created,
+        select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isform,
-            fo.category, fo.modified_by, _nrows, _npages
+            fo.category, fo.modified_by, fo.updated,
+            _nrows, _npages
         from forms_out fo
         order by created desc
         limit _pagesize offset (_page * _pagesize);

@@ -1,4 +1,3 @@
-
 -- =============================================================================
 -- update_folder()
 -- ----------------------------------------------------------------------------
@@ -7,6 +6,7 @@
 -- 2013-11-01 dbrown: Update eventcodes
 -- 2013-11-01 dbrown: change folder.fid to folder.uid
 -- 2013-11-15 dbrown: Organization, eventcodes, retvals, more arg checking
+-- 2013-12-14 dbrown: Fixed Error -25 when _folder_uid is already named _name
 -- -----------------------------------------------------------------------------
 
 create or replace function update_folder(
@@ -61,9 +61,12 @@ begin
         return RETVAL_ERR_FOLDER_NOTFOUND;
     end if;
 
-    -- Ensure we're not going to duplicate an existing foldername
-    if exists ( SELECT uid FROM folders WHERE mid = target_mid
-                    and lower(fdecrypt(x_name)) = lower(_name) ) then
+    -- Ensure we're not going to duplicate some other folder's name
+    if exists (
+        select uid from folders where mid = target_mid
+            and lower(fdecrypt(x_name)) = lower(_name)
+            and uid <> _folder_uid
+    ) then
         perform log_event( source_mid, target_mid, EVENT_USERERR_UPDATING_FOLDER,
                     'Member already has a folder named '||_name );
         return RETVAL_ERR_FOLDER_EXISTS;

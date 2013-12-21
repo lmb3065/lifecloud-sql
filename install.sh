@@ -57,6 +57,7 @@ psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-members.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-events.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-folders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-files.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-items.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-profilepics.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-sessions.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql

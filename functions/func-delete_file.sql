@@ -12,6 +12,7 @@
 -- 2013-11-11 dbrown: logs filename (or uid on error)
 -- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- 2013-11-24 dbrown: Removed eventlog noise
+-- 2013-12-12 dbrown: Fixed some bugs
 -- -----------------------------------------------------------------------------
 
 create or replace function delete_file(
@@ -44,10 +45,9 @@ declare
 begin
 
     -- Ensure target-file exists (and get its owner)
-    SELECT mid, fdecrypt(x_name) INTO target_mid, file_name
-        FROM files WHERE uid = file_uid;
-    if (file_name is null) then
-        perform log_event( source_cid, source_mid, EVENT_DEVERR_DELETING_FILE,
+    SELECT mid INTO target_mid FROM files WHERE uid = file_uid;
+    if (target_mid is null) then
+        perform log_event( null, source_mid, EVENT_DEVERR_DELETING_FILE,
                     'File ['||file_uid||'] does not exist' );
         return RETVAL_FILE_NOTFOUND;
     end if;
@@ -75,7 +75,7 @@ begin
     exception when others then
         -- Couldn't delete File!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        perform log_event(_cid, null, EVENT_DEVERR_DELETING_FILE, '['||errno||'] '||errmsg||' : '||errdetail);
+        perform log_event( source_cid, source_mid, EVENT_DEVERR_DELETING_FILE, '['||errno||'] '||errmsg||' : '||errdetail);
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 

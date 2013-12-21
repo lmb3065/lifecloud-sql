@@ -39,5 +39,3 @@ You must have permission to run pg_ctl,
 
 Once the installation package is in place, go to its 'lifecloud' directory
     and run ./install.sh.
-
-    pg_sql restart -D
