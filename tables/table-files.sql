@@ -9,6 +9,7 @@
 -- 2013-11-23 dbrown: added columns isForm, category
 -- 2013-12-11 dbrown: added item_uid
 -- 2013-12-20 dbrown: added updated
+-- 2013-12-24 dbrown: added form_data, changed isform to isprofile
 -- -----------------------------------------------------------------------------
 
 create table Files
@@ -20,9 +21,10 @@ create table Files
     x_name       bytea       not null,
     x_desc       bytea       not null,
     content_type varchar,
-    isform       int         default 0,
+    isprofile    int         default 0,
     category     int,           -- reference to ref_Categories(UID)
-                                -- Only meaningful if isForm=1.
+                                -- Only meaningful if isProfile=1
+    x_form_data  bytea,         -- Only meaningful if isProfile=1
     modified_by  int,           -- reference to Members(MID)
     created      timestamp   not null default now(),
     updated      timestamp   not null default now()
