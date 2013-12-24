@@ -9,6 +9,7 @@
 --  2013-11-23 dbrown: created
 --  2013-12-12 dbrown: added item_uid
 --  2013-12-20 dbrown: added updated
+--  2013-12-24 dbrown: added form_data, changed isForm to isProfile
 -- ---------------------------------------------------------------------------
 
 create or replace function get_forms (
@@ -36,7 +37,8 @@ begin
         select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
             fdecrypt(f.x_name) as filename,
             fdecrypt(f.x_desc) as description,
-            f.content_type, f.isform, f.category,
+            f.content_type, f.isprofile, f.category,
+            fdecrypt(f.x_form_data) as form_data,
             f.modified_by, f.updated
         from files f
         where f.mid = _mid
@@ -58,8 +60,8 @@ begin
     -- Output results
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
-            fo.filename, fo.description, fo.content_type, fo.isform,
-            fo.category, fo.modified_by, fo.updated,
+            fo.filename, fo.description, fo.content_type, fo.isprofile,
+            fo.category, fo.form_data, fo.modified_by, fo.updated,
             _nrows, _npages
         from forms_out fo
         order by created desc
