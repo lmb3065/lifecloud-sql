@@ -1,16 +1,21 @@
 -- ===========================================================================
 --  function update_file
 -- ---------------------------------------------------------------------------
---  Description goes here.
+--  _new_desc and _new_form_data are the new (updated) info fields.
+--      to leave a field unchanged, pass a NULL
+--      to update a field,          pass a non-empty string data
+--      to blank out a field,       pass an empty string ''
 -- ---------------------------------------------------------------------------
 --  2013-12-20 dbrown: created to update description field only
+--  2013-12-24 dbrown: added ability to update x_form_data field
 -- ---------------------------------------------------------------------------
 
 create or replace function update_file (
 
-    source_mid     int,
-    _file_uid       int,
-    _new_desc       text
+    source_mid      int,     -- Member performing the update
+    _file_uid       int,     -- File to be updated
+    _new_desc       text    default null, -- New description, or NULL if no change
+    _new_form_data  text    default null  -- New formdata, or NULL if no change
 
 ) returns int as $$
 
@@ -24,6 +29,7 @@ declare
     event_out char(4);
 
     RETVAL_SUCCESS              constant int := 1;
+    RETVAL_ERR_ARGUMENTS        constant int := 0;
     RETVAL_ERR_FILE_NOTFOUND    constant int := -14;
     RETVAL_ERR_EXCEPTION        constant int := -98;
     result int;
@@ -35,6 +41,15 @@ declare
     source_isadmin int;
 
 begin
+
+    -- Check arguments
+
+    if (_new_desc is null) and (_new_form_data is null) then
+        event_out := EVENT_DEVERR_UPDATING_FILE;
+        result := RETVAL_ERR_ARGUMENTS;
+        perform log_event( null, source_mid, event_out, 'No new data supplied' );
+        return result;
+    end if;
 
     -- Get owner of specified file
 
@@ -61,7 +76,8 @@ begin
     begin
 
         update Files set
-            x_desc      = fencrypt(_new_desc),
+            x_desc      = coalesce(fencrypt(_new_desc),      x_desc),
+            x_form_data = coalesce(fencrypt(_new_form_data), x_form_data),
             modified_by = source_mid,
             updated     = now()
         where uid = _file_uid;
