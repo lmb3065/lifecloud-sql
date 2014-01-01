@@ -25,6 +25,7 @@
 -- 2013-11-24 dbrown : Removed eventlog noise
 -- 2013-12-12 dbrown : added _item_uid
 -- 2013-12-18 dbrown : added _isform
+-- 2013-12-24 dbrown : changed _isform to _isprofile; added form_data
 -- ---------------------------------------------------------------------------
 
 create or replace function add_file
@@ -34,8 +35,9 @@ create or replace function add_file
     _name         varchar,
     _desc         varchar,
     _content_type varchar,
-    _isform           int default 0,
-    _item_uid         int default null
+    _isprofile        int default 0,
+    _item_uid         int default null,
+    _form_data       text default null
 
 ) returns int as $$
 
@@ -68,9 +70,9 @@ begin
         return RETVAL_ERR_ARG_INVALID;
     end if;
 
-    -- Ensure 'is_form' is 0 or 1
-    if (_isform not in (0, 1)) then
-        perform log_event( null, source_mid, EVENT_DEVERR_ADDING_FILE, 'isForm must be 0 or 1' );
+    -- Ensure 'isprofile' is 0 or 1
+    if (_isprofile not in (0, 1)) then
+        perform log_event( null, source_mid, EVENT_DEVERR_ADDING_FILE, 'isProfile must be 0 or 1' );
         return RETVAL_ERR_ARG_INVALID;
     end if;
 
@@ -117,9 +119,9 @@ begin
 
     begin
 
-        INSERT INTO Files ( folder_uid, mid, item_uid, x_name, x_desc, content_type, isform, modified_by )
+        INSERT INTO Files ( folder_uid, mid, item_uid, x_name, x_desc, content_type, isprofile, x_form_data, modified_by )
         VALUES ( parent_folder_uid, target_mid, _item_uid, fencrypt(_name), fencrypt(_desc),
-            _content_type, _isform, source_mid );
+            _content_type, _isprofile, fencrypt(_form_data), source_mid );
         select last_value into newfileuid from files_uid_seq;
 
     exception when others then

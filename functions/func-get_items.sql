@@ -3,9 +3,9 @@
 -- ---------------------------------------------------------------------------
 --  Retrieves Items based on the FIRST criterion provided:
 --    _item_uid     Simple index lookup for one item
---    _folder_uid   Retrieve all files in the specified folder.
---    _mid          Retrieve all files owner by the specified member.
---                    (If member is Owner, retrieve all files in account.)
+--    _folder_uid   Retrieve all items in the specified folder.
+--    _mid          Retrieve all items by the specified member.
+--                    (If member is Owner, retrieve all items in account.)
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
 --  2013-12-17 dbrown: added column modified_by
