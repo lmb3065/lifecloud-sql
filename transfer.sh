@@ -3,7 +3,7 @@
 ## ------------------------------------------------------------------
 ##  transfer.sh
 ## ------------------------------------------------------------------
-##  Transfers a LifeCloud PostgreSQL Database installation package 
+##  Transfers a LifeCloud PostgreSQL Database installation package
 ##      using an scp (ssh cp) connection string.
 ##  You are prompted for the user's login password.
 ## ------------------------------------------------------------------
@@ -18,7 +18,7 @@
 target=pgsql@70.99.204.141:/usr/local/pgsql/lifecloud_src
 
 echo # Remove Mac garbage files
-rm -f .DS_Store 
+rm -f .DS_Store
 rm -f crypto/.DS_Store
 rm -f documents/.DS_Store
 rm -f functions/.DS_Store
@@ -28,7 +28,7 @@ rm -f tables/.DS_Store
 
 echo Connecting to $target ...
 echo
-scp -r install.sh crypto functions roles tables types README.txt $target
+scp -r -P 4422 install.sh crypto functions roles tables types README.txt $target
 
 echo Done.
 echo
