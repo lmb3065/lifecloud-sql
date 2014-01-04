@@ -127,6 +127,7 @@ begin
         ( '6033', 'unauthorized attempt to update member' ),
         ( '6043', 'unauthorized attempt to change password' ),
         ( '6070', 'unauthorized attempt to add folder' ),
+        ( '6073', 'unauthorized attempt to modify folder' ),
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6083', 'unauthorized attempt to modify file' ),
