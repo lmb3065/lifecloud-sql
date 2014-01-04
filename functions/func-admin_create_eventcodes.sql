@@ -104,9 +104,7 @@ begin
     -- 4000 - 4999 : User's Fault errors
 
         ( '4000', 'invalid login attempt' ),
-        ( '4001', 'login failed: account is suspended' ),
-        ( '4002', 'login failed: account is closed' ),
-        ( '4003', 'login failed: account creation incomplete' ),
+        ( '4001', 'login denied' ),
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),
         ( '4030', 'user could not add member' ),
@@ -202,13 +200,6 @@ begin
         ( '0044', 'promotion code updated (obsolete eventcode)'),
         ( '0045', 'promotion code deleted (obsolete eventcode)'),
 
-        ( '9000', 'failed login attempt (obsolete eventcode)'),
-        ( '9001', 'error adding account (obsolete eventcode)'),
-        ( '9002', 'error updating account (obsolete eventcode)'),
-        ( '9003', 'error adding member (obsolete eventcode)'),
-        ( '9004', 'error updating member (obsolete eventcode)'),
-        ( '9005', 'error updating session (obsolete eventcode)'),
-        ( '9006', 'error updating password (obsolete eventcode)'),
         ( '9011', 'reserved (obsolete eventcode)'),
         ( '9012', 'IPN update error (obsolete eventcode)'),
         ( '9013', 'i/o notification error (obsolete eventcode)'),

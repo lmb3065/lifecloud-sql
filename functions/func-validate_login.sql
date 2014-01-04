@@ -27,15 +27,14 @@ create or replace function validate_login(
 declare
     EVENT_LOGIN              constant char(4) := '1000';
     EVENT_NOLOGIN_USERPASS   constant char(4) := '4000';
-    EVENT_NOLOGIN_ACCTSUSP   constant char(4) := '4001';
-    EVENT_NOLOGIN_ACCTCLOSED constant char(4) := '4002';
-    EVENT_NOLOGIN_ACCTTEMP   constant char(4) := '4003';
+    EVENT_NOLOGIN_OTHER      constant char(4) := '4001';
 
     _userid_c varchar(64) := lower(arg_userid);
     _passwd_h text        := sha1( arg_passwd );
     _mid int;
     _cid int;
     _acctstatus int;
+    _failmsg text;
 
     r member_t;
     n int;
@@ -56,8 +55,7 @@ begin
     -- Check account's status
     select status into _acctstatus from accounts where cid = _cid;
     if (_acctstatus > 0) then
-        -- acctstatus 1,2,3 -> eventcode 4001,4002,4003
-        perform log_event( _cid, _mid, '400' || _acctstatus );
+        perform log_event( _cid, _mid, EVENT_NOLOGIN_OTHER, 'account is unavailable' );
         return null;
     end if;
 
