@@ -25,6 +25,7 @@
 -- 2013-12-12 dbrown: added item_uid
 -- 2013-12-20 dbrown: added updated
 -- 2013-12-24 dbrown: added form_data, changed isForm to isProfile
+-- 2014-01-03 dbrown: fixed arguments of 0 returning nonsensical errors
 -- -----------------------------------------------------------------------------
 
 create or replace function get_files(
@@ -48,7 +49,7 @@ begin
     -- Check arguments -------------------------------------------------------------
 
     -- Ensure we have at least one argument
-    if (coalesce(_fileuid, _folder_uid, _mid, 0) = 0) then
+    if (coalesce(_fileuid, _folder_uid, _mid, -1) = -1) then
         perform log_event( null, null, EVENT_DEVERR_GETTING_FILE,
                     'no arguments supplied');
         return;
