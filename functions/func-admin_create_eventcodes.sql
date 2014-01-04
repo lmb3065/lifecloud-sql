@@ -10,6 +10,7 @@
 -- 2013-11-14 dbrown: communicates by returning text
 -- 2013-11-17 dbrown: cleanup
 -- 2013-12-12 dbrown: Added eventcodes for [Item] data type (x10x)
+-- 2014-01-03 dbrown: Added eventcodes for account-related login failure
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -103,6 +104,9 @@ begin
     -- 4000 - 4999 : User's Fault errors
 
         ( '4000', 'invalid login attempt' ),
+        ( '4001', 'login failed: account is suspended' ),
+        ( '4002', 'login failed: account is closed' ),
+        ( '4003', 'login failed: account creation incomplete' ),
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),
         ( '4030', 'user could not add member' ),

@@ -25,13 +25,17 @@ create or replace function validate_login(
 ) returns member_t as $$
 
 declare
-    EVENT_LOGIN          char(4) := '1000';
-    EVENT_INVALID_LOGIN  char(4) := '4000';
+    EVENT_LOGIN              constant char(4) := '1000';
+    EVENT_NOLOGIN_USERPASS   constant char(4) := '4000';
+    EVENT_NOLOGIN_ACCTSUSP   constant char(4) := '4001';
+    EVENT_NOLOGIN_ACCTCLOSED constant char(4) := '4002';
+    EVENT_NOLOGIN_ACCTTEMP   constant char(4) := '4003';
 
     _userid_c varchar(64) := lower(arg_userid);
     _passwd_h text        := sha1( arg_passwd );
     _mid int;
     _cid int;
+    _acctstatus int;
 
     r member_t;
     n int;
@@ -45,7 +49,15 @@ begin
 
     if (_mid is null) then
         -- No match / Auth failed : 4000 = 'failed login attempt'
-        perform log_event( null, null, EVENT_INVALID_LOGIN, _userid_c );
+        perform log_event( null, null, EVENT_NOLOGIN_USERPASS, _userid_c );
+        return null;
+    end if;
+
+    -- Check account's status
+    select status into _acctstatus from accounts where cid = _cid;
+    if (_acctstatus > 0) then
+        -- acctstatus 1,2,3 -> eventcode 4001,4002,4003
+        perform log_event( _cid, _mid, '400' || _acctstatus );
         return null;
     end if;
 
