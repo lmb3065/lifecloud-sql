@@ -15,6 +15,7 @@
 -- 2013-10-16 dbrown : UserID validation is case insensitive
 -- 2013-11-01 dbrown : eventcodes revision
 -- 2013-11-17 dbrown : Replaced magic eventcodes with constants
+-- 2014-01-09 dbrown : Added checks for account status and expiry
 -- ----------------------------------------------------------------------
 
 create or replace function validate_login(
@@ -34,6 +35,7 @@ declare
     _mid int;
     _cid int;
     _acctstatus int;
+    _acctexpiry timestamp;
     _failmsg text;
 
     r member_t;
@@ -53,9 +55,13 @@ begin
     end if;
 
     -- Check account's status
-    select status into _acctstatus from accounts where cid = _cid;
+    select a.status, a.expires into _acctstatus, _acctexpiry
+        from accounts a where a.cid = _cid;
     if (_acctstatus > 0) then
         perform log_event( _cid, _mid, EVENT_NOLOGIN_OTHER, 'account is unavailable' );
+        return null;
+    elsif (_acctexpiry <= current_timestamp) then
+        perform log_event( _cid, _mid, EVENT_NOLOGIN_OTHER, 'account is expired' );
         return null;
     end if;
 
