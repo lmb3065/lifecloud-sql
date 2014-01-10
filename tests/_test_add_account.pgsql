@@ -1,5 +1,4 @@
-drop function if exists _test_add_account(int);
-create function _test_add_account( _ntests int ) returns setof int as
+create or replace function _test_add_account( _ntests int ) returns setof int as
 $$
 declare
     result int; i int;

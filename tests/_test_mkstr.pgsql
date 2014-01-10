@@ -1,6 +1,4 @@
-drop function if exists _test_mkstr(int, int, numeric);
-drop function if exists _test_mkstr(int, numeric);
-create function _test_mkstr(
+create or replace function _test_mkstr(
     _length int,
     _nullchance numeric default null
 ) returns text as
