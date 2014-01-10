@@ -19,6 +19,7 @@
 ## 2013-11-05 dbrown : removed pg_ctl, added ref_apps and admin_create_applist
 ## 2013-11-24 dbrown : adds tables ref_categories, ref_forms
 ##                     runs new admin_create_categories(), admin_create_forms()
+## 2014-01-10 dbrown:  Added TEST SUITE to installation
 ## -----------------------------------------------------------------------------
 
 lcdir=.
@@ -82,6 +83,11 @@ psql -d lc -U pgsql -t -c 'select admin_create_forms();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_applist();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_admin_account();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_demo_account();' | grep '.'
+
+echo 9/9 Installing Test Suite
+for i in $lcdir/tests/*.pgsql; do
+    psql --dbname=lc --username=pgsql --quiet --file=$i
+done
 
 echo Finished.
 echo
