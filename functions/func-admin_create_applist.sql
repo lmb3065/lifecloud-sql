@@ -10,6 +10,7 @@
 --  2013-11-14 dbrown: Communicates by returning TEXT
 --  2013-12-11 dbrown: default app_url replaced with ComingSoon.jsp, as we
 --                     begin developing the actual apps
+--  2014-01-23 dbrown: added URLs for Education, Reminder, ReviewReminders
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -29,7 +30,7 @@ begin
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
      ( 'comingSoon.jsp',    'Contacts',                     'contacts.gif'      ),
      ( 'comingSoon.jsp',    'Cooking/Dining',               'cooking.gif'       ),
-     ( 'comingSoon.jsp',    'Education',                    'education.gif'     ),
+     ( 'appEducation',      'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
      ( 'comingSoon.jsp',    'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
@@ -60,8 +61,8 @@ begin
      ( 'comingSoon.jsp',    'Vacation',                     'vacation.gif'      ),
      ( 'comingSoon.jsp',    'Wallet Contents',              'wallet.gif'        ),
      ( 'comingSoon.jsp',    'Delphi VIM',                   'vim.gif'           ),
-     ( 'comingSoon.jsp',    'Reminder',                     'reminder.gif'      ),
-     ( 'comingSoon.jsp',    'Review<br/>Reminders',         'reminders.gif'     );
+     ( 'appReminders',      'Reminders',                    'reminder.gif'      ),
+     ( 'appReview',         'Review<br/>Reminders',         'reminders.gif'     );
 
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
