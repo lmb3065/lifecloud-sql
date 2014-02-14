@@ -1,4 +1,3 @@
-
 -- -----------------------------------------------------------------------------
 --  function admin_create_applist
 -- -----------------------------------------------------------------------------
@@ -10,6 +9,8 @@
 --  2013-11-14 dbrown: Communicates by returning TEXT
 --  2013-12-11 dbrown: default app_url replaced with ComingSoon.jsp, as we
 --                     begin developing the actual apps
+--  2014-01-23 dbrown: added URLs for Education, Reminder, ReviewReminders
+--  2014-02-11 dbrown: default folders changed, given URLs
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -27,11 +28,11 @@ begin
      ( 'comingSoon.jsp',    'Caregiver',                    'caregiver.gif'     ),
      ( 'comingSoon.jsp',    'Carpool',                      'carpool.gif'       ),
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
-     ( 'comingSoon.jsp',    'Contacts',                     'contacts.gif'      ),
+     ( 'appContacts',       'Contacts',                     'contacts.gif'      ),
      ( 'comingSoon.jsp',    'Cooking/Dining',               'cooking.gif'       ),
      ( 'comingSoon.jsp',    'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
-     ( 'comingSoon.jsp',    'Emergency',                    'emergency.gif'     ),
+     ( 'appEmergency',      'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
      ( 'comingSoon.jsp',    'Funeral<br/>Plans',            'funeral.gif'       ),
      ( 'comingSoon.jsp',    'Gifts',                        'gifts.gif'         ),
@@ -45,8 +46,8 @@ begin
      ( 'comingSoon.jsp',    'Loan<br/>Information',         'loans.gif'         ),
      ( 'comingSoon.jsp',    'Major<br/>Purchases',          'purchases.gif'     ),
      ( 'comingSoon.jsp',    'Marriage<br/>Information',     'marriage.gif'      ),
-     ( 'comingSoon.jsp',    'Medical',                      'medical.gif'       ),
-     ( 'comingSoon.jsp',    'Memory<br/>Box',               'memories.gif'      ),
+     ( 'appMedical',        'Medical',                      'medical.gif'       ),
+     ( 'appMemoryBox',      'Memory<br/>Box',               'memories.gif'      ),
      ( 'comingSoon.jsp',    'Net&nbsp;Worth',               'net_worth.gif'     ),
      ( 'comingSoon.jsp',    'Party',                        'party.gif'         ),
      ( 'comingSoon.jsp',    'Passwords',                    'passwords.gif'     ),
@@ -66,6 +67,5 @@ begin
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
 
-end
+end;
 $$ language plpgsql;
-

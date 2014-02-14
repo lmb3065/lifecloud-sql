@@ -1,4 +1,3 @@
-
 -- =============================================================================
 -- admin_create_defaultfolders()
 -- -----------------------------------------------------------------------------
@@ -10,6 +9,7 @@
 -- 2013-11-10 dbrown: returns void, communicates via RAISE
 -- 2013-11-14 dbrown: Communicates by returning TEXT
 -- 2013-12-11 dbrown: removed itemtype field
+-- 2014-02-11 dbrown: pared to Contacts Emergency Medical MemoryBox Reminder
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_defaultfolders() returns text as $$
@@ -18,20 +18,13 @@ declare
 begin
     truncate table ref_defaultfolders cascade;
     insert into ref_defaultfolders(x_name, x_desc) values
-        (fencrypt('Activities'),            fencrypt('Activities folder')),
-        (fencrypt('Car Pool'),              fencrypt('Car Pool folder')),
-        (fencrypt('Education'),             fencrypt('Education folder')),
+        (fencrypt('Contacts'),              fencrypt('Contacts folder')),
         (fencrypt('Emergency'),             fencrypt('Emergency folder')),
-        (fencrypt('Financial Summary'),     fencrypt('Financial folder')),
-        (fencrypt('Insurance'),             fencrypt('Insurance folder')),
         (fencrypt('Medical'),               fencrypt('Medical folder')),
         (fencrypt('Memory Box'),            fencrypt('Memory Box folder')),
-        (fencrypt('Passwords'),             fencrypt('Passwords folder')),
-        (fencrypt('Personal Info'),         fencrypt('Personal Info folder')),
-        (fencrypt('To Do List'),            fencrypt('To Do List folder'));
+        (fencrypt('Reminders'),             fencrypt('Reminders folder'));
 
     select count(*) into nrows from ref_defaultfolders;
     return 'DefaultFolders reference table loaded: '||nrows||' rows.';
 end;
 $$ language plpgsql;
-
