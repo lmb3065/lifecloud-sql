@@ -10,7 +10,7 @@
 --  2013-12-11 dbrown: default app_url replaced with ComingSoon.jsp, as we
 --                     begin developing the actual apps
 --  2014-01-23 dbrown: added URLs for Education, Reminder, ReviewReminders
---  2014-02-11 dbrown: default folders changed, given URLs
+--  2014-03-23 dbrown: add URLS to match database contents
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -29,8 +29,7 @@ begin
      ( 'comingSoon.jsp',    'Carpool',                      'carpool.gif'       ),
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
      ( 'appContacts',       'Contacts',                     'contacts.gif'      ),
-     ( 'comingSoon.jsp',    'Cooking/Dining',               'cooking.gif'       ),
-     ( 'comingSoon.jsp',    'Education',                    'education.gif'     ),
+     ( 'appEducation',      'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
      ( 'appEmergency',      'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
@@ -42,6 +41,7 @@ begin
      ( 'comingSoon.jsp',    'Home Care<br/>Utilities',      'home_repair.gif'   ),
      ( 'comingSoon.jsp',    'Important<br/>Dates',          'dates.gif'         ),
      ( 'comingSoon.jsp',    'Insurance',                    'insurance.gif'     ),
+     ( 'appKitchen'    ,    'Kitchen',                      'kitchen.gif'       ),
      ( 'comingSoon.jsp',    'Legal<br/>Documents',          'legal.gif'         ),
      ( 'comingSoon.jsp',    'Loan<br/>Information',         'loans.gif'         ),
      ( 'comingSoon.jsp',    'Major<br/>Purchases',          'purchases.gif'     ),
@@ -61,8 +61,8 @@ begin
      ( 'comingSoon.jsp',    'Vacation',                     'vacation.gif'      ),
      ( 'comingSoon.jsp',    'Wallet Contents',              'wallet.gif'        ),
      ( 'comingSoon.jsp',    'Delphi VIM',                   'vim.gif'           ),
-     ( 'comingSoon.jsp',    'Reminder',                     'reminder.gif'      ),
-     ( 'comingSoon.jsp',    'Review<br/>Reminders',         'reminders.gif'     );
+     ( 'appReminders',      'Reminder',                     'reminder.gif'      ),
+     ( 'appReview',         'Review<br/>Reminders',         'reminders.gif'     );
 
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
