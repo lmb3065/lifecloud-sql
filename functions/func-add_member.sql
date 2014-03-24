@@ -19,6 +19,7 @@
 -- 2013-11-16 dbrown : Shortened error output
 -- 2013-11-16 dbrown : TODO: Prevent NULLS from getting through and crashing table
 -- 2013-11-24 dbrown : removed eventlog noise
+-- 2014-01-09 dbrown : fixed typo _maxlogins
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -108,7 +109,7 @@ begin
     SELECT count(*) INTO nrows FROM Members WHERE cid = _cid;
     if (nrows >= _maxlogins) then
         perform log_event( _cid, null, EVENT_USERERR_ADDING_MEMBER,
-                    'Would exceed maximum members ('||maxlogins||')');
+                    'Would exceed maximum members ('||_maxlogins||')');
         return RETVAL_ERR_MEMBER_EXISTS_FULL;
     end if;
 

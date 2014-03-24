@@ -10,6 +10,7 @@
 -- 2013-11-14 dbrown: communicates by returning text
 -- 2013-11-17 dbrown: cleanup
 -- 2013-12-12 dbrown: Added eventcodes for [Item] data type (x10x)
+-- 2014-01-03 dbrown: Added eventcodes for account-related login failure
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -103,6 +104,7 @@ begin
     -- 4000 - 4999 : User's Fault errors
 
         ( '4000', 'invalid login attempt' ),
+        ( '4001', 'login denied' ),
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),
         ( '4030', 'user could not add member' ),
@@ -125,6 +127,7 @@ begin
         ( '6033', 'unauthorized attempt to update member' ),
         ( '6043', 'unauthorized attempt to change password' ),
         ( '6070', 'unauthorized attempt to add folder' ),
+        ( '6073', 'unauthorized attempt to modify folder' ),
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6083', 'unauthorized attempt to modify file' ),
@@ -198,13 +201,6 @@ begin
         ( '0044', 'promotion code updated (obsolete eventcode)'),
         ( '0045', 'promotion code deleted (obsolete eventcode)'),
 
-        ( '9000', 'failed login attempt (obsolete eventcode)'),
-        ( '9001', 'error adding account (obsolete eventcode)'),
-        ( '9002', 'error updating account (obsolete eventcode)'),
-        ( '9003', 'error adding member (obsolete eventcode)'),
-        ( '9004', 'error updating member (obsolete eventcode)'),
-        ( '9005', 'error updating session (obsolete eventcode)'),
-        ( '9006', 'error updating password (obsolete eventcode)'),
         ( '9011', 'reserved (obsolete eventcode)'),
         ( '9012', 'IPN update error (obsolete eventcode)'),
         ( '9013', 'i/o notification error (obsolete eventcode)'),

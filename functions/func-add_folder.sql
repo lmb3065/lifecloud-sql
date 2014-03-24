@@ -41,7 +41,7 @@ declare
     EVENT_OK_ADMIN_ADDED_FOLDER   constant varchar := '1072';
     EVENT_USERERR_ADDING_FOLDER   constant varchar := '4070';
     EVENT_AUTHERR_ADDING_FOLDER   constant varchar := '6070';
-    EVENT_DEVERR_ADDING_MEMBER    constant varchar := '9070';
+    EVENT_DEVERR_ADDING_FOLDER    constant varchar := '9070';
 
     RETVAL_SUCCESS             constant int :=  1;
     RETVAL_ERR_ARG_INVALID     constant int :=  0;
@@ -106,7 +106,7 @@ begin
     exception when others then
         -- Couldn't add Folder!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        perform log_event(_cid, null, EVENT_DEVERR_ADDING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail);
+        perform log_event(source_cid, source_mid, EVENT_DEVERR_ADDING_FOLDER, '['||errno||'] '||errmsg||' : '||errdetail, target_cid, target_mid);
         RETURN RETVAL_ERR_EXCEPTION;
     end;
 

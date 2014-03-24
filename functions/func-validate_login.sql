@@ -15,6 +15,7 @@
 -- 2013-10-16 dbrown : UserID validation is case insensitive
 -- 2013-11-01 dbrown : eventcodes revision
 -- 2013-11-17 dbrown : Replaced magic eventcodes with constants
+-- 2014-01-09 dbrown : Added checks for account status and expiry
 -- ----------------------------------------------------------------------
 
 create or replace function validate_login(
@@ -25,13 +26,17 @@ create or replace function validate_login(
 ) returns member_t as $$
 
 declare
-    EVENT_LOGIN          char(4) := '1000';
-    EVENT_INVALID_LOGIN  char(4) := '4000';
+    EVENT_LOGIN              constant char(4) := '1000';
+    EVENT_NOLOGIN_USERPASS   constant char(4) := '4000';
+    EVENT_NOLOGIN_OTHER      constant char(4) := '4001';
 
     _userid_c varchar(64) := lower(arg_userid);
     _passwd_h text        := sha1( arg_passwd );
     _mid int;
     _cid int;
+    _acctstatus int;
+    _acctexpiry timestamp;
+    _failmsg text;
 
     r member_t;
     n int;
@@ -45,7 +50,18 @@ begin
 
     if (_mid is null) then
         -- No match / Auth failed : 4000 = 'failed login attempt'
-        perform log_event( null, null, EVENT_INVALID_LOGIN, _userid_c );
+        perform log_event( null, null, EVENT_NOLOGIN_USERPASS, _userid_c );
+        return null;
+    end if;
+
+    -- Check account's status
+    select a.status, a.expires into _acctstatus, _acctexpiry
+        from accounts a where a.cid = _cid;
+    if (_acctstatus > 0) then
+        perform log_event( _cid, _mid, EVENT_NOLOGIN_OTHER, 'account is unavailable' );
+        return null;
+    elsif (_acctexpiry <= current_timestamp) then
+        perform log_event( _cid, _mid, EVENT_NOLOGIN_OTHER, 'account is expired' );
         return null;
     end if;
 

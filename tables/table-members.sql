@@ -11,6 +11,7 @@
 -- 2013-09-25 dbrown : Encrypted fields moved here from Accounts table,
 --                     UID renamed to MID, defaults set for non-X fields
 -- 2013-10-18 dbrown : added column profilepic, reordered some columns
+-- 2014-01-09 dbrown : removed NOT NULL constrants from optional x_ fields
 -----------------------------------------------------------------------------
 create table Members
 (
@@ -23,16 +24,16 @@ create table Members
     h_profilepic text,
 
     x_fname     bytea       not null,
-    x_mi        bytea       not null,
+    x_mi        bytea,
     x_lname     bytea       not null,
 
-    x_address1  bytea       not null,
-    x_address2  bytea       not null,
-    x_city      bytea       not null,
-    x_state     bytea       not null,
-    x_postalcode bytea      not null,
-    x_country   bytea       not null,
-    x_phone     bytea       not null,
+    x_address1  bytea,
+    x_address2  bytea,
+    x_city      bytea,
+    x_state     bytea,
+    x_postalcode bytea,
+    x_country   bytea,
+    x_phone     bytea,
 
     status      int         not null   default 0,
     pwstatus    int         not null   default 0,

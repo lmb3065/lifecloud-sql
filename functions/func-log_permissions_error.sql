@@ -38,7 +38,7 @@ begin
         when RETVAL_ERR_ARG_MISSING     then msg := 'A required argument was null';
         when RETVAL_ERR_MEMBER_NOTFOUND then msg := 'Source Member does not exist';
         when RETVAL_ERR_TARGET_NOTFOUND then msg := 'Target Member does not exist';
-        when RETVAL_ERR_NOT_ALLOWED     then msg := 'Source Member is not allowed to do that';
+        when RETVAL_ERR_NOT_ALLOWED     then msg := 'Operation failed security check';
         else                                 msg := 'Unrecognized permissions error code: '||result;
     end case;
 

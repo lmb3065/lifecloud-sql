@@ -6,11 +6,14 @@
 -- ----------------------------------------------------------------------------------------------
 -- status: 
 --   0 = Normal
---   9 = Temporary/Incomplete Signup Account
+--   1 = Suspended
+--   2 = Closed
+--   3 or 9 = Pending signup
 -- ----------------------------------------------------------------------------------------------
 -- 2013-09-25 dbrown Encrypted fields moved to Members; owner_mid added; removed autorenew
 -- 2013-10-02 dbrown added "referrer"
 -- 2013-11-13 dbrown removed redundant (interfering?) NOT NULLs
+-- 2014-01-03 dbrown Updated "status" documentation
 -- ----------------------------------------------------------------------------------------------
 
 create table Accounts

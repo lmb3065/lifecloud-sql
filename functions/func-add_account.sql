@@ -19,6 +19,8 @@
 --       Removed RAISE, added exception handling around SQL
 --       Organized, more information in eventlog details
 -- 2013-11-24 dbrown: removed eventlog noise
+-- 2014-01-09 dbrown: change NULL account expiration dates to default of 1 yr
+--       Added new possible status of 3, same meaning as 9
 -- ---------------------------------------------------------------------------
 
 create or replace function add_account
@@ -29,7 +31,7 @@ create or replace function add_account
     _fname      varchar(64),
 
     _mi         char(1)      default  '',
-    _expires    timestamp    default  current_date + interval '1 year',
+    _expires    timestamp    default  null,
     _referrer   varchar(64)  default  '',
     _address1   varchar(64)  default  '',
     _address2   varchar(64)  default  '',
@@ -57,6 +59,9 @@ declare
 
 begin
 
+    -- Enforce a valid expiration date
+    if (_expires is null) then _expires := current_date + interval '1 year'; end if;
+
     -- Check for an existing account with this e-mail address
     _email := lower(_email); -- Case insensitive
     SELECT a.status, a.cid, m.mid
@@ -64,7 +69,7 @@ begin
         FROM Accounts a JOIN Members m on (a.owner_mid = m.mid)
         WHERE _email = fdecrypt(m.x_email);
 
-    if (exist_status = 9) then
+    if (exist_status in (3, 9)) then
         -- Found a temp signup account: Return that
         return exist_cid;
     elsif (exist_cid is not null) then
