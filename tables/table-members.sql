@@ -12,6 +12,7 @@
 --                     UID renamed to MID, defaults set for non-X fields
 -- 2013-10-18 dbrown : added column profilepic, reordered some columns
 -- 2014-01-09 dbrown : removed NOT NULL constrants from optional x_ fields
+-- 2014-03-24 dbrown : new fields alerttype, x_alertphone, x_alertemail
 -----------------------------------------------------------------------------
 create table Members
 (
@@ -34,6 +35,10 @@ create table Members
     x_postalcode bytea,
     x_country   bytea,
     x_phone     bytea,
+    
+    alerttype     int,
+    x_alertphone  bytea,
+    x_alertemail  bytea,
 
     status      int         not null   default 0,
     pwstatus    int         not null   default 0,

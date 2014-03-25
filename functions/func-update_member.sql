@@ -17,6 +17,7 @@
 -- 2013-11-16 dbrown : Exempt target user from name/userid/email change scanning
 --                     (fix error when updating values to what they already are)
 -- 2013-11-16 dbrown : Logs different eventcodes by source-member role
+-- 2013-03-24 dbrown : New optional fields alerttype, alertphone, alertemail
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
@@ -44,7 +45,12 @@ create or replace function update_member
     _pwstatus     int          default null,
     _status       int          default null,
     _userlevel    int          default null,
-    _tooltips     int          default null
+    _tooltips     int          default null,
+    
+    _alerttype    int          default null,
+    _alertphone   varchar(20)  default null,
+    _alertemail   varchar(64)  default null
+    
 )
     returns integer as $$
 
@@ -95,6 +101,8 @@ declare
     x_new_postalcode bytea;
     x_new_country    bytea;
     x_new_phone      bytea;
+    x_new_alertphone bytea;
+    x_new_alertemail bytea;
     nrows int;
 
 
@@ -194,31 +202,36 @@ begin
     if (_postalcode is not null) then x_new_postalcode := fencrypt(_postalcode); end if;
     if (_country    is not null) then x_new_country    := fencrypt(_country);    end if;
     if (_phone      is not null) then x_new_phone      := fencrypt(_phone);      end if;
+    if (_alertphone is not null) then x_new_alertphone := fencrypt(_alertphone); end if;
+    if (_alertemail is not null) then x_new_alertemail := fencrypt(_alertemail); end if;
 
 
     -- Perform the update, only touching columns
     -- where our argument is NOT NULL
 
     update Members m set
-        h_passwd    = coalesce(h_new_passwd,     m.h_passwd),
-        x_userid    = coalesce(x_new_userid,     m.x_userid),
-        x_email     = coalesce(x_new_email,      m.x_email),
-        h_profilepic= coalesce(_h_profilepic,    m.h_profilepic),
-        x_fname     = coalesce(x_new_fname,      m.x_fname),
-        x_mi        = coalesce(x_new_mi,         m.x_mi),
-        x_lname     = coalesce(x_new_lname,      m.x_lname),
-        x_address1  = coalesce(x_new_address1,   m.x_address1),
-        x_address2  = coalesce(x_new_address2,   m.x_address2),
-        x_city      = coalesce(x_new_city,       m.x_city),
-        x_state     = coalesce(x_new_state,      m.x_state),
-        x_postalcode= coalesce(x_new_postalcode, m.x_postalcode),
-        x_country   = coalesce(x_new_country,    m.x_country),
-        x_phone     = coalesce(x_new_phone,      m.x_phone),
-        status      = coalesce(_status,          m.status),
-        pwstatus    = coalesce(_pwstatus,        m.pwstatus),
-        userlevel   = coalesce(_userlevel,       m.userlevel),
-        tooltips    = coalesce(_tooltips,        m.tooltips),
-        updated     = clock_timestamp()
+        h_passwd     = coalesce(h_new_passwd,     m.h_passwd),
+        x_userid     = coalesce(x_new_userid,     m.x_userid),
+        x_email      = coalesce(x_new_email,      m.x_email),
+        h_profilepic = coalesce(_h_profilepic,    m.h_profilepic),
+        x_fname      = coalesce(x_new_fname,      m.x_fname),
+        x_mi         = coalesce(x_new_mi,         m.x_mi),
+        x_lname      = coalesce(x_new_lname,      m.x_lname),
+        x_address1   = coalesce(x_new_address1,   m.x_address1),
+        x_address2   = coalesce(x_new_address2,   m.x_address2),
+        x_city       = coalesce(x_new_city,       m.x_city),
+        x_state      = coalesce(x_new_state,      m.x_state),
+        x_postalcode = coalesce(x_new_postalcode, m.x_postalcode),
+        x_country    = coalesce(x_new_country,    m.x_country),
+        x_phone      = coalesce(x_new_phone,      m.x_phone),
+        status       = coalesce(_status,          m.status),
+        pwstatus     = coalesce(_pwstatus,        m.pwstatus),
+        userlevel    = coalesce(_userlevel,       m.userlevel),
+        tooltips     = coalesce(_tooltips,        m.tooltips),
+        alerttype    = coalesce(_alerttype,       m.alerttype),
+        x_alertphone = coalesce(x_new_alertphone, m.x_alertphone),
+        x_alertemail = coalesce(x_new_alertemail, m.x_alertemail),
+        updated      = clock_timestamp()
     where mid = target_mid;
 
 
