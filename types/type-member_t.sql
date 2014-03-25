@@ -6,6 +6,7 @@
 -- -----------------------------------------------------------------------------
 -- 2013-10-18 dbrown : new column 'profilepic'; reordered some fields
 -- 2013-10-31 dbrown : changed varchar columns to text
+-- 2014-03-24 dbrown : new fields alertType, alertPhone, alertEmail
 -- -----------------------------------------------------------------------------
 
 create type member_t as (
@@ -29,6 +30,10 @@ create type member_t as (
     country     text,
     phone       text,
 
+    alerttype   int,
+    alertphone  text,
+    alertemail  text,
+    
     status      int,
     pwstatus    int,
     userlevel   int,
