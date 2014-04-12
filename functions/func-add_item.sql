@@ -7,6 +7,7 @@
 --  2013-12-14 dbrown: fixed typo
 --  2013-12-17 dbrown: fixed bug where source_mid would always own new Items
 --  2013-12-17 dbrown: added column modified_by
+--  2014-04-12 dbrown: bug fix (no declaration for RETVAL_ERR_EXCEPTION)
 -- ---------------------------------------------------------------------------
 
 create or replace function add_item(
@@ -32,6 +33,7 @@ declare
     RETVAL_ERR_ARG_INVALID      constant int := 0;
     RETVAL_ERR_FOLDER_NOTFOUND  constant int := -13;
     RETVAL_ERR_ITEM_EXISTS      constant int := -27;
+    RETVAL_ERR_EXCEPTION        constant int := -98;
     result int;
 
     source_cid int; source_level int; source_isadmin int;
@@ -46,6 +48,7 @@ begin
         perform log_event( null, source_mid, EVENT_DEVERR_ADDING_ITEM, 'Item_Name is required' );
         return RETVAL_ERR_ARG_INVALID;
     end if;
+
 
     -- If app_uid was supplied, ensure it is valid
     if (_app_uid is not null)
