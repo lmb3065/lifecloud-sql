@@ -11,7 +11,7 @@
 -- 2013-11-17 dbrown: cleanup
 -- 2013-12-12 dbrown: Added eventcodes for [Item] data type (x10x)
 -- 2014-01-03 dbrown: Added eventcodes for account-related login failure
--- 2014-04-12 dbrown: Added eventcodes for Adding Reminders
+-- 2014-04-12 dbrown: Added eventcodes for Adding,Deleting Reminders
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -103,6 +103,9 @@ begin
         ( '1108', 'item deleted by owner'),
         ( '1109', 'item deleted by Admin'),
         ( '1110', 'reminder added' ),
+        ( '1117', 'reminder deleted' ),
+        ( '1118', 'reminder deleted by account owner' ),
+        ( '1119', 'reminder deleted by Admin' ),
 
     -- 4000 - 4999 : User's Fault errors
 
@@ -138,6 +141,7 @@ begin
         ( '6100', 'unauthorized attempt to add item' ),
         ( '6103', 'unauthorized attempt to update item' ),
         ( '6107', 'unauthorized attempt to delete item' ),
+        ( '6117', 'unauthorized attempt to delete reminder' ),
 
     -- 9000+ : Database/Developer errors
 
@@ -161,64 +165,10 @@ begin
         ( '9106', 'error getting item(s)' ),
         ( '9107', 'error deleting item' ),
         ( '9110', 'error adding reminder' ),
+        ( '9117', 'error deleting reminder' ),
 
         ( '9999', 'ASSERT failure');
 
-    -- ---------------------------------------------------------------------------
-    -- OBSOLETE EventCodes
-    -- ---------------------------------------------------------------------------
-/*
-        ( '0000', 'user logged in (obsolete eventcode, use 1000)' ),
-        ( '0001', 'user logged out (obsolete eventcode, use 1001)' ),
-        ( '0002', 'invalid login attempt (obsolete eventcode, use 4000)' ),
-        ( '0003', 'automatic log-in (obsolete eventcode, use 1003)' ),
-        ( '0004', 'userid/password e-mailed (obsolete eventcode)' ),
-        ( '0005', 'imaging options notified (obsolete eventcode)' ),
-        ( '0006', 'unauthorized page attempt (obsolete eventcode)' ),
-
-        ( '0010', 'account added by admin (obsolete eventcode)' ),
-        ( '0011', 'account deleted by admin (obsolete eventcode)' ),
-        ( '0012', 'new account registration (obsolete eventcode)' ),
-        ( '0013', 'new member added (obsolete eventcode)' ),
-        ( '0014', 'member deleted (obsolete eventcode)' ),
-        ( '0015', 'account updated (obsolete eventcode)' ),
-        ( '0016', 'member updated (obsolete eventcode)' ),
-        ( '0017', 'member password reset (obsolete eventcode)' ),
-
-        ( '0020', 'folder added (obsolete eventcode)' ),
-        ( '0021', 'folder updated (obsolete eventcode)' ),
-        ( '0022', 'folder deleted (obsolete eventcode)' ),
-        ( '0023', 'folder purged (obsolete eventcode)' ),
-        ( '0024', 'item added (obsolete eventcode)' ),
-        ( '0025', 'item updated (obsolete eventcode)'),
-        ( '0026', 'item deleted (obsolete eventcode)'),
-        ( '0027', 'item purged (obsolete eventcode)'),
-        ( '0028', 'image uploaded (obsolete eventcode)'),
-        ( '0029', 'image deleted (obsolete eventcode)'),
-        ( '0030', 'user updated password (obsolete eventcode)'),
-        ( '0031', 'owner updated password (obsolete eventcode)'),
-        ( '0032', 'admin updated password (obsolete eventcode)'),
-        ( '0040', 'payment recorded (obsolete eventcode)'),
-        ( '0041', 'payment declined (obsolete eventcode)'),
-        ( '0042', 'IPN recevied (obsolete eventcode)'),
-        ( '0043', 'promotion code added (obsolete eventcode)'),
-        ( '0044', 'promotion code updated (obsolete eventcode)'),
-        ( '0045', 'promotion code deleted (obsolete eventcode)'),
-
-        ( '9011', 'reserved (obsolete eventcode)'),
-        ( '9012', 'IPN update error (obsolete eventcode)'),
-        ( '9013', 'i/o notification error (obsolete eventcode)'),
-        ( '9014', 'error generating password (obsolete eventcode)'),
-        ( '9015', 'mail error on lost password (obsolete eventcode)'),
-        ( '9016', 'error adding promocode (obsolete eventcode)'),
-        ( '9017', 'error updating promocode (obsolete eventcode)'),
-        ( '9021', 'error updating folder (obsolete eventcode)'),
-        ( '9022', 'error marking folder deleted (obsolete eventcode)'),
-        ( '9024', 'error adding file (obsolete eventcode)'),
-        ( '9025', 'error updating file (obsolete eventcode)'),
-        ( '9040', 'error uploading image (obsolete eventcode)'),
-        ( '9041', 'error adding image (obsolete eventcode)');
-*/
     select count(*) into nrows from ref_eventcodes;
     return 'EventCodes reference table loaded: '||nrows||' rows.';
 end;
