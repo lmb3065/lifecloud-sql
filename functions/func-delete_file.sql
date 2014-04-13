@@ -13,6 +13,7 @@
 -- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- 2013-11-24 dbrown: Removed eventlog noise
 -- 2013-12-12 dbrown: Fixed some bugs
+-- 2014-04-12 dbrown: Fixed another bug
 -- -----------------------------------------------------------------------------
 
 create or replace function delete_file(
@@ -49,7 +50,7 @@ begin
     if (target_mid is null) then
         perform log_event( null, source_mid, EVENT_DEVERR_DELETING_FILE,
                     'File ['||file_uid||'] does not exist' );
-        return RETVAL_FILE_NOTFOUND;
+        return RETVAL_ERR_FILE_NOTFOUND;
     end if;
 
     -- Check that user is allowed to touch file-owner's stuff
