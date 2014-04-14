@@ -11,7 +11,8 @@
 -- 2013-11-17 dbrown: cleanup
 -- 2013-12-12 dbrown: Added eventcodes for [Item] data type (x10x)
 -- 2014-01-03 dbrown: Added eventcodes for account-related login failure
--- 2014-04-12 dbrown: Added eventcodes for Adding,Deleting Reminders
+-- 2014-04-12 dbrown: Added eventcodes for Adding, Deleting Reminders
+-- 2014-04-13 dbrown: Added eventcodes for Updating Reminders
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -103,6 +104,9 @@ begin
         ( '1108', 'item deleted by owner'),
         ( '1109', 'item deleted by Admin'),
         ( '1110', 'reminder added' ),
+        ( '1113', 'reminder updated' ),
+        ( '1114', 'reminder updated by account owner' ),
+        ( '1115', 'reminder updated by Admin' ),
         ( '1117', 'reminder deleted' ),
         ( '1118', 'reminder deleted by account owner' ),
         ( '1119', 'reminder deleted by Admin' ),
@@ -141,6 +145,7 @@ begin
         ( '6100', 'unauthorized attempt to add item' ),
         ( '6103', 'unauthorized attempt to update item' ),
         ( '6107', 'unauthorized attempt to delete item' ),
+        ( '6113', 'unauthorized attempt to update reminder' ),
         ( '6117', 'unauthorized attempt to delete reminder' ),
 
     -- 9000+ : Database/Developer errors
@@ -165,6 +170,7 @@ begin
         ( '9106', 'error getting item(s)' ),
         ( '9107', 'error deleting item' ),
         ( '9110', 'error adding reminder' ),
+        ( '9113', 'error updating reminder' ),
         ( '9117', 'error deleting reminder' ),
 
         ( '9999', 'ASSERT failure');
