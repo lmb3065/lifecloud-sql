@@ -77,7 +77,7 @@ begin
         update reminders set
             event_name  = coalesce(fencrypt(_event_name), reminders.event_name),
             x_form_data = coalesce(fencrypt(_event_date), reminders.event_date),
-            modified_by = source_mid,`
+            modified_by = source_mid,
             updated     = now()
         where uid = _file_uid;
 
