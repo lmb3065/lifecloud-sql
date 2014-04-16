@@ -7,6 +7,7 @@
 --  Returns integer from ref_retvals
 -----------------------------------------------------------------------------
 -- 2014-04-13 dbrown: created
+-- 2014-04-15 dbrown: exception now logs target mid/cid 
 -----------------------------------------------------------------------------
 
 create or replace function update_alert(
@@ -87,7 +88,8 @@ begin
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
         event_out := EVENT_DEVERR_UPDATING_FILE;
         result    := RETVAL_ERR_EXCEPTION;
-        perform log_event( _source_cid, _source_mid, event_out, '['||errno||'] '||errmsg||' : '||errdetail);
+        perform log_event( _source_cid, _source_mid, event_out,
+                    '['||errno||'] '||errmsg||' : '||errdetail, _target_cid, _target_mid );
         return result;
 
     end;
