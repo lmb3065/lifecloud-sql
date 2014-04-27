@@ -1,41 +1,31 @@
 
-Directory Structure
--------------------
+# Directory Structure
 
- - crypto/     Support and wrapper functions for the pgcrypto library
- - documents/  Text and documentation
- - functions/  Data manipulation functions, the bulk of the code.
- - roles/      Database user definitions (currently only "delphi")
- - tables/     Database table definitions
- - types/      Data type definitions, used to standardize interfaces
-                across functions that return the same types of data
- - transfer.sh Utility to place an install package on a target machine via SCP.
- - install.sh  Utility, meant to be run in the target location, which creates
-                the database.
- - update-functions.sh  Development utility which updates all of the
-                database functions without restarting the database
+ - **`crypto/`** Support and wrapper functions for the pgcrypto library
+ - **`documents/`** Text and documentation
+ - **`functions/`** The bulk of the code. These populate the database with initial data, handle all user transactions, and provide administrative tools.
+ - **`roles/`** Database user definitions (currently only "delphi")
+ - **`tables/`** Database table definitions
+ - **`types/`** Data type definitions, standardize interfaces across functions that return the same types of data.
+ - `transfer.sh` Script to place an install package on a target machine via SCP
+ - `install.sh`  Creates the `lc` database on the local machine, dropping it first if necessary.
 
-Getting the Install package
----------------------------
+# Getting the Install package
+ - On the target machine, Clone the repository from GitHub: ``git clone git://github.com:mojo-blues/lifecloud.git``
+ - On the source machine, edit and run `transfer.sh`, which copies the installation package onto the target machine via `scp`.
 
-There are two ways to get the database installation package on the target machine:
+# Installation
 
- - The easier is: "git clone git@github.com:mojo-blues/lifecloud.git".
-    You may need a username and password.  This will create a subdirectory
-    called 'lifecloud' from your current directory, with the install pack
-    therein.
+Once the installation package is in place, run `install.sh`
 
- - The second:  Edit and run the script 'transfer.sh', which copies the
-   installation package onto the target machine via scp (cp|ssh).
+ - PostgreSQL must be running
+ - the `pgcrypto` library must be installed
+ - You may need to first invoke these magic words:
+ 
+ 	`pg_ctl restart -D /opt/pgsql/data/ -m fast`
+ 	
+ 	This restarts PostgreSQL, kicking off any attached web users and freeing up the database to be dropped and recreated.
 
-Installation
-------------
-You must have a running installation of PostgreSQL
-    with the pgcrypto library installed.
-You must know where PostgreSQL stores its data files and have rwx access there
-You must have permission to run pg_ctl,
-    which stops and restarts PostgreSQL to kick the web service users off
-     -- required in order to drop and recreate the database
+### Notes
 
-Once the installation package is in place, go to its 'lifecloud' directory
-    and run ./install.sh.
+The `admin_create_...` functions define all of the magic EventCodes, ReturnValues, Applications, etc that are used by the other functions
