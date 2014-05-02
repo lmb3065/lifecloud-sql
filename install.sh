@@ -20,6 +20,7 @@
 ## 2013-11-24 dbrown : adds tables ref_categories, ref_forms
 ##                     runs new admin_create_categories(), admin_create_forms()
 ## 2014-01-10 dbrown:  Added TEST SUITE to installation
+## 2014-05-02 dbrown:  Should now bail out if dropdb/createdb fail
 ## -----------------------------------------------------------------------------
 
 lcdir=.
@@ -29,10 +30,10 @@ echo
 echo LifeCloud Database Installer
 
 echo 1/8 Dropping old LifeCloud database
-dropdb lc;
+dropdb lc || exit
 
 echo 2/8 Creating new LifeCloud database
-createdb lc;
+createdb lc || exit
 
 echo 3/8 Installing Crypto Functions
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/crypto/pgcrypto.sql
