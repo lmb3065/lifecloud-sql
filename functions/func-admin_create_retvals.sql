@@ -2,6 +2,7 @@
  --  admin_create_retvals.sql
  -- ---------------------------------------------------------------------------
  --  2013-12-20 dbrown: added -15, -27 (items)
+ --  2014-04-12 dbrown: added -16 (reminder)
  -- -----------------------------------------------------------------------------
 
  create or replace function admin_create_retvals() returns text as $$
@@ -21,6 +22,7 @@
         ( -13, 'Folder does not exist' ),
         ( -14, 'File does not exist' ),
         ( -15, 'Item does not exist' ),
+        ( -16, 'Reminder does not exist' ),
 
         ( -20, 'Account exists with this e-mail address' ),
         ( -21, 'Member exists with this e-mail address' ),
