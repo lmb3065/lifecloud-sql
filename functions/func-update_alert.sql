@@ -7,7 +7,8 @@
 --  Returns integer from ref_retvals
 -----------------------------------------------------------------------------
 -- 2014-04-13 dbrown: created
--- 2014-04-15 dbrown: exception now logs target mid/cid 
+-- 2014-04-15 dbrown: exception now logs target mid/cid
+-- 2014-05-23 dbrown: fixed some typos
 -----------------------------------------------------------------------------
 
 create or replace function update_alert(
@@ -80,13 +81,13 @@ begin
             x_form_data = coalesce(fencrypt(_event_date), reminders.event_date),
             modified_by = source_mid,
             updated     = now()
-        where uid = _file_uid;
+        where uid = _alert_uid;
 
     exception when others then
 
         -- Couldn't update reminder!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
-        event_out := EVENT_DEVERR_UPDATING_FILE;
+        event_out := EVENT_DEVERR_UPDATING_ALERT;
         result    := RETVAL_ERR_EXCEPTION;
         perform log_event( _source_cid, _source_mid, event_out,
                     '['||errno||'] '||errmsg||' : '||errdetail, _target_cid, _target_mid );
