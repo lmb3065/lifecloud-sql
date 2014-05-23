@@ -20,6 +20,8 @@
 ## 2013-11-24 dbrown : adds tables ref_categories, ref_forms
 ##                     runs new admin_create_categories(), admin_create_forms()
 ## 2014-01-10 dbrown:  Added TEST SUITE to installation
+## 2014-05-02 dbrown:  Should now bail out if dropdb/createdb fails
+## 2014-05-02 dbrown:  Fixed step numbering
 ## -----------------------------------------------------------------------------
 
 lcdir=.
@@ -28,24 +30,24 @@ pgdatadir=/opt/pgsql/data/
 echo
 echo LifeCloud Database Installer
 
-echo 1/8 Dropping old LifeCloud database
-dropdb lc;
+echo 1/9 Dropping old LifeCloud database
+dropdb lc || exit
 
-echo 2/8 Creating new LifeCloud database
-createdb lc;
+echo 2/9 Creating new LifeCloud database
+createdb lc || exit
 
-echo 3/8 Installing Crypto Functions
+echo 3/9 Installing Crypto Functions
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/crypto/pgcrypto.sql
 for i in $lcdir/crypto/func-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 4/8 installing Data Types
+echo 4/9 installing Data Types
 for i in $lcdir/types/type-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 5/8 Installing Tables
+echo 5/9 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_categories.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
@@ -60,20 +62,21 @@ psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-folders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-files.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-items.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-profilepics.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-reminders.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-sessions.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-member_apps.sql
 
-echo 6/8 Installing Functions
+echo 6/9 Installing Functions
 for i in $lcdir/functions/func-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 7/8 Installing Roles
+echo 7/9 Installing Roles
 for i in $lcdir/roles/role-*.sql; do
     psql --dbname=lc --username=pgsql --quiet --file=$i
 done
 
-echo 8/8 Running Setup Functions
+echo 8/9 Running Setup Functions
 ## psql emits a blank line, grep eats it
 psql -d lc -U pgsql -t -c 'select admin_create_categories();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_eventcodes();' | grep '.'

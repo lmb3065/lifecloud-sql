@@ -21,7 +21,7 @@ create table Reminders
     event_name      text        not null,
     event_date      timestamp   not null,
     advance_days    int         not null,
-    item_uid        int         -- references Items(uid),
+    item_uid        int,        -- references Items(uid)
     recurrence      int         default 0,
     sent            int         default 0
 );
