@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------
 -- 2014-04-12 dbrown: created
 -- 2014-05-22 dbrown: added paging functions
+-- 2014-05-23 dbrown: fixed paging functions
 -----------------------------------------------------------------------------
 
 create or replace function get_alerts(
@@ -44,7 +45,7 @@ begin
 
         create temporary table alerts_out on commit drop as
         select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
-            r.item_uid, r.recurrence, r.sent
+            r.item_uid, r.recurrence, r.sent, 0 as nrows, 0 as npages
         from reminders r
         where _mid = r.mid;
         
@@ -52,7 +53,7 @@ begin
 
         create temporary table alerts_out on commit drop as
         select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
-            r.item_uid, r.recurrence, r.sent
+            r.item_uid, r.recurrence, r.sent, 0 as nrows, 0 as npages
         from reminders r
         where r.mid in ( select m.mid from members m where m.cid = _cid );
 
