@@ -11,6 +11,7 @@
 --                     begin developing the actual apps
 --  2014-01-23 dbrown: added URLs for Education, Reminder, ReviewReminders
 --  2014-03-23 dbrown: add URLS to match database contents
+--  2014-04-13 dbrown: req by lbrown appReview -> appReview.jsp
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -62,7 +63,7 @@ begin
      ( 'comingSoon.jsp',    'Wallet Contents',              'wallet.gif'        ),
      ( 'comingSoon.jsp',    'Delphi VIM',                   'vim.gif'           ),
      ( 'appReminders',      'Reminder',                     'reminder.gif'      ),
-     ( 'appReview',         'Review<br/>Reminders',         'reminders.gif'     );
+     ( 'appReview.jsp',     'Review<br/>Reminders',         'reminders.gif'     );
 
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
