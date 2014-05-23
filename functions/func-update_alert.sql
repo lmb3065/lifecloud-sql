@@ -4,18 +4,23 @@
 -- updates an existing reminder with the new data provided.  it may be the
 -- same as the old data.  source_mid will need to be validated to determine
 -- if they are allowed to edit (account owner, proxy, or creator).
---  Returns integer from ref_retvals
+--
+-- We assume that the caller is passing us a *complete* alert structure;
+-- any existing data is simply overwritten.
+--
+-- Returns integer from ref_retvals
 -----------------------------------------------------------------------------
 -- 2014-04-13 dbrown: created
 -- 2014-04-15 dbrown: exception now logs target mid/cid
--- 2014-05-23 dbrown: fixed some typos
+-- 2014-05-23 dbrown: fixed some incomplete sections
+-- 2014-05-23 dbrown: changed behavior to expect complete structure
 -----------------------------------------------------------------------------
 
 create or replace function update_alert(
 
-    _source_mid     int,
-    _alert_uid      int,
-    _event_name     text,
+    _source_mid     int,   -- Which member is updating the alert
+    _alert_uid      int,   -- Which alert is being updated
+    _event_name     text,  -- Data fields ....
     _event_date     timestamp,
     _advance_days   int,
     _item_uid       int,
@@ -54,10 +59,11 @@ begin
     if (_target_mid is null) then
         event_out := EVENT_DEVERR_UPDATING_ALERT;
         result    := RETVAL_ERR_ALERT_NOTFOUND;
-        perform log_event( null, _source_mid, event_out, 'Alert ['||_alert_uid||'] does not exist' );
+        perform log_event( null, _source_mid, event_out, 'reminder ['||_alert_uid||'] does not exist' );
         return result;
     end if;
     
+
     -- Ensure caller is allowed to touch target's stuff
     
     select allowed, scid, slevel, sisadmin, tcid
@@ -72,20 +78,22 @@ begin
 
     
     -- Update database record
-    
+
     declare errno text; errmsg text; errdetail text;
     begin
 
         update reminders set
-            event_name  = coalesce(fencrypt(_event_name), reminders.event_name),
-            x_form_data = coalesce(fencrypt(_event_date), reminders.event_date),
-            modified_by = source_mid,
-            updated     = now()
+            event_name   = _event_name,
+            event_date   = _event_date,
+            advance_days = _advance_days,
+            item_uid     = _item_uid,
+            recurrence   = _recurrence,
+            sent         = _sent
         where uid = _alert_uid;
 
     exception when others then
 
-        -- Couldn't update reminder!
+        -- Couldn't update reminder: Bail out!
         get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
         event_out := EVENT_DEVERR_UPDATING_ALERT;
         result    := RETVAL_ERR_EXCEPTION;
@@ -95,8 +103,9 @@ begin
 
     end;
     
+
     -- Success
-    
+
     if (_source_mid = _target_mid) then event_out := EVENT_OK_UPDATED_ALERT;
     elsif (_source_isamin = 1) then     event_out := EVENT_OK_ADMIN_UPDATED_ALERT;
     elsif (_source_level <= 1) then     event_out := EVENT_OK_OWNER_UPDATED_ALERT;
