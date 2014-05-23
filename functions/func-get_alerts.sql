@@ -6,6 +6,7 @@
 -- 2014-04-12 dbrown: created
 -- 2014-05-22 dbrown: added paging functions
 -- 2014-05-23 dbrown: fixed paging functions
+-- 2014-05-23 dbrown: order output by date asc
 -----------------------------------------------------------------------------
 
 create or replace function get_alerts(
@@ -77,7 +78,7 @@ begin
 
     return query 
         select * from alerts_out
-        order by event_date desc
+        order by event_date asc
         limit _pagesize offset (_page * _pagesize);
 
 end; $$ language plpgsql;
