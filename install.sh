@@ -20,7 +20,7 @@
 ## 2013-11-24 dbrown : adds tables ref_categories, ref_forms
 ##                     runs new admin_create_categories(), admin_create_forms()
 ## 2014-01-10 dbrown:  Added TEST SUITE to installation
-## 2014-05-02 dbrown:  Should now bail out if dropdb/createdb fails
+## 2014-05-02 dbrown:  Should now bail out if createdb fails
 ## 2014-05-02 dbrown:  Fixed step numbering
 ## -----------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ echo
 echo LifeCloud Database Installer
 
 echo 1/9 Dropping old LifeCloud database
-dropdb lc || exit
+dropdb lc
 
 echo 2/9 Creating new LifeCloud database
 createdb lc || exit
