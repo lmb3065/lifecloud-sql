@@ -2,6 +2,7 @@
 -- function get_alerts
 -----------------------------------------------------------------------------
 -- Gets alerts (reminders) from database
+-- Uses the most specific criterion supplied (UID > MID > CID)
 -----------------------------------------------------------------------------
 -- 2014-04-12 dbrown: created
 -- 2014-05-22 dbrown: added paging functions
@@ -13,6 +14,7 @@ create or replace function get_alerts(
 
     _cid        int default null,
     _mid        int default null,
+    _uid        int default null,
     _pagesize   int default 0,
     _page       int default 0
     
@@ -37,12 +39,20 @@ declare
 
 begin
 
-    if (_cid is null) and (_mid is null) then return; end if;
+    if (_cid is null) and (_mid is null) and (_uid is null) then return; end if;
     
 
     -- Perform unpaged query into a temporary table
 
-    if (_cid is null) then
+    if (_uid is not null) then
+
+        select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
+            r.item_uid, r.recurrence, r.sent, 1 as nrows, 1 as npages
+        from reminders r
+        where _uid = r.uid; -- 1 row returned
+
+    elsif (_mid is not null) then
+
 
         create temporary table alerts_out on commit drop as
         select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
@@ -50,7 +60,7 @@ begin
         from reminders r
         where _mid = r.mid;
         
-    else
+    else -- _cid is not null
 
         create temporary table alerts_out on commit drop as
         select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
