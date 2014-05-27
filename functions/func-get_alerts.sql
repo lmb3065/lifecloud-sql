@@ -8,6 +8,7 @@
 -- 2014-05-22 dbrown: added paging functions
 -- 2014-05-23 dbrown: fixed paging functions
 -- 2014-05-23 dbrown: order output by date asc
+-- 2014-05-27 dbrown: bug fix
 -----------------------------------------------------------------------------
 
 create or replace function get_alerts(
@@ -46,13 +47,15 @@ begin
 
     if (_uid is not null) then
 
-        select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
-            r.item_uid, r.recurrence, r.sent, 1 as nrows, 1 as npages
-        from reminders r
-        where _uid = r.uid; -- 1 row returned
+        return query
+            select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
+                r.item_uid, r.recurrence, r.sent, 1 as nrows, 1 as npages
+            from reminders r
+            where r.uid = _uid limit 1;
+
+        return;
 
     elsif (_mid is not null) then
-
 
         create temporary table alerts_out on commit drop as
         select r.uid, r.mid, r.event_name, r.event_date, r.advance_days,
