@@ -51,7 +51,7 @@ begin
 
     select cat.uid into i from ref_categories cat where name = 'Family';
     insert into ref_forms( category, filename, title ) values
-        (i, '24hrTrackingSheet',                    'Caregiver Tracking Form'),
+        (i, '24hrTrackingSheet.pdf',                'Caregiver Tracking Form'),
         (i, 'CaregiverInformation.pdf',             'Caregiver Information'),
         (i, 'FamilyMemberInformation.pdf',          'Family Member Information'),
         (i, 'InfantBreastFeeding.pdf',              'Infant Breast Feeding Schedule'),
