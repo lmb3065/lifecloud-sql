@@ -9,6 +9,7 @@
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
 --  2013-12-17 dbrown: added column modified_by
+--  2014-05-27 dbrown: new column "reminders"
 -- ---------------------------------------------------------------------------
 
 create or replace function get_items(
@@ -32,6 +33,7 @@ create or replace function get_items(
     created     timestamp,
     updated     timestamp,
     modified_by int,
+    reminders   int,
     nrows       int,
     npages      int
 
@@ -61,15 +63,19 @@ begin
     -- Get initial results ---------------------------------------------------
 
     create temporary table items_out on commit drop as
-        select i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
+        select
+            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
             fdecrypt(i.x_name) as item_name,
             fdecrypt(i.x_desc) as item_desc,
-            i.created, i.updated, i.modified_by
-        from items i
+            i.created, i.updated, i.modified_by,
+            cast(count(*) as int) as reminders, 0 as nrows, 0 as npages
+        from items i join reminders r on (r.item_uid = i.uid)
         where (( _item_uid   is not null) and (i.uid = _item_uid ))
            or (( _folder_uid is not null) and (i.folder_uid = _folder_uid ))
-           or (( _mid        is not null) and (i.mid = _mid ));
-
+           or (( _mid        is not null) and (i.mid = _mid ))
+        group by
+            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
+            item_name, item_desc, i.created, i.updated, i.modified_by;
 
     -- Count results; if none, log exceptional reasons and exit
 
@@ -108,7 +114,7 @@ begin
     return query
         select io.uid, io.mid, io.cid, io.folder_uid, io.app_uid,
                 io.item_name, io.item_desc, io.created, io.updated, io.modified_by,
-                _nrows, _npages
+                io.reminders, _nrows, _npages
         from items_out io
         order by created desc
         limit _pagesize offset (_page * _pagesize);

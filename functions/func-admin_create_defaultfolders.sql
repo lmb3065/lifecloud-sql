@@ -10,6 +10,7 @@
 -- 2013-11-14 dbrown: Communicates by returning TEXT
 -- 2013-12-11 dbrown: removed itemtype field
 -- 2014-02-11 dbrown: pared to Contacts Emergency Medical MemoryBox Reminder
+-- 2014-05-24 dbrown: removed Reminders
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_defaultfolders() returns text as $$
@@ -21,8 +22,7 @@ begin
         (fencrypt('Contacts'),              fencrypt('Contacts folder')),
         (fencrypt('Emergency'),             fencrypt('Emergency folder')),
         (fencrypt('Medical'),               fencrypt('Medical folder')),
-        (fencrypt('Memory Box'),            fencrypt('Memory Box folder')),
-        (fencrypt('Reminders'),             fencrypt('Reminders folder'));
+        (fencrypt('Memory Box'),            fencrypt('Memory Box folder'));
 
     select count(*) into nrows from ref_defaultfolders;
     return 'DefaultFolders reference table loaded: '||nrows||' rows.';

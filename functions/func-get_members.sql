@@ -20,6 +20,7 @@
 --  2013-11-01 dbrown : Stricter argument processing
 --  2013-11-15 dbrown : fix typo
 --  2013-11-24 dbrown : remove scope-mangling local variable
+--  2013-03-24 dbrown : new Alert fields
 -- -----------------------------------------------------------------------------
 
 create or replace function get_members(
@@ -48,7 +49,8 @@ begin
         fdecrypt(x_userid),   fdecrypt(x_email),      h_profilepic,
         fdecrypt(x_address1), fdecrypt(x_address2),   fdecrypt(x_city),
         fdecrypt(x_state),    fdecrypt(x_postalcode), fdecrypt(x_country),
-        fdecrypt(x_phone),
+        fdecrypt(x_phone),  
+        alerttype,            fdecrypt(x_alertphone), fdecrypt(x_alertemail),
         status, pwstatus, userlevel, tooltips,
         isadmin, logincount, created, updated
     from Members

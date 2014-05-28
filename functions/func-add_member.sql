@@ -20,6 +20,7 @@
 -- 2013-11-16 dbrown : TODO: Prevent NULLS from getting through and crashing table
 -- 2013-11-24 dbrown : removed eventlog noise
 -- 2014-01-09 dbrown : fixed typo _maxlogins
+-- 2014-03-24 dbrown : new input fields alerttype, alertphone, alertemail
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -45,7 +46,11 @@ create or replace function add_member
     _status       int  default 0,
     _pwstatus     int  default 0,
     _userlevel    int  default 4,
-    _tooltips     int  default 1
+    _tooltips     int  default 1,
+    
+    _alerttype    int  default 0,
+    _alertphone   varchar(20)   default '',
+    _alertemail   varchar(64)   default ''
 
 ) returns int as $$
 
@@ -123,13 +128,17 @@ begin
     begin
         INSERT INTO Members ( cid, h_profilepic, h_passwd, x_userid, x_email,
             x_fname, x_mi, x_lname, x_address1, x_address2, x_city, x_state,
-            x_postalcode, x_country, x_phone, status, pwstatus, userlevel,
+            x_postalcode, x_country, x_phone,
+            alerttype, x_alertphone, x_alertemail,
+            status, pwstatus, userlevel,
             tooltips, isadmin )
         VALUES ( _cid, _h_profilepic, sha1(_passwd), fencrypt(_userid),
             fencrypt(_email), fencrypt(_fname), fencrypt(_mi), fencrypt(_lname),
             fencrypt(_address1), fencrypt(_address2), fencrypt(_city),
             fencrypt(_state), fencrypt(_postalcode), fencrypt(_country),
-            fencrypt(_phone), _status, _pwstatus, _userlevel, _tooltips, 0 );
+            fencrypt(_phone),
+            _alerttype, fencrypt(_alertphone), fencrypt(_alertemail),
+            _status, _pwstatus, _userlevel, _tooltips, 0 );
         select last_value into newmid from members_mid_seq;
 
     exception when others then
