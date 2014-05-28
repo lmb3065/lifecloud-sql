@@ -8,6 +8,7 @@
 --  2013-11-22 dbrown: added columm 'category' with content 'default'
 --  2013-11-23 dbrown: reorganized around categories
 --  2014-03-24 dbrown: updated to match development database
+--  2014-05-27 dbrown: added missing PDF extension
 -- ---------------------------------------------------------------------------
 
 create or replace function admin_create_forms() returns text as $$
@@ -61,7 +62,7 @@ begin
 
     select cat.uid into i from ref_categories cat where name = 'Medical';
     insert into ref_forms( category, filename, title ) values
-        (i, '24hrTrackingSheet',                    'Caregiver Tracking Form'),
+        (i, '24hrTrackingSheet.pdf',                'Caregiver Tracking Form'),
         (i, 'CaregiverInformation.pdf',             'Caregiver Information'),
         (i, 'HealthTrackingSheet.pdf',              'Health Tracking Sheet'),
         (1, 'MedicalAuthorizationForm.pdf',         'Medical Authorization Form'),
