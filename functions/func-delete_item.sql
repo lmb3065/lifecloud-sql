@@ -3,12 +3,16 @@
 -- ---------------------------------------------------------------------------
 --  2013-12-12 dbrown: created
 --  2013-12-20 dbrown: fix missing || operator in does-not-exist err message
+--  2014-06-23 dbrown: Now deletes all Reminders that were dependend on the
+--                     deleted item; Item_uid argument now has an underscore
+--                     due to a column in Reminders having the same name.
 -- ---------------------------------------------------------------------------
 
-create or replace function delete_item(
+drop function if exists delete_item(int, int);
+create function delete_item(
 
     source_mid  int,
-    item_uid    int
+    _item_uid   int
 
 ) returns int as $$
 
@@ -34,11 +38,11 @@ declare
 begin
 
     -- Ensure target-item exists (and get its owner)
-    select mid into target_mid from items where uid = item_uid;
+    select mid into target_mid from items where uid = _item_uid;
 
     if (target_mid is null) then
         perform log_event( null, source_mid, EVENT_DEVERR_DELETING_ITEM,
-                    'Item.UID ['||item_uid||'] does not exist' );
+                    'Item.UID ['||_item_uid||'] does not exist' );
         return RETVAL_ERR_ITEM_NOTFOUND;
     end if;
 
@@ -60,7 +64,8 @@ begin
         errdetail text;
 
     begin
-        delete from Items where uid = item_uid;
+        delete from Reminders R where  _item_uid = R.item_uid;
+        delete from Items where uid = _item_uid;
 
     exception when others then
         -- Couldn't delete Item!
