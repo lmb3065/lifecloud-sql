@@ -12,6 +12,7 @@
 --               logs foldername in eventlog (or uid on error)
 -- 2013-11-14 dbrown: Organization, Exception handling, More info in eventcodes
 -- 2013-11-21 dbrown: Fixed some obsolete event code constants
+-- 2014-06-23 dbrown: Fix: deletes all items from the deleted folder
 -- ---------------------------------------------------------------------------
 
 create or replace function delete_folder(
@@ -72,6 +73,7 @@ begin
         errdetail text;
     begin
         delete from Files where folder_uid = folderid;
+        delete from Items where folder_uid = folderid;
         delete from Folders where uid = folderid;
 
     exception when others then
