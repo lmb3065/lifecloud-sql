@@ -69,7 +69,7 @@ begin
             fdecrypt(i.x_desc) as item_desc,
             i.created, i.updated, i.modified_by,
             cast(count(*) as int) as reminders, 0 as nrows, 0 as npages
-        from items i join reminders r on (r.item_uid = i.uid)
+        from items i left outer join reminders r on (r.item_uid = i.uid)
         where (( _item_uid   is not null) and (i.uid = _item_uid ))
            or (( _folder_uid is not null) and (i.folder_uid = _folder_uid ))
            or (( _mid        is not null) and (i.mid = _mid ))
