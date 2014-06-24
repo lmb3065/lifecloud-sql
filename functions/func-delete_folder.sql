@@ -73,6 +73,8 @@ begin
         errdetail text;
     begin
         delete from Files where folder_uid = folderid;
+        delete from Reminders where item_uid in
+            (select uid from Items where folder_uid = folderid);
         delete from Items where folder_uid = folderid;
         delete from Folders where uid = folderid;
 
