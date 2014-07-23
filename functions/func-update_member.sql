@@ -18,6 +18,7 @@
 --                     (fix error when updating values to what they already are)
 -- 2013-11-16 dbrown : Logs different eventcodes by source-member role
 -- 2013-03-24 dbrown : New optional fields alerttype, alertphone, alertemail
+-- 2014-07-23 dbrown : Added exception handling
 -- -----------------------------------------------------------------------------
 
 create or replace function update_member
@@ -209,31 +210,43 @@ begin
     -- Perform the update, only touching columns
     -- where our argument is NOT NULL
 
-    update Members m set
-        h_passwd     = coalesce(h_new_passwd,     m.h_passwd),
-        x_userid     = coalesce(x_new_userid,     m.x_userid),
-        x_email      = coalesce(x_new_email,      m.x_email),
-        h_profilepic = coalesce(_h_profilepic,    m.h_profilepic),
-        x_fname      = coalesce(x_new_fname,      m.x_fname),
-        x_mi         = coalesce(x_new_mi,         m.x_mi),
-        x_lname      = coalesce(x_new_lname,      m.x_lname),
-        x_address1   = coalesce(x_new_address1,   m.x_address1),
-        x_address2   = coalesce(x_new_address2,   m.x_address2),
-        x_city       = coalesce(x_new_city,       m.x_city),
-        x_state      = coalesce(x_new_state,      m.x_state),
-        x_postalcode = coalesce(x_new_postalcode, m.x_postalcode),
-        x_country    = coalesce(x_new_country,    m.x_country),
-        x_phone      = coalesce(x_new_phone,      m.x_phone),
-        status       = coalesce(_status,          m.status),
-        pwstatus     = coalesce(_pwstatus,        m.pwstatus),
-        userlevel    = coalesce(_userlevel,       m.userlevel),
-        tooltips     = coalesce(_tooltips,        m.tooltips),
-        alerttype    = coalesce(_alerttype,       m.alerttype),
-        x_alertphone = coalesce(x_new_alertphone, m.x_alertphone),
-        x_alertemail = coalesce(x_new_alertemail, m.x_alertemail),
-        updated      = clock_timestamp()
-    where mid = target_mid;
+    declare errno text; errmsg text; errdetail text;
+    begin
 
+        update Members m set
+            h_passwd     = coalesce(h_new_passwd,     m.h_passwd),
+            x_userid     = coalesce(x_new_userid,     m.x_userid),
+            x_email      = coalesce(x_new_email,      m.x_email),
+            h_profilepic = coalesce(_h_profilepic,    m.h_profilepic),
+            x_fname      = coalesce(x_new_fname,      m.x_fname),
+            x_mi         = coalesce(x_new_mi,         m.x_mi),
+            x_lname      = coalesce(x_new_lname,      m.x_lname),
+            x_address1   = coalesce(x_new_address1,   m.x_address1),
+            x_address2   = coalesce(x_new_address2,   m.x_address2),
+            x_city       = coalesce(x_new_city,       m.x_city),
+            x_state      = coalesce(x_new_state,      m.x_state),
+            x_postalcode = coalesce(x_new_postalcode, m.x_postalcode),
+            x_country    = coalesce(x_new_country,    m.x_country),
+            x_phone      = coalesce(x_new_phone,      m.x_phone),
+            status       = coalesce(_status,          m.status),
+            pwstatus     = coalesce(_pwstatus,        m.pwstatus),
+            userlevel    = coalesce(_userlevel,       m.userlevel),
+            tooltips     = coalesce(_tooltips,        m.tooltips),
+            alerttype    = coalesce(_alerttype,       m.alerttype),
+            x_alertphone = coalesce(x_new_alertphone, m.x_alertphone),
+            x_alertemail = coalesce(x_new_alertemail, m.x_alertemail),
+            updated      = clock_timestamp()
+        where mid = target_mid;
+
+    exception when others then
+
+        -- Couldn't update member!
+        get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+        event_out := EVENT_DEVERR_UPDATING_MEMBER;
+        perform log_event(source_cid, source_mid, event_out, '['||errno||'] '||errmsg||' : '||errdetail);
+        RETURN RETVAL_ERR_EXCEPTION;
+
+    end;
 
     -- Success
     if (source_mid = target_mid) then event_out := EVENT_OK_UPDATED_MEMBER;
