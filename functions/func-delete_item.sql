@@ -8,8 +8,7 @@
 --                     due to a column in Reminders having the same name.
 -- ---------------------------------------------------------------------------
 
-drop function if exists delete_item(int, int);
-create function delete_item(
+create or replace function delete_item(
 
     source_mid  int,
     _item_uid   int

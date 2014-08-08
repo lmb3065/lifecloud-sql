@@ -12,6 +12,7 @@
 --  2014-01-23 dbrown: added URLs for Education, Reminder, ReviewReminders
 --  2014-03-23 dbrown: add URLS to match database contents
 --  2014-04-13 dbrown: req by lbrown appReview -> appReview.jsp
+--  2014-08-07 dbrown: req by lbrown add appPets
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -53,7 +54,7 @@ begin
      ( 'comingSoon.jsp',    'Party',                        'party.gif'         ),
      ( 'comingSoon.jsp',    'Passwords',                    'passwords.gif'     ),
      ( 'comingSoon.jsp',    'Personal',                     'personal.gif'      ),
-     ( 'comingSoon.jsp',    'Pets',                         'pets.gif'          ),
+     ( 'appPets',           'Pets',                         'pets.gif'          ),
      ( 'comingSoon.jsp',    'Professional<br/>Relationships', 'contacts_professional.gif'),
      ( 'comingSoon.jsp',    'R&eacute;sum&eacute;',         'resume.gif'        ),
      ( 'comingSoon.jsp',    'Subscriptions',                'subscriptions.gif' ),
