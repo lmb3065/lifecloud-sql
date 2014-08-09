@@ -21,6 +21,7 @@
 -- 2013-11-24 dbrown : removed eventlog noise
 -- 2014-01-09 dbrown : fixed typo _maxlogins
 -- 2014-03-24 dbrown : new input fields alerttype, alertphone, alertemail
+-- 2014-08-09 dbrown : new members are now assigned the default app selection
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -65,6 +66,9 @@ declare
     RETVAL_ERR_MEMBER_EXISTS_NAME   constant int := -23;
     RETVAL_ERR_MEMBER_EXISTS_FULL   constant int := -24;
     RETVAL_ERR_EXCEPTION            constant int := -98;
+
+    MAGIC_DEFAULT_APPS_STRING constant varchar =
+        '0010000000010000100000000011000010000000011000000000000000000000';
 
     nrows       int;
     newmid      int;
@@ -152,6 +156,7 @@ begin
     -- Success
 
     perform add_initial_folders( newmid );
+    perform update_member_apps( newmid, MAGIC_DEFAULT_APPS_STRING );
 
     perform log_event( _cid, newmid, EVENT_OK_ADDED_MEMBER, null );
     return newmid;
