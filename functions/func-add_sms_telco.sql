@@ -8,9 +8,9 @@ create or replace function add_sms_telco
 ) returns int as $$
 declare
 
-    _cleantelco text;
     RETVAL_SUCCESS              constant int :=   1;
     RETVAL_ERR_EXCEPTION        constant int := -98;
+
 begin
 
     declare
@@ -20,13 +20,8 @@ begin
 
     begin
 
-        _cleantelco := upper(_telco);
-        _cleantelco := replace(_cleantelco, '-','');
-        _cleantelco := replace(_cleantelco, '&','');
-        _cleantelco := replace(_cleantelco, ' ','');
-
         insert into sms_telcos (telco, suffix)
-        values(_cleantelco, _suffix);
+        values(_telco, _suffix);
 
     exception when others then
 
