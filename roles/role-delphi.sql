@@ -14,7 +14,8 @@ grant all on
     members,     members_mid_seq,
     profilepics, profilepics_ppid_seq,
     reminders,   reminders_uid_seq,
-    sessions,    sessions_sid_seq
+    sessions,    sessions_sid_seq,
+    sms_telcos
 to delphi;
 
 grant select on
