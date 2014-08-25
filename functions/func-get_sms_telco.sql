@@ -5,7 +5,7 @@ create or replace function get_sms_telco
 (
    _telco text
 
-) returns text as $$
+) returns table (suffix text) as $$
 
 declare
 
@@ -13,11 +13,10 @@ declare
 
 begin
 
-    SELECT suffix into _result
-    FROM sms_telcos 
-    WHERE telco = _telco;
-
-    return _result;
+    return query
+        SELECT st.suffix as suffix
+        FROM sms_telcos st 
+        WHERE st.telco = _telco;
 
 end;
 $$ language plpgsql;
