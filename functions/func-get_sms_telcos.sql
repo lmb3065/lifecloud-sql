@@ -39,6 +39,7 @@ begin
     update telcos_out set nrows = _nrows, npages = _npages;
 
     return query select * from telcos_out
+    order by telco asc
     limit _pagesize offset (_page * _pagesize);
 
 end;
