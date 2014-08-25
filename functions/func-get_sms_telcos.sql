@@ -45,5 +45,3 @@ begin
 end;
 $$ language plpgsql;
 
-
-select * from get_sms_telcos();
