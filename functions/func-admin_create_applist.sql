@@ -13,7 +13,6 @@
 --  2014-03-23 dbrown: add URLS to match database contents
 --  2014-04-13 dbrown: req by lbrown appReview -> appReview.jsp
 --  2014-08-07 dbrown: req by lbrown add appPets
---  2014-08-28 dbrown: changed URL format to app/appNAME.jsp
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -24,38 +23,38 @@ begin
  truncate table ref_apps restart identity;
 
  insert into ref_apps( app_url, app_name, app_icon) values
-     ( 'app/appActivities.jsp', 'Activities',                   'activities.gif'    ),
-     ( 'app/appAutos.jsp',         'Autos',                        'auto.gif'          ),
+     ( 'appActivities',     'Activities',                   'activities.gif'    ),
+     ( 'appAutos',          'Autos',                        'auto.gif'          ),
      ( 'comingSoon.jsp',    'Babysitting',                  'babysitting.gif'   ),
      ( 'comingSoon.jsp',    'Banking<br/>Information',      'banking.gif'       ),
      ( 'comingSoon.jsp',    'Caregiver',                    'caregiver.gif'     ),
      ( 'comingSoon.jsp',    'Carpool',                      'carpool.gif'       ),
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
-     ( 'app/appContacts.jsp',      'Contacts',                     'contacts.gif'      ),
-     ( 'app/appEducation.jsp',     'Education',                    'education.gif'     ),
+     ( 'appContacts',       'Contacts',                     'contacts.gif'      ),
+     ( 'appEducation',      'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
-     ( 'app/appEmergency.jsp',     'Emergency',                    'emergency.gif'     ),
+     ( 'appEmergency',      'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
      ( 'comingSoon.jsp',    'Funeral<br/>Plans',            'funeral.gif'       ),
      ( 'comingSoon.jsp',    'Gifts',                        'gifts.gif'         ),
      ( 'comingSoon.jsp',    'Handyman<br/>Contractor',      'handyman.gif'      ),
-     ( 'app/appHome.jsp',          'Home',                         'home.gif'          ),
+     ( 'appHome',           'Home',                         'home.gif'          ),
      ( 'comingSoon.jsp',    'Home<br/>Improvement',         'home_improvement.gif'),
      ( 'comingSoon.jsp',    'Home Care<br/>Utilities',      'home_repair.gif'   ),
      ( 'comingSoon.jsp',    'Important<br/>Dates',          'dates.gif'         ),
      ( 'comingSoon.jsp',    'Insurance',                    'insurance.gif'     ),
-     ( 'app/appKitchen.jsp'    ,   'Kitchen',                      'kitchen.gif'       ),
+     ( 'appKitchen'    ,    'Kitchen',                      'kitchen.gif'       ),
      ( 'comingSoon.jsp',    'Legal<br/>Documents',          'legal.gif'         ),
      ( 'comingSoon.jsp',    'Loan<br/>Information',         'loans.gif'         ),
      ( 'comingSoon.jsp',    'Major<br/>Purchases',          'purchases.gif'     ),
      ( 'comingSoon.jsp',    'Marriage<br/>Information',     'marriage.gif'      ),
-     ( 'app/appMedical.jsp',       'Medical',                      'medical.gif'       ),
-     ( 'app/appMemories.jsp',      'Memories',                     'memories.gif'      ),
+     ( 'appMedical',        'Medical',                      'medical.gif'       ),
+     ( 'appMemories',       'Memories',                     'memories.gif'      ),
      ( 'comingSoon.jsp',    'Net&nbsp;Worth',               'net_worth.gif'     ),
      ( 'comingSoon.jsp',    'Party',                        'party.gif'         ),
      ( 'comingSoon.jsp',    'Passwords',                    'passwords.gif'     ),
      ( 'comingSoon.jsp',    'Personal',                     'personal.gif'      ),
-     ( 'app/appPets.jsp',          'Pets',                         'pets.gif'          ),
+     ( 'appPets',           'Pets',                         'pets.gif'          ),
      ( 'comingSoon.jsp',    'Professional<br/>Relationships', 'contacts_professional.gif'),
      ( 'comingSoon.jsp',    'R&eacute;sum&eacute;',         'resume.gif'        ),
      ( 'comingSoon.jsp',    'Subscriptions',                'subscriptions.gif' ),
@@ -64,8 +63,8 @@ begin
      ( 'comingSoon.jsp',    'Vacation',                     'vacation.gif'      ),
      ( 'comingSoon.jsp',    'Wallet Contents',              'wallet.gif'        ),
      ( 'comingSoon.jsp',    'Delphi VIM',                   'vim.gif'           ),
-     ( 'app/appReminders.jsp',     'Reminder',                     'reminder.gif'      ),
-     ( 'app/appReview.jsp',        'Review<br/>Reminders',         'reminders.gif'     );
+     ( 'appReminders',      'Reminder',                     'reminder.gif'      ),
+     ( 'appReview.jsp',     'Review<br/>Reminders',         'reminders.gif'     );
 
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
