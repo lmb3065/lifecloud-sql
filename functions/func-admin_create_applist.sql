@@ -13,6 +13,7 @@
 --  2014-03-23 dbrown: add URLS to match database contents
 --  2014-04-13 dbrown: req by lbrown appReview -> appReview.jsp
 --  2014-08-07 dbrown: req by lbrown add appPets
+--  2014-08-28 dbrown: app/appMedical.jsp
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -48,7 +49,7 @@ begin
      ( 'comingSoon.jsp',    'Loan<br/>Information',         'loans.gif'         ),
      ( 'comingSoon.jsp',    'Major<br/>Purchases',          'purchases.gif'     ),
      ( 'comingSoon.jsp',    'Marriage<br/>Information',     'marriage.gif'      ),
-     ( 'appMedical',        'Medical',                      'medical.gif'       ),
+     ( 'app/appMedical.jsp',        'Medical',                      'medical.gif'       ),
      ( 'appMemories',       'Memories',                     'memories.gif'      ),
      ( 'comingSoon.jsp',    'Net&nbsp;Worth',               'net_worth.gif'     ),
      ( 'comingSoon.jsp',    'Party',                        'party.gif'         ),
