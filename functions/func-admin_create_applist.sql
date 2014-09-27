@@ -14,6 +14,7 @@
 --  2014-04-13 dbrown: req by lbrown appReview -> appReview.jsp
 --  2014-08-07 dbrown: req by lbrown add appPets
 --  2014-08-28 dbrown: app/appMedical.jsp
+--  2014-09-26 dbrown: appMedical, appEducation URL changed
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -32,7 +33,7 @@ begin
      ( 'comingSoon.jsp',    'Carpool',                      'carpool.gif'       ),
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
      ( 'appContacts',       'Contacts',                     'contacts.gif'      ),
-     ( 'appEducation',      'Education',                    'education.gif'     ),
+     ( 'app/Education',      'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
      ( 'appEmergency',      'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
@@ -49,7 +50,7 @@ begin
      ( 'comingSoon.jsp',    'Loan<br/>Information',         'loans.gif'         ),
      ( 'comingSoon.jsp',    'Major<br/>Purchases',          'purchases.gif'     ),
      ( 'comingSoon.jsp',    'Marriage<br/>Information',     'marriage.gif'      ),
-     ( 'app/appMedical.jsp',        'Medical',                      'medical.gif'       ),
+     ( 'app/Medical.jsp',   'Medical',                      'medical.gif'       ),
      ( 'appMemories',       'Memories',                     'memories.gif'      ),
      ( 'comingSoon.jsp',    'Net&nbsp;Worth',               'net_worth.gif'     ),
      ( 'comingSoon.jsp',    'Party',                        'party.gif'         ),
