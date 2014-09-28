@@ -13,6 +13,7 @@
 -- 2014-01-03 dbrown: Added eventcodes for account-related login failure
 -- 2014-04-12 dbrown: Added eventcodes for Adding, Deleting Reminders
 -- 2014-04-13 dbrown: Added eventcodes for Updating Reminders
+-- 2014-09-27 dbrown: Added 6086
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -141,6 +142,7 @@ begin
         ( '6077', 'unauthorized attempt to delete folder' ),
         ( '6080', 'unauthorized attempt to add file' ),
         ( '6083', 'unauthorized attempt to modify file' ),
+        ( '6086', 'unauthorized attempt to get files'),
         ( '6087', 'unauthorized attempt to delete file' ),
         ( '6100', 'unauthorized attempt to add item' ),
         ( '6103', 'unauthorized attempt to update item' ),
