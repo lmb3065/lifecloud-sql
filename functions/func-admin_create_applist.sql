@@ -15,6 +15,7 @@
 --  2014-08-07 dbrown: req by lbrown add appPets
 --  2014-08-28 dbrown: app/appMedical.jsp
 --  2014-09-26 dbrown: appMedical, appEducation URL changed
+--  2014-09-29 dbrown: appAutos URL changed
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -26,14 +27,14 @@ begin
 
  insert into ref_apps( app_url, app_name, app_icon) values
      ( 'appActivities',     'Activities',                   'activities.gif'    ),
-     ( 'appAutos',          'Autos',                        'auto.gif'          ),
+     ( 'app/Autos.jsp',     'Autos',                        'auto.gif'          ),
      ( 'comingSoon.jsp',    'Babysitting',                  'babysitting.gif'   ),
      ( 'comingSoon.jsp',    'Banking<br/>Information',      'banking.gif'       ),
      ( 'comingSoon.jsp',    'Caregiver',                    'caregiver.gif'     ),
      ( 'comingSoon.jsp',    'Carpool',                      'carpool.gif'       ),
      ( 'comingSoon.jsp',    'Clients',                      'client.gif'        ),
      ( 'appContacts',       'Contacts',                     'contacts.gif'      ),
-     ( 'app/Education',      'Education',                    'education.gif'     ),
+     ( 'app/Education.jsp', 'Education',                    'education.gif'     ),
      ( 'comingSoon.jsp',    'Elder&nbsp;Care',              'eldercare.gif'     ),
      ( 'appEmergency',      'Emergency',                    'emergency.gif'     ),
      ( 'comingSoon.jsp',    'Financial<br/>Summary',        'financial.gif'     ),
