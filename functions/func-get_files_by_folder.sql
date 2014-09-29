@@ -1,13 +1,4 @@
 
-create or replace function get_files_by_folder
-(
-    _source_mid int,
-    _folder_uid int,
-    _pagesize   int    default null,
-    _page       int    default 0
-)
-returns table ( filerec file_t ) as $$
-
 -----------------------------------------------------------------------------
 -- get_files_by_folder
 -----------------------------------------------------------------------------
@@ -19,6 +10,14 @@ returns table ( filerec file_t ) as $$
 -- 2014-09-27 dbrown Created
 -----------------------------------------------------------------------------
 
+create or replace function get_files_by_folder
+(
+    _source_mid int,
+    _folder_uid int,
+    _pagesize   int    default null,
+    _page       int    default 0
+)
+returns table ( filerec file_t ) as $$
 declare
 
     RETVAL_SUCCESS             constant int     = 1;
@@ -38,6 +37,7 @@ begin
     if _target_mid is null then
         perform log_event( null, null, EVENT_DEVERR_GETTING_FILE,
                     'FolderUID ' || _folder_uid || ' not found');
+        return;
     end if;
 
     -- Check permissions
