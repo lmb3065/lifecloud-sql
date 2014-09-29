@@ -1,13 +1,4 @@
 
-create or replace function get_files_by_cid
-(
-    _source_mid int,
-    _target_cid int,
-    _pagesize   int    default null,
-    _page       int    default 0
-)
-returns table ( filerec file_t ) as $$
-
 -----------------------------------------------------------------------------
 -- get_files_by_cid
 -----------------------------------------------------------------------------
@@ -21,7 +12,17 @@ returns table ( filerec file_t ) as $$
 -- Others may not look at any CID
 -----------------------------------------------------------------------------
 -- 2014-09-27 dbrown Created
+-- 2014-09-28 dbrown Add ownerfname, ownerlname
 -----------------------------------------------------------------------------
+
+create or replace function get_files_by_cid
+(
+    _source_mid int,
+    _target_cid int,
+    _pagesize   int    default null,
+    _page       int    default 0
+)
+returns table ( filerec file_t ) as $$
 
 declare
 
@@ -54,8 +55,10 @@ begin
                 fdecrypt(f.x_desc) as description,
                 f.content_type, f.isprofile, f.category,
                 fdecrypt(f.x_form_data) as form_data,
-                f.modified_by, f.updated
-            from files f
+                f.modified_by, f.updated,
+                fdecrypt(m.x_fname) as ownerfname,
+                fdecrypt(m.x_lname) as ownerlname
+            from files f join members m on (m.mid = f.mid)
             where f.mid in (select m.mid from members m where m.cid = _target_cid);
 
     -- Calculate output paging
@@ -73,6 +76,7 @@ begin
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isprofile,
             fo.category, fo.form_data, fo.modified_by, fo.updated,
+            fo.ownerfname, fo.ownerlname,
             _nrows, _npages
         from files_out fo
         order by updated desc, created desc
