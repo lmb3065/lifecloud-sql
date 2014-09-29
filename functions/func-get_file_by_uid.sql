@@ -1,11 +1,12 @@
 
 -----------------------------------------------------------------------------
--- get_files_by_folder
+-- get_files_by_uid
 -----------------------------------------------------------------------------
 -- _source_mid int : Member requesting the file.
 -- _file_uid   int : File to retrieve
 -----------------------------------------------------------------------------
 -- 2014-09-27 dbrown Created
+-- 2014-09-28 dbrown Add ownerfname, ownerlname
 -----------------------------------------------------------------------------
 
 create or replace function get_file_by_uid
@@ -51,8 +52,11 @@ begin
                 fdecrypt(f.x_desc) as description,
                 f.content_type, f.isprofile, f.category,
                 fdecrypt(f.x_form_data) as form_data,
-                f.modified_by, f.updated, 1, 1
-            from files f
+                f.modified_by, f.updated, 
+                fdecrypt(m.x_fname) as ownerfname,
+                fdecrypt(m.x_lname) as ownerlname,
+                1, 1
+            from files f join members m on (f.mid = m.mid)
             where f.uid = _file_uid;
 
     return;
