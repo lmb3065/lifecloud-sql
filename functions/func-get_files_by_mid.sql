@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------
 -- 2014-09-27 dbrown Created
 -- 2014-09-28 dbrown TargetMID 0 returns caller's entire CID if authorized
+-- 2014-09-28 dbrown Add ownerfname, ownerlname
 -----------------------------------------------------------------------------
 
 create or replace function get_files_by_mid
@@ -37,8 +38,11 @@ begin
         select m.cid, m.userlevel into _target_cid, _source_userlevel
             from members m
             where m.mid = _source_mid;
-
-        if _source_userlevel > 2 then return; end if; -- Not allowed
+        if _source_userlevel > 2 then 
+            perform log_permissions_error( EVENT_AUTHERR_GETTING_FILE, result, 
+                    null, _source_mid, null, _target_mid );
+            return; 
+        end if;
 
         create temporary table files_out on commit drop as
             select f.uid, f.folder_uid, f.mid, f.item_uid, f.created,
@@ -46,8 +50,10 @@ begin
                     fdecrypt(f.x_desc) as description,
                     f.content_type, f.isprofile, f.category,
                     fdecrypt(f.x_form_data) as form_data,
-                    f.modified_by, f.updated
-                from files f
+                    f.modified_by, f.updated,
+                    fdecrypt(m.x_fname) as ownerfname,
+                    fdecrypt(m.x_lname) as ownerlname
+                from files f join members m on (f.mid = m.mid)
                 where f.mid in (
                     select m.mid from members m where m.cid = _target_cid
                 );
@@ -72,8 +78,10 @@ begin
                     fdecrypt(f.x_desc) as description,
                     f.content_type, f.isprofile, f.category,
                     fdecrypt(f.x_form_data) as form_data,
-                    f.modified_by, f.updated
-                from files f
+                    f.modified_by, f.updated,
+                    fdecrypt(m.x_fname) as ownerfname,
+                    fdecrypt(m.x_lname) as ownerlname
+                from files f join members m on (f.mid = m.mid)
                 where f.mid = _target_mid;
 
     end if;
@@ -95,12 +103,11 @@ begin
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isprofile,
             fo.category, fo.form_data, fo.modified_by, fo.updated,
+            fo.ownerfname, fo.ownerlname,
             _nrows, _npages
         from files_out fo
-        order by mid asc, updated desc, created desc
+        order by ownerfname asc, updated desc, created desc
         offset (_page * _pagesize) limit _pagesize;
-
-    return;
 
 end
 $$ language plpgsql;
