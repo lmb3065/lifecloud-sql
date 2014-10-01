@@ -6,6 +6,7 @@
 -- source mid must own the item or be owner/proxy
 -----------------------------------------------------------------------------
 -- 2014-09-28 dbrown: Created
+-- 2014-10-01 dbrown: Sort order changed
 -----------------------------------------------------------------------------
 
 create or replace function get_files_by_item
@@ -81,7 +82,7 @@ begin
             fo.ownerfname, fo.ownerlname,
             _nrows, _npages
         from files_out fo
-        order by updated desc, created desc
+        order by isprofile desc, ownerfname asc, updated desc, created desc
         offset (_page * _pagesize) limit _pagesize;
 
 end
