@@ -10,6 +10,7 @@
 --  2013-12-12 dbrown: added item_uid
 --  2013-12-20 dbrown: added updated
 --  2013-12-24 dbrown: added form_data, changed isForm to isProfile
+--  2014-09-28 dbrown: added ownerfname, ownerlname
 -- ---------------------------------------------------------------------------
 
 create or replace function get_forms (
@@ -39,8 +40,10 @@ begin
             fdecrypt(f.x_desc) as description,
             f.content_type, f.isprofile, f.category,
             fdecrypt(f.x_form_data) as form_data,
-            f.modified_by, f.updated
-        from files f
+            f.modified_by, f.updated, 
+            fdecrypt(m.x_fname) as ownerfname,
+            fdecrypt(m.x_lname) as ownerlname
+        from files f join members m on (f.mid = m.mid)
         where f.mid = _mid
           and (_formuid is null or _formuid = f.uid)
           and (_categuid is null or _categuid = f.category);
@@ -62,9 +65,10 @@ begin
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
             fo.filename, fo.description, fo.content_type, fo.isprofile,
             fo.category, fo.form_data, fo.modified_by, fo.updated,
+            fo.ownerfname, fo.ownerlname,
             _nrows, _npages
         from forms_out fo
-        order by created desc
+        order by ownerfname asc, updated desc, created desc
         limit _pagesize offset (_page * _pagesize);
 
 end

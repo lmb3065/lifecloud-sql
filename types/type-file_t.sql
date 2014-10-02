@@ -6,6 +6,7 @@
 --  2013-11-23 dbrown: created
 --  2013-12-12 dbrown: added item_uid
 --  2013-12-20 dbrown: added updated
+--  2014-09-28 dbrown: adder ownerlname, ownerfname
 -- ---------------------------------------------------------------------------
 
 create type file_t as (
@@ -23,6 +24,8 @@ create type file_t as (
     form_data    text,
     modified_by  int,
     updated      timestamp,
+    ownerfname   text,
+    ownerlname   text,
     nrows        int,
     npages       int
 

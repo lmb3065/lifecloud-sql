@@ -10,6 +10,7 @@
 --  2013-12-12 dbrown: created
 --  2013-12-17 dbrown: added column modified_by
 --  2014-05-27 dbrown: new column "reminders"
+--  2014-09-29 dbrown: reminders column now actually works
 -- ---------------------------------------------------------------------------
 
 create or replace function get_items(
@@ -68,14 +69,26 @@ begin
             fdecrypt(i.x_name) as item_name,
             fdecrypt(i.x_desc) as item_desc,
             i.created, i.updated, i.modified_by,
-            cast(count(*) as int) as reminders, 0 as nrows, 0 as npages
-        from items i left outer join reminders r on (r.item_uid = i.uid)
+            -1 as reminders, 0 as nrows, 0 as npages
+        from items i
         where (( _item_uid   is not null) and (i.uid = _item_uid ))
            or (( _folder_uid is not null) and (i.folder_uid = _folder_uid ))
            or (( _mid        is not null) and (i.mid = _mid ))
         group by
             i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
             item_name, item_desc, i.created, i.updated, i.modified_by;
+
+    declare
+        _curs cursor for select io.uid from items_out io;
+        _alertcount int;
+    begin
+        for _row in _curs loop
+            select count(*) into _alertcount from reminders r
+                 where item_uid = _row.uid;
+            update items_out io set reminders = _alertcount
+                where io.uid = _row.uid;
+        end loop;
+    end;
 
     -- Count results; if none, log exceptional reasons and exit
 
