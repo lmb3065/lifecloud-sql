@@ -11,6 +11,7 @@
 --  2013-12-17 dbrown: added column modified_by
 --  2014-05-27 dbrown: new column "reminders"
 --  2014-09-29 dbrown: reminders column now actually works
+--  2014-10-02 dbrown: add column ItemType
 -- ---------------------------------------------------------------------------
 
 create or replace function get_items(
@@ -29,6 +30,7 @@ create or replace function get_items(
     cid         int,
     folder_uid  int,
     app_uid     int,
+    itemtype    int,
     item_name   text,
     item_desc   text,
     created     timestamp,
@@ -65,7 +67,7 @@ begin
 
     create temporary table items_out on commit drop as
         select
-            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
+            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid, i.itemtype,
             fdecrypt(i.x_name) as item_name,
             fdecrypt(i.x_desc) as item_desc,
             i.created, i.updated, i.modified_by,
@@ -125,7 +127,7 @@ begin
 
     -- Output final results
     return query
-        select io.uid, io.mid, io.cid, io.folder_uid, io.app_uid,
+        select io.uid, io.mid, io.cid, io.folder_uid, io.app_uid, io.itemtype,
                 io.item_name, io.item_desc, io.created, io.updated, io.modified_by,
                 io.reminders, _nrows, _npages
         from items_out io
