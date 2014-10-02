@@ -79,6 +79,7 @@ done
 
 echo 8/9 Running Setup Functions
 ## psql emits a blank line, grep eats it
+psql -d lc -U pgsql -t -c 'select admin_create_itemtypes();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_categories();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_eventcodes();' | grep '.'
 psql -d lc -U pgsql -t -c 'select admin_create_retvals();' | grep '.'
