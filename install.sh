@@ -49,6 +49,7 @@ done
 
 echo 5/9 Installing Tables
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-pgpkeys.sql
+psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_itemtypes.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_categories.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_eventcodes.sql
 psql --dbname=lc --username=pgsql --quiet --file=$lcdir/tables/table-ref_retvals.sql

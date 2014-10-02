@@ -25,5 +25,6 @@ grant select on
     ref_defaultfolders,
     ref_eventcodes,
     ref_forms,
+    ref_itemtypes,
     ref_retvals
 to delphi;
