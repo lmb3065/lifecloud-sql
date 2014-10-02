@@ -12,14 +12,15 @@
 --  2014-05-27 dbrown: new column "reminders"
 --  2014-09-29 dbrown: reminders column now actually works
 --  2014-10-02 dbrown: add column ItemType
+--  2014-10-02 dbrown: add argument ItemType
 -- ---------------------------------------------------------------------------
 
 create or replace function get_items(
 
-    _item_uid       int default null,  -- \
-    _folder_uid     int default null,  --  > Search criteria
-    _mid            int default null,  -- /
-
+    _item_uid       int default null,  --  \
+    _folder_uid     int default null,  --   > Search criteria
+    _mid            int default null,  --  /
+    _itemtype       int default null,  -- ] Optional additional filter
     _pagesize       int     default null,  -- \  Output pagination
     _page           int     default 0      -- /     parameters
 
@@ -67,17 +68,18 @@ begin
 
     create temporary table items_out on commit drop as
         select
-            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid, i.itemtype,
+            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid, i.itemtype, 
             fdecrypt(i.x_name) as item_name,
             fdecrypt(i.x_desc) as item_desc,
             i.created, i.updated, i.modified_by,
             -1 as reminders, 0 as nrows, 0 as npages
         from items i
-        where (( _item_uid   is not null) and (i.uid = _item_uid ))
+        where ((( _item_uid   is not null) and (i.uid = _item_uid ))
            or (( _folder_uid is not null) and (i.folder_uid = _folder_uid ))
-           or (( _mid        is not null) and (i.mid = _mid ))
+           or (( _mid        is not null) and (i.mid = _mid )))
+           and (( _itemtype   is null) or (i.itemtype = _itemtype))
         group by
-            i.uid, i.mid, i.cid, i.folder_uid, i.app_uid,
+            i.uid, i.mid, i.cid, i.folder_uid, i.itemtype, i.app_uid,
             item_name, item_desc, i.created, i.updated, i.modified_by;
 
     declare
