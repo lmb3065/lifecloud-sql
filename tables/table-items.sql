@@ -6,6 +6,8 @@
 -- -------------------------------------------------------------------------
 --  2013-12-11 dbrown Created
 --  2013-12-17 dbrown Added column modified_by
+--  2014-10-02 dbrown Added column itemtype
+--              alter table Items add column itemtype int not null default 1
 -- -------------------------------------------------------------------------
 
 create table items
@@ -15,6 +17,7 @@ create table items
     cid         int         not null references Accounts(CID),
     folder_uid  int         not null references Folders(UID),
     app_uid     int,        -- optional reference to ref_apps(UID)
+    itemtype    int         not null default 1,  -- reference to ref_itemtypes(UID)
     x_name      bytea       not null,
     x_desc      bytea       not null,
     created     timestamp   not null default now(),
