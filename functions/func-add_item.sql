@@ -8,7 +8,7 @@
 --  2013-12-17 dbrown: fixed bug where source_mid would always own new Items
 --  2013-12-17 dbrown: added column modified_by
 --  2014-04-12 dbrown: bug fix (no declaration for RETVAL_ERR_EXCEPTION)
---  2014-10-02 dbrown: added argument/column 'itemtype'
+--  2014-10-02 dbrown: added argument 'itemtype'
 -- ---------------------------------------------------------------------------
 
 create or replace function add_item(
