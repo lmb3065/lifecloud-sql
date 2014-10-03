@@ -8,6 +8,7 @@
 --  2013-12-17 dbrown: fixed bug where source_mid would always own new Items
 --  2013-12-17 dbrown: added column modified_by
 --  2014-04-12 dbrown: bug fix (no declaration for RETVAL_ERR_EXCEPTION)
+--  2014-10-02 dbrown: added argument 'itemtype'
 -- ---------------------------------------------------------------------------
 
 create or replace function add_item(
@@ -16,7 +17,8 @@ create or replace function add_item(
     _folder_uid int,     -- Folder which will contain this Item
     _item_name text,             --  \  Attributes of
     _item_desc text default '',  --   >  the new file
-    _app_uid int default null    --  /
+    _app_uid int default null,    --  /
+    _itemtype int default 1     --- /
 
 ) returns int as $$
 
@@ -91,8 +93,8 @@ begin
     declare errno text; errmsg text; errdetail text;
     begin
 
-        INSERT INTO Items( mid, cid, folder_uid, app_uid, x_name, x_desc, modified_by )
-        VALUES ( target_mid, target_cid, _folder_uid, _app_uid,
+        INSERT INTO Items( mid, cid, folder_uid, app_uid, itemtype, x_name, x_desc, modified_by )
+        VALUES ( target_mid, target_cid, _folder_uid, _app_uid, _itemtype,
                     fencrypt(_item_name), fencrypt(_item_desc), source_mid );
         select last_value into newuid from items_uid_seq;
 
