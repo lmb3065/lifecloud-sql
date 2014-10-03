@@ -14,11 +14,14 @@ begin
 
     truncate table ref_itemtypes restart identity cascade;
     insert into ref_itemtypes (name) values
-        ('Generic Item'),
-        ('Physician'),
-        ('Pet'),
-        ('Vehicle');
-
+        ('item'),
+        ('physician'),
+        ('provider'),
+        ('auto'),
+        ('school'),
+        ('home'),
+        ('kitchen'),
+        ('pet');
     select count(*) from ref_itemtypes into nrows;
     return 'ItemTypes reference table loaded: '||nrows||' rows.';
 
