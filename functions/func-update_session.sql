@@ -10,6 +10,7 @@
      2009-08-26 lbrown : original (T-SQL)
      2013-08-29 dbrown : ported to PL/pgSQL
      2013-11-01 dbrown : eventcodes revision
+     2014-10-09 dbrown : fix eventcode 9501 -> 9053 'dev err updating session'
     ============================================================================= */
 
 create or replace function update_session(
@@ -58,7 +59,7 @@ begin
     else -- Unknown action code
     
         -- eventcode 9040 : error updating session
-        perform log_event( _cid, _mid, '9501', "unknown action '" || char || "'");
+        perform log_event( _cid, _mid, '9053', "unknown action '" || char || "'");
         select (-1, -1, -1) into n_ins, n_clos1, n_purg;
         
     end if;
