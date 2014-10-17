@@ -6,6 +6,7 @@
 -----------------------------------------------------------------------------
 -- 2014-04-12 dbrown : created
 -- 2014-04-12 dbrown : provided defaults for some arguments
+-- 2014-10-17 dbrown : If a similar alert exists, return it instead
 -----------------------------------------------------------------------------
 
 create or replace function add_alert(
@@ -23,6 +24,7 @@ create or replace function add_alert(
 declare
 
     newuid int;
+    existing_uid int;
     
     EVENT_OK_ADDED_ALERT        constant varchar := '1110';
     EVENT_DEVERR_ADDING_ALERT   constant varchar := '9110';
@@ -46,7 +48,19 @@ begin
         return RETVAL_ERR_ARG_INVALID;
     end if;
     
-    
+    -- Check for an existing reminder that looks like this one.
+    -- If we find one, return its UID instead
+
+    SELECT r.uid into existing_uid FROM Reminders r
+    WHERE r.mid = _mid
+      and r.event_name = _event_name
+      and r.event_date = _event_date
+      and r.advance_days = _advance_days
+      and r.recurrence = _recurrence;
+    if existing_uid > 0 then
+        return existing_uid;
+    end if;
+
     -- ADD REMINDER TO DATABASE
     
     declare errno text; errmsg text; errdetail text;
