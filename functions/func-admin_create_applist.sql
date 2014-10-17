@@ -17,6 +17,7 @@
 --  2014-09-26 dbrown: appMedical, appEducation URL changed
 --  2014-09-29 dbrown: appAutos URL changed
 --  2014-10-01 dbrown: URL changes
+--  2014-10-17 dbrown: Reminder / Review Reminders URLs changed
 -- -----------------------------------------------------------------------------
 
 create or replace function admin_create_applist() returns text as $$
@@ -68,8 +69,8 @@ begin
      ( 'comingSoon.jsp',    'Vacation',                     'vacation.gif'      ),
      ( 'comingSoon.jsp',    'Wallet Contents',              'wallet.gif'        ),
      ( 'comingSoon.jsp',    'Delphi VIM',                   'vim.gif'           ),
-     ( 'appReminders',      'Reminder',                     'reminder.gif'      ),
-     ( 'appReview.jsp',     'Review<br/>Reminders',         'reminders.gif'     );
+     ( 'app/Reminders.jsp', 'Reminder',                     'reminder.gif'      ),
+     ( 'app/Reminders2.jsp', 'Review<br/>Reminders',        'reminders.gif'     );
 
     select count(*) into nrows from ref_apps;
     return 'AppList reference table loaded: '||nrows||' rows.';
