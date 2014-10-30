@@ -11,6 +11,7 @@
 -- 2014-09-27 dbrown Created
 -- 2014-09-28 dbrown TargetMID 0 returns caller's entire CID if authorized
 -- 2014-09-28 dbrown Add ownerfname, ownerlname
+-- 2014-10-30 dbrown Remove names from sorting criteria
 -----------------------------------------------------------------------------
 
 create or replace function get_files_by_mid
@@ -106,7 +107,7 @@ begin
             fo.ownerfname, fo.ownerlname,
             _nrows, _npages
         from files_out fo
-        order by ownerfname asc, updated desc, created desc
+        order by updated desc, created desc
         offset (_page * _pagesize) limit _pagesize;
 
 end
