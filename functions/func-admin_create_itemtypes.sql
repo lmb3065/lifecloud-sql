@@ -4,6 +4,7 @@
 --  Runs once at installation to populate the ref_itemtypes reference table
 -- ---------------------------------------------------------------------------
 -- 2014-10-02 dbrown: Created
+-- 2014-10-31 dbrown: Add itemtypes 15--17
 
 create or replace function admin_create_itemtypes() returns text as $$
 
@@ -14,14 +15,26 @@ begin
 
     truncate table ref_itemtypes restart identity cascade;
     insert into ref_itemtypes (name) values
-        ('item'),
-        ('physician'),
-        ('provider'),
-        ('auto'),
-        ('school'),
-        ('home'),
-        ('kitchen'),
-        ('pet');
+        ('item'),                   -- 1
+        ('physician'),              -- 2
+        ('provider'),               -- 3
+        ('auto'),                   -- 4
+        ('school'),                 -- 5
+        ('home'),                   -- 6
+        ('kitchen'),                -- 7
+        ('pet'),                    -- 8
+        ('health tracking form'),   -- 9
+        ('medical facility stay'),  -- 10
+        ('medication/supplement'),  -- 11
+        ('pharmacy'),               -- 12
+        ('allergy'),                -- 13
+        ('health history'),         -- 14
+        ('reminder'),               -- 15
+        ('safety checklist'),       -- 16
+        ('items'),                  -- 17
+        ('reserved'),               -- 18
+        ('reserved'),               -- 19
+        ('vehicle');                -- 20
     select count(*) from ref_itemtypes into nrows;
     return 'ItemTypes reference table loaded: '||nrows||' rows.';
 

@@ -14,6 +14,7 @@
 -- 2014-04-12 dbrown: Added eventcodes for Adding, Deleting Reminders
 -- 2014-04-13 dbrown: Added eventcodes for Updating Reminders
 -- 2014-09-27 dbrown: Added 6086
+-- 2014-10-09 dbrown: Changed 9050 -> 9053 'dev err updating session'
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -159,7 +160,7 @@ begin
         ( '9033', 'error updating member' ),
         ( '9036', 'error getting member(s)' ),
         ( '9043', 'error updating password' ),
-        ( '9050', 'error updating session'  ),
+        ( '9053', 'error updating session'  ),
         ( '9070', 'error adding folder' ),
         ( '9073', 'error updating folder' ),
         ( '9077', 'error deleting folder' ),
