@@ -4,6 +4,7 @@
 --  Runs once at installation to populate the ref_itemtypes reference table
 -- ---------------------------------------------------------------------------
 -- 2014-10-02 dbrown: Created
+-- 2014-10-31 dbrown: Add itemtypes 15--17
 
 create or replace function admin_create_itemtypes() returns text as $$
 
@@ -28,9 +29,9 @@ begin
         ('pharmacy'),               -- 12
         ('allergy'),                -- 13
         ('health history'),         -- 14
-        ('reserved'),               -- 15
-        ('reserved'),               -- 16
-        ('reserved'),               -- 17
+        ('reminder'),               -- 15
+        ('safety checklist'),       -- 16
+        ('items'),                  -- 17
         ('reserved'),               -- 18
         ('reserved'),               -- 19
         ('vehicle')                 -- 20
