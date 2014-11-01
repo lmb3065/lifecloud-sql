@@ -34,7 +34,7 @@ begin
         ('items'),                  -- 17
         ('reserved'),               -- 18
         ('reserved'),               -- 19
-        ('vehicle')                 -- 20
+        ('vehicle');                -- 20
     select count(*) from ref_itemtypes into nrows;
     return 'ItemTypes reference table loaded: '||nrows||' rows.';
 
