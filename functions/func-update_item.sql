@@ -5,12 +5,14 @@
 -- ---------------------------------------------------------------------------
 --  2013-12-20 dbrown: created to update description field only
 --  2014-10-02 dbrown: added itemType argument
+--  2014-10-31 dbrown: add Name argument
 -- ---------------------------------------------------------------------------
 
 create or replace function update_item (
 
     source_mid     int,
     _item_uid       int,
+    _new_name       text,
     _new_desc       text,
     _new_itemtype   int
 
@@ -66,6 +68,7 @@ begin
 
         update Items set
             x_desc      = fencrypt(_new_desc),
+            x_name      = fencrypt(_new_name),
             ItemType    = _new_itemtype,
             modified_by = source_mid,
             updated     = now()
