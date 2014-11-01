@@ -8,12 +8,14 @@
 -- ---------------------------------------------------------------------------
 --  2013-12-20 dbrown: created to update description field only
 --  2013-12-24 dbrown: added ability to update x_form_data field
+--  2014-10-31 dbrown: Add ability to update x_name field
 -- ---------------------------------------------------------------------------
 
 create or replace function update_file (
 
     source_mid      int,     -- Member performing the update
     _file_uid       int,     -- File to be updated
+    _new_name       text    default null, -- New name, or NULL if no change
     _new_desc       text    default null, -- New description, or NULL if no change
     _new_form_data  text    default null  -- New formdata, or NULL if no change
 
@@ -44,7 +46,7 @@ begin
 
     -- Check arguments
 
-    if (_new_desc is null) and (_new_form_data is null) then
+    if (_new_name is null) and (_new_desc is null) and (_new_form_data is null) then
         event_out := EVENT_DEVERR_UPDATING_FILE;
         result := RETVAL_ERR_ARGUMENTS;
         perform log_event( null, source_mid, event_out, 'No new data supplied' );
@@ -76,6 +78,7 @@ begin
     begin
 
         update Files set
+            x_name      = coalesce(fencrypt(_new_name),      x_name),
             x_desc      = coalesce(fencrypt(_new_desc),      x_desc),
             x_form_data = coalesce(fencrypt(_new_form_data), x_form_data),
             modified_by = source_mid,
