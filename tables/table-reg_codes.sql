@@ -3,11 +3,12 @@
 --  table reg_codes
 -- -----------------------------------------------------------------------------
 -- 2014-12-30 dbrown: created
+-- 2015-01-07 dbrown: make 'code' column primary key
 -- -----------------------------------------------------------------------------
 
 create table reg_codes
 (
-    code            text    not null,
+    code            text    not null  primary key,
     maximum_uses    int     not null,
     code_uses       int     not null  default 0,
     description     text,
