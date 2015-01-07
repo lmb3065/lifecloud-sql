@@ -3,6 +3,7 @@
  -- ---------------------------------------------------------------------------
  --  2013-12-20 dbrown: added -15, -27 (items)
  --  2014-04-12 dbrown: added -16 (reminder)
+ --  2015-01-02 dbrown: add 17, -28 (registration codes)
  -- -----------------------------------------------------------------------------
 
  create or replace function admin_create_retvals() returns text as $$
@@ -23,6 +24,7 @@
         ( -14, 'File does not exist' ),
         ( -15, 'Item does not exist' ),
         ( -16, 'Reminder does not exist' ),
+        ( -17, 'Invalid registration code'),
 
         ( -20, 'Account exists with this e-mail address' ),
         ( -21, 'Member exists with this e-mail address' ),
@@ -32,6 +34,7 @@
         ( -25, 'Member already has this folder' ),
         ( -26, 'Folder already contains this file' ),
         ( -27, 'Folder already contains this item' ),
+        ( -28, 'Registration code already in use'),
 
         ( -80, 'Action not authorized' ),
 
