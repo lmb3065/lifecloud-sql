@@ -12,7 +12,8 @@ create or replace function get_regcode
     code_effective  timestamp,
     code_expires    timestamp,
     account_expires timestamp,
-    account_life    int    
+    account_life    int,
+    discount        int   
 ) as $$
 
 begin

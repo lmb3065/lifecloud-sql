@@ -1,6 +1,7 @@
 
 -- Adds a new registration code to the database.
 -- 2015-01-02 dbrown: create
+-- 2015-01-15 dbrown: add new column/field 'discount'
 
 create or replace function add_regcode
 (
@@ -10,6 +11,7 @@ create or replace function add_regcode
     _codeExp     timestamp,
     _acctExp     timestamp,
     _acctLife    int,
+    _discount    integer,
     _description text   default '',
     _uses        int    default 0
 ) returns int as $$
@@ -34,10 +36,10 @@ begin
 
         insert into reg_codes (
             code, maximum_uses, code_uses, description, code_effective,
-            code_expires, account_expires, account_life )
+            code_expires, account_expires, account_life, discount )
         values ( 
             _code, _maxuses, _uses, _description, _codeEff,
-            _codeExp, _acctExp, _acctLife);
+            _codeExp, _acctExp, _acctLife, _discount );
 
     exception when others then
 

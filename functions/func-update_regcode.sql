@@ -1,6 +1,7 @@
 
 -- Update an existing registration code.
 -- 2015-01-02 dbrown: create
+-- 2015-01-15 dbrown: add new column/field 'discount'
 
 create or replace function update_regcode
 (
@@ -11,7 +12,8 @@ create or replace function update_regcode
     _codeEffective timestamp,
     _codeExpires timestamp,
     _acctExpires timestamp,
-    _acctLife int
+    _acctLife int,
+    _discount int
 ) returns int as $$
 declare
 
@@ -40,7 +42,8 @@ begin
             code_effective = _codeEffective,
             code_expires = _codeExpires,
             account_expires = _acctExpires,
-            account_life = _acctLife
+            account_life = _acctLife,
+            discount = _discount
         where code = _code;
 
         _found = FOUND;
