@@ -4,6 +4,7 @@
 -- -----------------------------------------------------------------------------
 -- 2014-12-30 dbrown: created
 -- 2015-01-07 dbrown: make 'code' column primary key
+-- 2015-01-15 dbrown: add column discount (int)
 -- -----------------------------------------------------------------------------
 
 create table reg_codes
@@ -15,6 +16,7 @@ create table reg_codes
     code_effective  timestamp not null,
     code_expires    timestamp,
     account_expires timestamp,
-    account_life    int
+    account_life    int,
+    discount        int
 );
 alter table reg_codes owner to pgsql;
