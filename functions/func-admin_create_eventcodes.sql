@@ -16,6 +16,7 @@
 -- 2014-09-27 dbrown: Added 6086
 -- 2014-10-09 dbrown: Changed 9050 -> 9053 'dev err updating session'
 -- 2015-01-02 dbrown: Added x12x 'Registration Codes' events
+-- 2015-01-15 dbrown: Added 6126 'Auth Failure Getting Regcodes'
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -156,6 +157,7 @@ begin
         ( '6107', 'unauthorized attempt to delete item' ),
         ( '6113', 'unauthorized attempt to update reminder' ),
         ( '6117', 'unauthorized attempt to delete reminder' ),
+        ( '6126', 'unauthorized attempt to list registration codes'),
 
     -- 9000+ : Database/Developer errors
 
