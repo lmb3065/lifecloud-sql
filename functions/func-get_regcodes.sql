@@ -2,6 +2,7 @@
 -- Get ALL registration codes, with paging -- if MID is an Admin.
 -- 2015-01-15 dbrown : Create
 -- 2015-01-17 dbrown : Order output by code
+-- 2015-01-17 dbrown : Fix paging
 
 create or replace function get_regcodes
 (
@@ -61,7 +62,8 @@ begin
             rc.code_effective, rc.code_expires, rc.account_expires, 
             rc.account_life, rc.discount, _nrows, _npages
         from reg_codes rc
-        order by rc.code asc;
+        order by rc.code asc
+        offset (_page * _pagesize) limit _pagesize;
 
 end;
 
