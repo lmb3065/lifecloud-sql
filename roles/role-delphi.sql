@@ -11,6 +11,7 @@ grant all on
     folders,     folders_uid_seq,
     items,       items_uid_seq,
     member_apps,
+    reg_codes,
     members,     members_mid_seq,
     profilepics, profilepics_ppid_seq,
     reminders,   reminders_uid_seq,
