@@ -15,6 +15,8 @@
 -- 2014-04-13 dbrown: Added eventcodes for Updating Reminders
 -- 2014-09-27 dbrown: Added 6086
 -- 2014-10-09 dbrown: Changed 9050 -> 9053 'dev err updating session'
+-- 2015-01-02 dbrown: Added x12x 'Registration Codes' events
+-- 2015-01-15 dbrown: Added 6126 'Auth Failure Getting Regcodes'
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -37,6 +39,7 @@ begin
         -09-  Event
         -10-  Item
         -11-  Reminder
+        -12-  Registration Code
         ---0  Add/Create
         ---1  Add/Create by Account Owner
         ---2  Add/Create by Admin
@@ -112,6 +115,8 @@ begin
         ( '1117', 'reminder deleted' ),
         ( '1118', 'reminder deleted by account owner' ),
         ( '1119', 'reminder deleted by Admin' ),
+        ( '1120', 'registration code added'),
+        ( '1123', 'registration code updated'),
 
     -- 4000 - 4999 : User's Fault errors
 
@@ -131,6 +136,8 @@ begin
         ( '4100', 'user could not add item' ),
         ( '4103', 'user could not update item' ),
         ( '4107', 'user could not delete item' ),
+        ( '4120', 'user could not add registration code'),
+        ( '4123', 'user could not update registration code'),
 
     -- 6000+ Authorization (Permissions) Errors
 
@@ -150,6 +157,7 @@ begin
         ( '6107', 'unauthorized attempt to delete item' ),
         ( '6113', 'unauthorized attempt to update reminder' ),
         ( '6117', 'unauthorized attempt to delete reminder' ),
+        ( '6126', 'unauthorized attempt to list registration codes'),
 
     -- 9000+ : Database/Developer errors
 
@@ -175,7 +183,9 @@ begin
         ( '9110', 'error adding reminder' ),
         ( '9113', 'error updating reminder' ),
         ( '9117', 'error deleting reminder' ),
-
+        ( '9120', 'error adding registration code'),
+        ( '9123', 'error updating registration code'),
+        
         ( '9999', 'ASSERT failure');
 
     select count(*) into nrows from ref_eventcodes;
