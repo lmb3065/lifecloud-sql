@@ -10,3 +10,4 @@ create table pending_purchases
 );
 
 alter table pending_purchases owner to pgsql;
+grant all on pending_purchases to delphi;
