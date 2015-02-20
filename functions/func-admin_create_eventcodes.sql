@@ -17,6 +17,7 @@
 -- 2014-10-09 dbrown: Changed 9050 -> 9053 'dev err updating session'
 -- 2015-01-02 dbrown: Added x12x 'Registration Codes' events
 -- 2015-01-15 dbrown: Added 6126 'Auth Failure Getting Regcodes'
+-- 2015-02-19 dnrowm: Add 1133 'Pending-Purchase Overwritten'
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -40,6 +41,7 @@ begin
         -10-  Item
         -11-  Reminder
         -12-  Registration Code
+        -13-  Pending Purchase
         ---0  Add/Create
         ---1  Add/Create by Account Owner
         ---2  Add/Create by Admin
@@ -117,6 +119,7 @@ begin
         ( '1119', 'reminder deleted by Admin' ),
         ( '1120', 'registration code added'),
         ( '1123', 'registration code updated'),
+        ( '1133', 'pending purchase overwritten'),
 
     -- 4000 - 4999 : User's Fault errors
 
