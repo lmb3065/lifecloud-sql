@@ -22,6 +22,7 @@
 -- 2014-01-09 dbrown : fixed typo _maxlogins
 -- 2014-03-24 dbrown : new input fields alerttype, alertphone, alertemail
 -- 2014-08-09 dbrown : new members are now assigned the default app selection
+-- 2015-02-26 dbrown : Fixed string typos
 -------------------------------------------------------------------------------
 
 create or replace function add_member
@@ -110,7 +111,7 @@ begin
             AND lower(fdecrypt(x_lname)) = lower(_lname)
     ) then
         perform log_event( _cid, null, EVENT_USERERR_ADDING_MEMBER,
-                    ||_fname||' '||_mi||' '||_lname' is already in this account');
+                    _fname||' '||_mi||' '||_lname||' is already in this account');
         return RETVAL_ERR_MEMBER_EXISTS_NAME;
     end if;
 
