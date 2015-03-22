@@ -1,104 +1,81 @@
-/* func-insert_ipn.sql : FIXME
 
-CODE TO BE PORTED:
+--
+-- 2015-03-21 dbrown : Created (ported from MS=SQL)
+-- 
 
-CREATE PROCEDURE [dbo].[InsertIPN]
+create or replace function insert_ipn
+(
+    _business          varchar(50)  default NULL, 
+    _receiver_email    varchar(50)  default NULL,
+    _item_name         varchar(50)  default NULL,     
+    _item_number       varchar(50)  default NULL,     
+    _quantity          int          default NULL, 
+    _invoice           varchar(50)  default NULL,  
+    _custom            varchar(50)  default NULL,  
+    _memo              varchar(50)  default NULL, 
+    _tax               money        default NULL, 
+    _payment_status    varchar(50)  default NULL, 
+    _pending_reason    varchar(50)  default NULL, 
+    _reason_code       varchar(50)  default NULL, 
+    _payment_date      varchar(50)  default NULL, 
+    _txn_id            varchar(50)  default NULL,
+    _txn_type          varchar(50)  default NULL, 
+    _payment_type      varchar(50)  default NULL, 
+    _mc_gross          money        default NULL, 
+    _mc_fee            money        default NULL, 
+    _mc_currency       char(3)      default NULL, 
+    _settle_amount     money        default NULL,
+    _settle_currency   varchar(50)  default NULL, 
+    _exchange_rate     float        default NULL,  
+    _payment_gross     money        default NULL, 
+    _payment_fee       money        default NULL, 
+    _subscr_date       varchar(50)  default NULL, 
+    _subscr_effective  varchar(50)  default NULL, 
+    _period1           varchar(50)  default NULL, 
+    _period2           varchar(50)  default NULL, 
+    _period3           varchar(50)  default NULL, 
+    _amount1           money        default NULL, 
+    _amount2           money        default NULL, 
+    _amount3           money        default NULL,
+    _mc_amount1        money        default NULL, 
+    _mc_amount2        money        default NULL, 
+    _mc_amount3        money        default NULL, 
+    _recurring         char(1)      default NULL, 
+    _reattempt         char(1)      default NULL, 
+    _retry_at          varchar(50)  default NULL,
+    _recur_times       int          default NULL, 
+    _username          varchar(50)  default NULL, 
+    _password          varchar(50)  default NULL,  
+    _subscr_id         varchar(50)  default NULL, 
+    _first_name        varchar(50)  default NULL, 
+    _last_name         varchar(50)  default NULL,
+    _address_name      varchar(50)  default NULL, 
+    _address_street    varchar(50)  default NULL, 
+    _address_city      varchar(50)  default NULL, 
+    _address_state     varchar(50)  default NULL, 
+    _address_zip       varchar(50)  default NULL,
+    _address_country   varchar(50)  default NULL, 
+    _address_status    varchar(50)  default NULL, 
+    _payer_email       varchar(50)  default NULL, 
+    _payer_id          varchar(50)  default NULL, 
+    _payer_status      varchar(50)  default NULL,
+    _notify_version    varchar(8)   default NULL, 
+    _verify_sign       varchar(200) default NULL, 
+    _post_status       varchar(50)  default NULL, 
+    _post_response     varchar(50)  default NULL
+) returns int as $$
 
- * InsertIPN () 
- *
- * This procedure inserts a PayPal Instant Payment Notice.
- *
- * Returns  Meaning
- * -------  --------------------------------
- * Rowcount Number of rows inserted
- * Error    Status: 0=success
- * Identity IPN Unique ID
- *
- * Copyright (C) 2002 Hamzei Analytics
- * -----------------------------------------------------------
- * Modification History
- * Date       PI Comments
- * ---------- -- ---------------------------------------------
- * 2003-08-27 Original version by Cypress Productivity Systems
- * 2010-07-03 LB Added try..catch and begin..end transaction
+declare
 
- (
-        @business          varchar(50)  = NULL, 
-        @receiver_email    varchar(50)  = NULL,
-        @item_name         varchar(50)  = NULL,     
-        @item_number       varchar(50)  = NULL,     
-        @quantity          int          = NULL, 
-        @invoice           varchar(50)  = NULL,  
-        @custom            varchar(50)  = NULL,  
-        @memo              varchar(50)  = NULL, 
-        @tax               money        = NULL, 
-        @payment_status    varchar(50)  = NULL, 
-        @pending_reason    varchar(50)  = NULL, 
-        @reason_code       varchar(50)  = NULL, 
-        @payment_date      varchar(50)  = NULL, 
-        @txn_id            varchar(50)  = NULL,
-        @txn_type          varchar(50)  = NULL, 
-        @payment_type      varchar(50)  = NULL, 
-        @mc_gross          money        = NULL, 
-        @mc_fee            money        = NULL, 
-        @mc_currency       char(3)      = NULL, 
-        @settle_amount     money        = NULL,
-        @settle_currency   varchar(50)  = NULL, 
-        @exchange_rate     float        = NULL,  
-        @payment_gross     money        = NULL, 
-        @payment_fee       money        = NULL, 
-        @subscr_date       varchar(50)  = NULL, 
-        @subscr_effective  varchar(50)  = NULL, 
-        @period1           varchar(50)  = NULL, 
-        @period2           varchar(50)  = NULL, 
-        @period3           varchar(50)  = NULL, 
-        @amount1           money        = NULL, 
-        @amount2           money        = NULL, 
-        @amount3           money        = NULL,
-        @mc_amount1        money        = NULL, 
-        @mc_amount2        money        = NULL, 
-        @mc_amount3        money        = NULL, 
-        @recurring         char(1)      = NULL, 
-        @reattempt         char(1)      = NULL, 
-        @retry_at          varchar(50)  = NULL,
-        @recur_times       int          = NULL, 
-        @username          varchar(50)  = NULL, 
-        @password          varchar(50)  = NULL,  
-        @subscr_id         varchar(50)  = NULL, 
-        @first_name        varchar(50)  = NULL, 
-        @last_name         varchar(50)  = NULL,
-        @address_name      varchar(50)  = NULL, 
-        @address_street    varchar(50)  = NULL, 
-        @address_city      varchar(50)  = NULL, 
-        @address_state     varchar(50)  = NULL, 
-        @address_zip       varchar(50)  = NULL,
-        @address_country   varchar(50)  = NULL, 
-        @address_status    varchar(50)  = NULL, 
-        @payer_email       varchar(50)  = NULL, 
-        @payer_id          varchar(50)  = NULL, 
-        @payer_status      varchar(50)  = NULL,
-        @notify_version    varchar(8)   = NULL, 
-        @verify_sign       varchar(200) = NULL, 
-        @post_status       varchar(50)  = NULL, 
-        @post_response     varchar(50)  = NULL
-) AS
--- Status variables
-DECLARE @Rowcount int,
-        @Error    int,
-        @Identity int
-        
-    SET NOCOUNT ON
+    EVENT_DEVERR_ADDING_IPN constant char(4) = '9999'; -- FIXME
+    RETVAL_ERR_EXCEPTION int = -98;
 
-    SELECT
-        @Rowcount = 0,
-        @Error = 0,
-        @Identity = 0
-    
-    IF (LTRIM(RTRIM(@custom)) = '') SET @custom = NULL
+begin
 
-    BEGIN TRY
-        BEGIN TRANSACTION
-        INSERT IPN (
+    declare errno text; errmsg text; errdetail text;
+    begin -- 'Try'
+
+        insert into ipn (
             business,
             IPNReceived, 
             receiver_email,     
@@ -140,7 +117,7 @@ DECLARE @Rowcount int,
             retry_at,
             recur_times, 
             username, 
-            [password],  
+            password,  
             subscr_id, 
             first_name, 
             last_name,
@@ -158,86 +135,76 @@ DECLARE @Rowcount int,
             verify_sign, 
             post_status, 
             post_response
-        ) VALUES (
-            @business, 
-            GetDate(),
-            @receiver_email,     
-            @item_name,     
-            @item_number,     
-            @quantity, 
-            @invoice,  
-            @custom,  
-            @memo, 
-            @tax, 
-            @payment_status, 
-            @pending_reason, 
-            @reason_code, 
-            @payment_date, 
-            @txn_id,
-            @txn_type, 
-            @payment_type, 
-            @mc_gross, 
-            @mc_fee, 
-            @mc_currency, 
-            @settle_amount,
-            @settle_currency, 
-            @exchange_rate,  
-            @payment_gross, 
-            @payment_fee, 
-            @subscr_date, 
-            @subscr_effective, 
-            @period1, 
-            @period2, 
-            @period3, 
-            @amount1, 
-            @amount2, 
-            @amount3,
-            @mc_amount1, 
-            @mc_amount2, 
-            @mc_amount3, 
-            @recurring, 
-            @reattempt, 
-            @retry_at,
-            @recur_times, 
-            @username, 
-            @password,  
-            @subscr_id, 
-            @first_name, 
-            @last_name,
-            @address_name, 
-            @address_street, 
-            @address_city, 
-            @address_state, 
-            @address_zip,
-            @address_country, 
-            @address_status, 
-            @payer_email, 
-            @payer_id, 
-            @payer_status,
-            @notify_version, 
-            @verify_sign, 
-            @post_status, 
-            @post_response
-        )
-        SELECT @Rowcount = @@ROWCOUNT,
-               @Error    = @@ERROR,
-               @Identity = @@IDENTITY
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        SELECT @Error = ERROR_NUMBER()
-        IF (XACT_STATE()) = -1
-            ROLLBACK TRANSACTION
-        IF (XACT_STATE()) = 1
-            COMMIT TRANSACTION          
-    END CATCH
+        ) values (
+            _business,
+            cast( now() as timestamp ), 
+            _receiver_email,     
+            _item_name,     
+            _item_number,     
+            _quantity, 
+            _invoice,  
+            _custom,  
+            _memo, 
+            _tax, 
+            _payment_status, 
+            _pending_reason, 
+            _reason_code, 
+            _payment_date, 
+            _txn_id,
+            _txn_type, 
+            _payment_type, 
+            _mc_gross, 
+            _mc_fee, 
+            _mc_currency, 
+            _settle_amount,
+            _settle_currency, 
+            _exchange_rate,  
+            _payment_gross, 
+            _payment_fee, 
+            _subscr_date, 
+            _subscr_effective, 
+            _period1, 
+            _period2, 
+            _period3, 
+            _amount1, 
+            _amount2, 
+            _amount3,
+            _mc_amount1, 
+            _mc_amount2, 
+            _mc_amount3, 
+            _recurring, 
+            _reattempt, 
+            _retry_at,
+            _recur_times, 
+            _username, 
+            _password,  
+            _subscr_id, 
+            _first_name, 
+            _last_name,
+            _address_name, 
+            _address_street, 
+            _address_city, 
+            _address_state, 
+            _address_zip,
+            _address_country, 
+            _address_status, 
+            _payer_email, 
+            _payer_id, 
+            _payer_status,
+            _notify_version, 
+            _verify_sign, 
+            _post_status, 
+            _post_response
+        );
 
-    -- Other code here?
-    SELECT @Rowcount as 'Rowcount',
-           @Error    as 'Error',
-           @Identity as 'IPNUID'
-    RETURN
+    exception when others then
 
-GO
+            get stacked diagnostics errno=RETURNED_SQLSTATE, errmsg=MESSAGE_TEXT, errdetail=PG_EXCEPTION_DETAIL;
+            perform log_event(null, null, EVENT_DEVERR_ADDING_IPN, '['||errno||'] '||errmsg||' : '||errdetail );   
+            return RETVAL_ERR_EXCEPTION;
+    end;
 
-*/
+    return lastval(); 
+end;
+$$ language plpgsql;
+
