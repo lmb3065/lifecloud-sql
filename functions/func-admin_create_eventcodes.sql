@@ -42,6 +42,7 @@ begin
         -11-  Reminder
         -12-  Registration Code
         -13-  Pending Purchase
+        -14-  Internet Payment Notice (IPN)
         ---0  Add/Create
         ---1  Add/Create by Account Owner
         ---2  Add/Create by Admin
@@ -188,6 +189,7 @@ begin
         ( '9117', 'error deleting reminder' ),
         ( '9120', 'error adding registration code'),
         ( '9123', 'error updating registration code'),
+        ( '9140', 'error adding IPN' ),
         
         ( '9999', 'ASSERT failure');
 

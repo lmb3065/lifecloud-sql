@@ -67,7 +67,7 @@ create or replace function insert_ipn
 
 declare
 
-    EVENT_DEVERR_ADDING_IPN constant char(4) = '9999'; -- FIXME
+    EVENT_DEVERR_ADDING_IPN constant char(4) = '9140';
     RETVAL_ERR_EXCEPTION int = -98;
 
 begin
