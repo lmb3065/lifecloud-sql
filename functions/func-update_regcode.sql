@@ -2,6 +2,7 @@
 -- Update an existing registration code.
 -- 2015-01-02 dbrown: create
 -- 2015-01-15 dbrown: add new column/field 'discount'
+-- 2015-03-23 dbrown: add new column/field 'paypal_button_id'
 
 create or replace function update_regcode
 (
@@ -13,7 +14,8 @@ create or replace function update_regcode
     _codeExpires timestamp,
     _acctExpires timestamp,
     _acctLife int,
-    _discount int
+    _discount int,
+    _paypal_button_id varchar(16)
 ) returns int as $$
 declare
 
@@ -43,7 +45,8 @@ begin
             code_expires = _codeExpires,
             account_expires = _acctExpires,
             account_life = _acctLife,
-            discount = _discount
+            discount = _discount,
+            paypal_button_id = _paypal_button_id
         where code = _code;
 
         _found = FOUND;

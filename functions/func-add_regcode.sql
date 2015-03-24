@@ -2,18 +2,20 @@
 -- Adds a new registration code to the database.
 -- 2015-01-02 dbrown: create
 -- 2015-01-15 dbrown: add new column/field 'discount'
+-- 2015-03-23 dbrown: add new column/field 'paypal_button_id'
 
 create or replace function add_regcode
 (
-    _code        text,
-    _maxuses     int,
-    _codeEff     timestamp,
-    _codeExp     timestamp,
-    _acctExp     timestamp,
-    _acctLife    int,
-    _discount    integer,
-    _description text   default '',
-    _uses        int    default 0
+    _code               text,
+    _maxuses            int,
+    _codeEff            timestamp,
+    _codeExp            timestamp,
+    _acctExp            timestamp,
+    _acctLife           int,
+    _discount           integer,
+    _description        text        default '',
+    _uses               int         default 0,
+    _paypal_button_id   varchar(16) default ''
 ) returns int as $$
 declare
 
@@ -36,10 +38,10 @@ begin
 
         insert into reg_codes (
             code, maximum_uses, code_uses, description, code_effective,
-            code_expires, account_expires, account_life, discount )
+            code_expires, account_expires, account_life, discount, paypal_button_id )
         values ( 
             _code, _maxuses, _uses, _description, _codeEff,
-            _codeExp, _acctExp, _acctLife, _discount );
+            _codeExp, _acctExp, _acctLife, _discount, _paypal_button_id );
 
     exception when others then
 
