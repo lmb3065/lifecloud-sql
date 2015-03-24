@@ -34,3 +34,4 @@ First of all
      freeing up the database to be dropped and recreated.
 
 Once the code is in place, run install.sh.
+
