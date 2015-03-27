@@ -5,8 +5,10 @@ crypto/     Support and wrapper functions for the pgcrypto library
 documents/  Text and documentation  
 functions/  The bulk of the code. These populate the database with initial
             data, handle user transactions, and provide administrative tools
-roles/      database user definitions (currently only "delphi")  
+roles/      database user definitions (currently only "delphi")
+sqltools/   Not product code; tools for working with Postgres
 tables/     Database table definitions  
+tests/      Not product code; performance tests
 types/      Data type definitions, standardize interfaces across functions
             that return the same types of data 
 
