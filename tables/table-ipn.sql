@@ -3,6 +3,7 @@
    IPN : PayPal Instant Payment Records
    2015-02-21 dbrown Ported from MS-SQL
    2015-03-31 dbrown Changed lots of columns to type 'bytea' for encryption
+   2015-04-01 dbrown Fix permissions err (add permission for UID column)
 */
 
 create table IPN
@@ -71,4 +72,5 @@ create table IPN
 );
 
 alter table ipn owner to pgsql;
+grant all on ipn_uid_seq to delphi;
 grant all on ipn to delphi;
