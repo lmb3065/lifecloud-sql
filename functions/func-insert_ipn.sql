@@ -2,7 +2,7 @@
 --
 -- 2015-03-21 dbrown : Created (ported from MS=SQL)
 -- 2015-03-31 dbrown : Added encryption of PII fields
--- 
+-- 2015-04-18 dbrowm : Force incoming email addresses to lowecase
 
 create or replace function insert_ipn
 (
@@ -72,6 +72,9 @@ declare
     RETVAL_ERR_EXCEPTION int = -98;
 
 begin
+
+    _receiver_email := lower(_receiver_email);
+    _payer_email := lower(_payer_email);
 
     declare errno text; errmsg text; errdetail text;
     begin -- 'Try'
