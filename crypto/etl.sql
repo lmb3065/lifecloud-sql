@@ -17,8 +17,8 @@ begin
 
     raise notice 'Extracting Members';      perform ETL_11();
     raise notice 'Extracting Folders';      perform ETL_12();
-    -- raise notice 'Extracting Files';       perform ETL_13();
-    -- raise notice 'Extracting Items';       perform ETL_14();
+    raise notice 'Extracting Files';        perform ETL_13();
+    raise notice 'Extracting Items';        perform ETL_14();
     -- raise notice 'Extracting IPNs';        perform ETL_15();
 
     -- raise notice 'Inserting Members';     perform ETL_21();
