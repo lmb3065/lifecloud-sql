@@ -9,6 +9,8 @@ declare
     
 begin
 
+    DROP TABLE IF EXISTS _ct_Members;
+
     CREATE TABLE _ct_Members AS SELECT
         mid,
         cid,

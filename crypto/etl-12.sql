@@ -9,6 +9,8 @@ declare
 
 begin
 
+    DROP TABLE IF EXISTS _ct_Folders;
+
     CREATE TABLE _ct_Folders AS SELECT
         uid,
         mid,

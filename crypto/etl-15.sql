@@ -8,6 +8,8 @@ declare
     _nrows integer;
 begin
 
+    DROP TABLE IF EXISTS _ct_IPN;
+
     CREATE TABLE _ct_IPN AS SELECT
         UID,
         IPNReceived,

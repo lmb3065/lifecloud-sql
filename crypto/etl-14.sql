@@ -9,6 +9,8 @@ declare
 
 begin
 
+    DROP TABLE IF EXISTS _ct_Items;
+
     CREATE TABLE _ct_Items as SELECT
         uid,
         mid,
