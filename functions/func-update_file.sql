@@ -9,12 +9,14 @@
 --  2013-12-20 dbrown: created to update description field only
 --  2013-12-24 dbrown: added ability to update x_form_data field
 --  2014-10-31 dbrown: Add ability to update x_name field
+--  2015-05-13 dbrown: Add ability to update item_uid field
 -- ---------------------------------------------------------------------------
 
 create or replace function update_file (
 
     source_mid      int,     -- Member performing the update
     _file_uid       int,     -- File to be updated
+    _item_uid       int     default 0,
     _new_name       text    default null, -- New name, or NULL if no change
     _new_desc       text    default null, -- New description, or NULL if no change
     _new_form_data  text    default null  -- New formdata, or NULL if no change
@@ -53,6 +55,8 @@ begin
         return result;
     end if;
 
+    if _item_uid is null then _item_uid := 0; end if;
+
     -- Get owner of specified file
 
     select mid into target_mid from files where uid = _file_uid;
@@ -78,6 +82,7 @@ begin
     begin
 
         update Files set
+            item_uid    = _item_uid,
             x_name      = coalesce(fencrypt(_new_name),      x_name),
             x_desc      = coalesce(fencrypt(_new_desc),      x_desc),
             x_form_data = coalesce(fencrypt(_new_form_data), x_form_data),
