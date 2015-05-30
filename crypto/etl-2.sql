@@ -95,3 +95,30 @@ insert into pgpkeys (keyname, keydata) values ('kp','H4sBYFvwWpEBrx6gjbsoDZqKGUQ
  etl-2b. Update fencrypt and fdecrypt functions
 
 */
+
+
+-- fencrypt() : AES-256 encrypt
+
+create or replace function fencrypt(msg text) returns bytea as $$
+    declare
+        cipherkey bytea;
+    begin
+        select dearmor(keydata) into cipherkey from pgpkeys where keyname='a-pub';
+        return pgp_pub_encrypt( msg, cipherkey, 'cipher-algo=aes256' );
+    end;
+$$ language plpgsql;
+
+
+-- fdecrypt() : AES-256 decrypt
+
+create or replace function fdecrypt(msg bytea) returns text as $$
+    declare
+        cipherkey bytea;
+        keypass text;
+    begin
+        select dearmor(keydata) into cipherkey from pgpkeys where keyname='a-sec';
+        select keydata into keypass from pgpkeys where keyname='kp';
+        return pgp_pub_decrypt( msg, cipherkey, keypass );
+    end;
+$$ language plpgsql;
+
