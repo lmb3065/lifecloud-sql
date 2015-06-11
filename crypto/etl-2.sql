@@ -119,7 +119,7 @@ create or replace function fdecrypt(data bytea) returns text as $$
     begin
         select dearmor(keydata) into cipherkey from pgpkeys where keyname='a-sec';
         select keydata into keypass from pgpkeys where keyname='kp';
-        return pgp_pub_decrypt( msg, cipherkey, keypass );
+        return pgp_pub_decrypt( data, cipherkey, keypass );
     end;
 $$ language plpgsql;
 
