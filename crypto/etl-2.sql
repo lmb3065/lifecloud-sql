@@ -3,6 +3,7 @@
  etl-2a. Insert new keys and passphrase into 'pgpkeys' table
 
 */
+delete from pgpkeys where keyname in ('a-pub','a-sec','kp');
 
 insert into pgpkeys (keyname, keydata) values ('a-pub','-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1
@@ -111,7 +112,7 @@ $$ language plpgsql;
 
 -- fdecrypt() : AES-256 decrypt
 
-create or replace function fdecrypt(msg bytea) returns text as $$
+create or replace function fdecrypt(data bytea) returns text as $$
     declare
         cipherkey bytea;
         keypass text;
