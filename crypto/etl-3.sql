@@ -19,26 +19,51 @@
     truncate table ipn;
 
 create or replace function etl3() returns int as $$
+declare
+
+    folders_c cursor for select * from _ct_Folders;
+    items_c   cursor for select * from _ct_Items;
+
 begin
 
-    truncate table folders;
+    -----------------------------------------------------------------------------
+    raise notice 'Adding Folders';
 
-    declare c cursor for select * from _ct_Folders;
-    begin
-        for r in c loop
+    truncate table Folders;
 
-            insert into folders(
-                uid, mid, cid, x_name, x_desc,
-                app_uid, created, updated )
-            values (
-                r.uid, r.mid, r.cid, fencrypt(r.name), fencrypt(r.desc),
-                r.app_uid, r.created, r.updated );
+    for r in folders_c loop
+        insert into Folders (
+            uid, mid, cid, x_name, x_desc,
+            app_uid, created, updated )
+        values (
+            r.uid, r.mid, r.cid, fencrypt(r.name), fencrypt(r.desc),
+            r.app_uid, r.created, r.updated );
+    end loop;
 
-        end loop;
-    end;     
+    -----------------------------------------------------------------------------
+    raise notice 'Adding Items';
 
-    return 1;
+    truncate table Items;
 
+    for r in items_c loop
+        insert into Items (
+            uid, mid, cid, 
+            folder_uid, app_uid, itemtype,
+            x_name, x_desc, 
+            created, updated, modified_by )
+        values (
+            r.uid, r.mid, r.cid, 
+            r.folder_uid, r.app_uid, r.itemtype,
+            fencrypt(r.name), fencrypt(r.desc), 
+            r.created, r.updated, r.modified_by );
+    end loop;
+
+    -----------------------------------------------------------------------------
+    raise notice 'Adding Files'
+
+    
+
+    return 0;
 end;
 $$ language plpgsql;
 
