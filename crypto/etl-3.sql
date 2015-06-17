@@ -23,6 +23,7 @@ declare
 
     folders_c cursor for select * from _ct_Folders;
     items_c   cursor for select * from _ct_Items;
+    files_c   cursor for select * from _ct_Files;
 
 begin
 
@@ -30,7 +31,6 @@ begin
     raise notice 'Adding Folders';
 
     truncate table Folders;
-
     for r in folders_c loop
         insert into Folders (
             uid, mid, cid, x_name, x_desc,
@@ -44,7 +44,6 @@ begin
     raise notice 'Adding Items';
 
     truncate table Items;
-
     for r in items_c loop
         insert into Items (
             uid, mid, cid, 
@@ -59,9 +58,24 @@ begin
     end loop;
 
     -----------------------------------------------------------------------------
-    raise notice 'Adding Files'
+    raise notice 'Adding Files';
 
-    
+    truncate table Files;
+    for r in files_c loop
+        insert into Files (
+            uid, folder_uid, mid, item_uid,
+            x_name, x_desc,
+            content_type, isprofile, category,
+            x_form_data, modified_by, created, updated )
+        values (
+            r.uid, r.folder_uid, r.mid, r.item_uid,
+            fencrypt(r.name), fencrypt(r.desc),
+            r.content_type, r.isprofile, r.category,
+            fencrypt(r.form_data), r.modified_by, r.created, r.updated );
+    end loop;
+
+    -----------------------------------------------------------------------------
+
 
     return 0;
 end;
