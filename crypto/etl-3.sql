@@ -24,6 +24,7 @@ declare
     folders_c cursor for select * from _ct_Folders;
     items_c   cursor for select * from _ct_Items;
     files_c   cursor for select * from _ct_Files;
+    members_c cursor for select * from _ct_Members;
 
 begin
 
@@ -75,6 +76,31 @@ begin
     end loop;
 
     -----------------------------------------------------------------------------
+    raise notice 'Adding Members';
+
+    truncate table Members;
+    for r in members_c loop
+        insert into Members (
+            mid, cid, h_passwd, x_userid, x_email,
+            h_profilepic,
+            x_fname, x_mi, x_lname,
+            x_address1, x_address2, x_city,
+            x_state, x_postalcode, x_country,
+            x_phone,
+            alerttype, x_alertphone, x_alertemail,
+            status, pwstatus, userlevel, tooltips, 
+            isadmin, logincount, created, updated )
+        values (
+            r.mid, r.cid, r.h_passwd, fencrypt(r.userid), fencrypt(r.email),
+            r.h_profilepic,
+            fencrypt(r.fname), fencrypt(r.mi), fencrypt(r.lname),
+            fencrypt(r.address1), fencrypt(r.address2), fencrypt(r.city),
+            fencrypt(r.state), fencrypt(r.postalcode), fencrypt(r.country),
+            fencrypt(r.phone),
+            r.alerttype, fencrypt(r.alertphone), fencrypt(r.alertemail),
+            r.status, r.pwstatus, r.userlevel, r.tooltips,
+            r.isadmin, r.logincount, r.created, r.updated );
+    end loop;
 
 
     return 0;
