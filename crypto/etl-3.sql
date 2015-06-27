@@ -12,12 +12,6 @@
     alter table files       drop constraint files_folder_uid_fkey;
     alter table items       drop constraint items_folder_uid_fkey;
 
-    truncate table members;
-    truncate table folders;
-    truncate table files;
-    truncate table items;
-    truncate table ipn;
-
 create or replace function etl3() returns int as $$
 declare
 

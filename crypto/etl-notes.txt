@@ -3,3 +3,11 @@ etl-1. Extract data out into temp tables
 etl-2a. Insert new keys and passphrase into 'pgpkeys' table
 etl-2b. Update fencrypt and fdecrypt functions
 etl-3. Insert data back into main tables
+
+Copy ETL1.SQL into target.
+run etl1()
+
+Copy ETL2.SQL into target.  This contains immediate commands.
+
+Copy ETL3.SQL into target.  This contains immediate commands.
+run etl3()

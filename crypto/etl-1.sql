@@ -3,7 +3,10 @@
 -- -----------------------------------------------------------------------------
 -- 1.1. Decrypt/Extract Members
 -- -----------------------------------------------------------------------------
+create or replace function etl1() returns integer as $$
+begin
 
+    raise notice 'Extracting Members';
     DROP TABLE IF EXISTS _ct_Members;
 
     CREATE TABLE _ct_Members AS SELECT
@@ -42,6 +45,7 @@
 -- 1.2. Decrypt/Extract Folders
 -- -----------------------------------------------------------------------------
 
+    raise notice 'Extracting Folders';
     DROP TABLE IF EXISTS _ct_Folders;
 
     CREATE TABLE _ct_Folders AS SELECT
@@ -60,6 +64,7 @@
 -- -----------------------------------------------------------------------------
 -- 1.3. Decrypt/Extract Files
 -- -----------------------------------------------------------------------------
+    raise notice 'Extracting Files';
 
     DROP TABLE IF EXISTS _ct_Files;
 
@@ -86,6 +91,8 @@
 -- 1.4. Decrypt/Extract Items
 -- -----------------------------------------------------------------------------
 
+    raise notice 'Extracting Itemss';
+
     DROP TABLE IF EXISTS _ct_Items;
 
     CREATE TABLE _ct_Items as SELECT
@@ -108,6 +115,8 @@
 -- -----------------------------------------------------------------------------
 -- 1.5. Decrypt/Extract IPN
 -- -----------------------------------------------------------------------------
+
+    raise notice 'Extracting IPNs';
 
     DROP TABLE IF EXISTS _ct_IPN;
 
@@ -175,3 +184,6 @@
         HAStatus
     from IPN;
 
+    return 0;
+
+end; $$ language plpgsql;
