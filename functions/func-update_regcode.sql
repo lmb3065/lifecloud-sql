@@ -18,9 +18,9 @@ create or replace function update_regcode
     _acctLife int,
     _discount int,
     _paypal_button_id varchar(16),
-    _period1    char(1),
-    _period2    char(1),
-    _period3    char(1),
+    _period1    varchar(4),
+    _period2    varchar(4),
+    _period3    varchar(4),
     _amount1    varchar(10),
     _amount2    varchar(10),
     _amount3    varchar(10)

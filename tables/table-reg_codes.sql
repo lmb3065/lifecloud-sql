@@ -33,9 +33,9 @@ alter table reg_codes owner to pgsql;
 /* Latest change:
 
     alter table reg_codes
-        add period1 char(1),
-        add period2 char(1),
-        add period3 char(1),
+        add period1 varchar(4),
+        add period2 varchar(4),
+        add period3 varchar(4),
         add amount1 varchar(10),
         add amount2 varchar(10),
         add amount3 varchar(10); 

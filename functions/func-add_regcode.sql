@@ -18,9 +18,9 @@ create or replace function add_regcode
     _description        text        default '',
     _uses               int         default 0,
     _paypal_button_id   varchar(16) default '',
-    _period1            char(1)     default '',
-    _period2            char(1)     default '',
-    _period3            char(1)     default '',
+    _period1            varchar(4)  default '',
+    _period2            varchar(4)  default '',
+    _period3            varchar(4)  default '',
     _amount1            varchar(10) default '',
     _amount2            varchar(10) default '',
     _amount3            varchar(10) default ''
