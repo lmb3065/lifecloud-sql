@@ -6,6 +6,7 @@
 -- 2015-01-07 dbrown: make 'code' column primary key
 -- 2015-01-15 dbrown: add column discount (int)
 -- 2015-03-23 dbrown: add column paypal_button_id
+-- 2015-06-27 dbrown: add columns periodN, amountN
 -- -----------------------------------------------------------------------------
 
 create table reg_codes
@@ -19,6 +20,24 @@ create table reg_codes
     account_expires timestamp,
     account_life    int,
     discount        int,
-    paypal_button_id varchar(16)
+    paypal_button_id varchar(16),
+    period1         char(1),
+    period2         char(1),
+    period3         char(1),
+    amount1         varchar(10),
+    amount2         varchar(10),
+    amount3         varchar(10)
 );
 alter table reg_codes owner to pgsql;
+
+/* Latest change:
+
+    alter table reg_codes
+        add period1 char(1),
+        add period2 char(1),
+        add period3 char(1),
+        add amount1 varchar(10),
+        add amount2 varchar(10),
+        add amount3 varchar(10); 
+
+*/

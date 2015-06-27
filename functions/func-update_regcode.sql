@@ -3,6 +3,8 @@
 -- 2015-01-02 dbrown: create
 -- 2015-01-15 dbrown: add new column/field 'discount'
 -- 2015-03-23 dbrown: add new column/field 'paypal_button_id'
+-- 2015-06-27 dbrown: add paypal columns PeriodN / AmountN
+-- drop function update_regcode(text,text,int,int,timestamp,timestamp,timestamp,int,int,varchar);
 
 create or replace function update_regcode
 (
@@ -15,7 +17,13 @@ create or replace function update_regcode
     _acctExpires timestamp,
     _acctLife int,
     _discount int,
-    _paypal_button_id varchar(16)
+    _paypal_button_id varchar(16),
+    _period1    char(1),
+    _period2    char(1),
+    _period3    char(1),
+    _amount1    varchar(10),
+    _amount2    varchar(10),
+    _amount3    varchar(10)
 ) returns int as $$
 declare
 
@@ -46,7 +54,13 @@ begin
             account_expires = _acctExpires,
             account_life = _acctLife,
             discount = _discount,
-            paypal_button_id = _paypal_button_id
+            paypal_button_id = _paypal_button_id,
+            period1     = _period1,
+            period2     = _period2,
+            period3     = _period3,
+            amount1     = _amount1,
+            amount2     = _amount2,
+            amount3     = _amount3
         where code = _code;
 
         _found = FOUND;

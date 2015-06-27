@@ -3,6 +3,8 @@
 -- 2015-01-02 dbrown: create
 -- 2015-01-15 dbrown: add new column/field 'discount'
 -- 2015-03-23 dbrown: add new column/field 'paypal_button_id'
+-- 2015-06-27 dbrown: add new columns/fields periodN / amountN
+--     drop function add_regcode(text, int, timestamp, timestamp, timestamp, int, int, text, int, varchar);
 
 create or replace function add_regcode
 (
@@ -15,7 +17,13 @@ create or replace function add_regcode
     _discount           integer,
     _description        text        default '',
     _uses               int         default 0,
-    _paypal_button_id   varchar(16) default ''
+    _paypal_button_id   varchar(16) default '',
+    _period1            char(1)     default '',
+    _period2            char(1)     default '',
+    _period3            char(1)     default '',
+    _amount1            varchar(10) default '',
+    _amount2            varchar(10) default '',
+    _amount3            varchar(10) default ''
 ) returns int as $$
 declare
 
@@ -38,10 +46,12 @@ begin
 
         insert into reg_codes (
             code, maximum_uses, code_uses, description, code_effective,
-            code_expires, account_expires, account_life, discount, paypal_button_id )
+            code_expires, account_expires, account_life, discount, paypal_button_id,
+            period1, period2, period3, amount1, amount2, amount3 )
         values ( 
             _code, _maxuses, _uses, _description, _codeEff,
-            _codeExp, _acctExp, _acctLife, _discount, _paypal_button_id );
+            _codeExp, _acctExp, _acctLife, _discount, _paypal_button_id,
+            _period1, _period2, _period3, _amount1, _amount2, _amount3 );
 
     exception when others then
 
