@@ -19,7 +19,8 @@
 -- 2013-11-06 dbrown: All new return values; replaced magic numbers with constants;
 --               Removed special case "if target is owner, source can be only self or admin"
 -- 2013-11-12 dbrown: Ensure test types and orders conform to documentation; New logic
--- 2013-11-16 dbrown: Correctet RETVAL_ERR_NOT_ALLOWED to 80
+-- 2013-11-16 dbrown: Corrected RETVAL_ERR_NOT_ALLOWED to -80
+-- 2015-04-23 dbrown: Output more information on failures
 -------------------------------------------------------------------------------------------------
 
 create or replace function member_can_update_member(
@@ -86,8 +87,9 @@ begin
     if (source_mid = target_mid) then
         if (source_ulevel >= ULEVEL_VIEWER) then
             -- Viewers (and beyond) are not allowed that
-            return query SELECT RETVAL_ERR_NOT_ALLOWED, nil, nil, nil, nil, nil, nil;
-            return;
+            return query SELECT RETVAL_ERR_NOT_ALLOWED,
+                source_cid, source_ulevel, source_isadmin,
+                source_cid, source_ulevel, source_isadmin;
         else -- Everyone else is OK
             return query SELECT RETVAL_SUCCESS,
                 source_cid, source_ulevel, source_isadmin,
@@ -106,7 +108,9 @@ begin
 
     -- Check for: [Target-Member] doesn't exist -> NO
     if (target_cid is null) then
-        return query select RETVAL_ERR_TARGET_NOTFOUND, nil, nil, nil, nil, nil, nil;
+        return query select RETVAL_ERR_TARGET_NOTFOUND,
+                source_cid, source_ulevel, source_isadmin,
+                target_cid, target_ulevel, target_isadmin;
         return;
     end if;
 

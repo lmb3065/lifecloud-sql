@@ -4,6 +4,8 @@
 -- 2015-01-17 dbrown : Order output by code
 -- 2015-01-17 dbrown : Fix paging
 -- 2015-03-23 dbrown : Add column 'paypal_button_id'
+-- 2015-06-27 dbrown : Add paypal columns periodN/amountN
+--  drop function get_regcodes(int, int, int);
 
 create or replace function get_regcodes
 (
@@ -23,6 +25,12 @@ returns table
     account_life     int,
     discount         int,
     paypal_button_id varchar(16),
+    period1           varchar(4),
+    period2           varchar(4),
+    period3           varchar(4),
+    amount1           varchar(10),
+    amount2           varchar(10),
+    amount3           varchar(10),
     nrows            int,
     npages           int
 ) as $$
@@ -62,7 +70,10 @@ begin
     return query
         select rc.code, rc.maximum_uses, rc.code_uses, rc.description,
             rc.code_effective, rc.code_expires, rc.account_expires, 
-            rc.account_life, rc.discount, rc.paypal_button_id, _nrows, _npages
+            rc.account_life, rc.discount, rc.paypal_button_id, 
+            rc.period1, rc.period2, rc.period3,
+            rc.amount1, rc.amount2, rc.amount3,
+            _nrows, _npages
         from reg_codes rc
         order by rc.code asc
         offset (_page * _pagesize) limit _pagesize;
