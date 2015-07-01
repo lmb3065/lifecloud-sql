@@ -41,7 +41,7 @@ create or replace function add_member
     _city         varchar(64)   default '',
     _state        char(2)       default '',
     _postalcode   varchar(16)   default '',
-    _country      char(2)       default '',
+    _country      char(2)       default 'US',
     _phone        varchar(20)   default '',
 
     _maxlogins    int  default 32767,
