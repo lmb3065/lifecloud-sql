@@ -12,6 +12,7 @@ declare
     ipn_c     cursor for select * from _ct_IPN;
     events_c  cursor for select * from _ct_Events;
     defaultfolders_c cursor for select * from _ct_DefaultFolders;
+    sessions_c cursor for select * from _ct_Sessions;
 
 begin
 
@@ -125,6 +126,13 @@ begin
         );
     end loop;
 
+    -----------------------------------------------------------------------------
+    raise notice 'Re-Encrypting Session IPs';
+
+    for r in sessions_c loop
+        update Sessions set x_ipaddr = fencrypt(r.ipaddr)
+        where Sessions.sid = r.sid;
+    end loop;
 
     return 0;
 end;

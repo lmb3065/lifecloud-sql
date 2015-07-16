@@ -119,7 +119,7 @@ begin
     from Events;
 
 -- =============================================================================
--- 1.6. Decrypt/Extract DefaultFolders
+-- 1.7. Decrypt/Extract DefaultFolders
 -- =============================================================================
     raise notice 'Decrypting DefaultFolders';
 
@@ -128,6 +128,15 @@ begin
         fdecrypt(x_desc) as desc
     from ref_defaultfolders;
 
+-- =============================================================================
+-- 1.8. Decrypt/Extract Sessions
+-- =============================================================================
+    raise notice 'Decrypting Session IPs';
+
+    create table _ct_Sessions as select
+        sid,
+        fdecrypt(x_ipaddr) as ipaddr
+    from Sessions;
 
     return 0;
 
