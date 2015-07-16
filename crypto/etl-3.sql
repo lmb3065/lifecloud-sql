@@ -11,6 +11,7 @@ declare
     members_c cursor for select * from _ct_Members;
     ipn_c     cursor for select * from _ct_IPN;
     events_c  cursor for select * from _ct_Events;
+    defaultfolders_c cursor for select * from _ct_DefaultFolders;
 
 begin
 
@@ -111,8 +112,19 @@ begin
         update events set x_data = fencrypt(r.data)
         where events.eid = r.eid;
     end loop;
-    
+
     -----------------------------------------------------------------------------
+    raise notice 'Re-Encrypting DefaultFolders';
+
+    truncate table ref_defaultfolders;
+    for r in defaultfolders_c loop
+        insert into ref_defaultfolders
+        values ( 
+            fencrypt(r.name),
+            fencrypt(r.desc)
+        );
+    end loop;
+
 
     return 0;
 end;

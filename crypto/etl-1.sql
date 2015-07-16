@@ -3,11 +3,20 @@
 create or replace function etl1() returns integer as $$
 begin
 
+-- Drop any existing tamp tables
+    DROP TABLE IF EXISTS _ct_Members;
+    DROP TABLE IF EXISTS _ct_Folders;
+    DROP TABLE IF EXISTS _ct_Files;
+    DROP TABLE IF EXISTS _ct_Items;
+    DROP TABLE IF EXISTS _ct_IPN;
+    DROP TABLE IF EXISTS _ct_Events;
+    DROP TABLE IF EXISTS _ct_DefaultFolders;
+    raise notice '-------------------- Ignore all errors above!';
+
 -- =============================================================================
 -- 1.1. Decrypt/Extract Members
 -- -----------------------------------------------------------------------------
     raise notice 'Decrypting Members';
-    DROP TABLE IF EXISTS _ct_Members;
 
     CREATE TABLE _ct_Members AS SELECT
         mid,
@@ -31,7 +40,6 @@ begin
 -- 1.2. Decrypt/Extract Folders
 -- -----------------------------------------------------------------------------
     raise notice 'Decrypting Folders';
-    DROP TABLE IF EXISTS _ct_Folders;
 
     CREATE TABLE _ct_Folders AS SELECT
         uid,
@@ -43,7 +51,6 @@ begin
 -- 1.3. Decrypt/Extract Files
 -- -----------------------------------------------------------------------------
     raise notice 'Decrypting Files';
-    DROP TABLE IF EXISTS _ct_Files;
 
     CREATE TABLE _ct_Files AS SELECT
         uid,
@@ -56,7 +63,6 @@ begin
 -- 1.4. Decrypt/Extract Items
 -- -----------------------------------------------------------------------------
     raise notice 'Decrypting Items';
-    DROP TABLE IF EXISTS _ct_Items;
 
     CREATE TABLE _ct_Items as SELECT
         uid,
@@ -68,7 +74,6 @@ begin
 -- 1.5. Decrypt/Extract IPN
 -- -----------------------------------------------------------------------------
     raise notice 'Decrypting IPNs';
-    DROP TABLE IF EXISTS _ct_IPN;
 
     CREATE TABLE _ct_IPN AS SELECT
         UID,
@@ -107,12 +112,21 @@ begin
 -- 1.6. Decrypt/Extract Events
 -- =============================================================================
     raise notice 'Decrypting Events';
-    DROP TABLE IF EXISTS _ct_Events;
 
     CREATE TABLE _ct_Events AS SELECT
         eid,
         fdecrypt(x_data) as data
     from Events;
+
+-- =============================================================================
+-- 1.6. Decrypt/Extract DefaultFolders
+-- =============================================================================
+    raise notice 'Decrypting DefaultFolders';
+
+    CREATE TABLE _ct_DefaultFolders AS SELECT
+        fdecrypt(x_name) as name,
+        fdecrypt(x_desc) as desc
+    from ref_defaultfolders;
 
 
     return 0;
