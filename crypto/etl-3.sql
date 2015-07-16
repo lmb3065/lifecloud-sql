@@ -10,6 +10,7 @@ declare
     files_c   cursor for select * from _ct_Files;
     members_c cursor for select * from _ct_Members;
     ipn_c     cursor for select * from _ct_IPN;
+    events_c  cursor for select * from _ct_Events;
 
 begin
 
@@ -103,6 +104,14 @@ begin
         where IPN.uid = r.uid;
     end loop;
 
+    -----------------------------------------------------------------------------
+    raise notice 'Re-Encrypting Events';
+
+    for r in events_c loop
+        update events set x_data = fencrypt(r.data)
+        where events.eid = r.eid;
+    end loop;
+    
     -----------------------------------------------------------------------------
 
     return 0;

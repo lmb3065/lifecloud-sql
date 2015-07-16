@@ -103,6 +103,18 @@ begin
         fdecrypt(x_payer_status)    as payer_status
     from IPN;
 
+-- =============================================================================
+-- 1.6. Decrypt/Extract Events
+-- =============================================================================
+    raise notice 'Decrypting Events';
+    DROP TABLE IF EXISTS _ct_Events;
+
+    CREATE TABLE _ct_Events AS SELECT
+        eid,
+        fdecrypt(x_data) as data
+    from Events;
+
+
     return 0;
 
 end; $$ language plpgsql;
