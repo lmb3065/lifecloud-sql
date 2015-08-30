@@ -5,8 +5,7 @@
 create or replace function find_files(
 
    _target_mid int default null,
-   _namesearchstr text default null,
-   _descsearchstr text default null,
+   _searchstr text default null,
    _pagesize int default null,
    _page int default 0
 
@@ -17,7 +16,7 @@ declare
 
 begin
 
-    if (_namesearchstr is null) and (_descsearchstr is null) then
+    if (_searchstr is null) then
         return;
     end if;
 
@@ -32,8 +31,8 @@ begin
         fdecrypt(m.x_lname) as ownerlname
     from files f join members m on (f.mid = m.mid)
     where ( _target_mid is null or _target_mid = m.mid)
-      and (_namesearchstr is null or (fdecrypt(f.x_name) ilike '%' || _namesearchstr || '%'))
-      and (_descsearchstr is null or (fdecrypt(f.x_desc)  ilike '%' || _descsearchstr || '%'));
+      and ((_searchstr is null or (fdecrypt(f.x_name) ilike '%' || _searchstr || '%'))
+      or (_searchstr is null or (fdecrypt(f.x_desc)  ilike '%' || _searchstr || '%')));
 
 
     select count(*) into _nrows from files_out;
@@ -45,7 +44,6 @@ begin
         _npages := 1;
     end if;
 
-    -- Output final results
 
     return query
         select fo.uid, fo.folder_uid, fo.mid, fo.item_uid, fo.created,
