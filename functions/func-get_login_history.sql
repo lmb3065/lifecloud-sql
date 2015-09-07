@@ -1,7 +1,10 @@
 
+ -- Get Login History
+ -- 2015-09-07 dbrown : Fixed function to work correctly
+
 create or replace function get_login_history(
 
-    _my_mid         int,
+    _source_mid     int,
     _target_mid     int,
     _from           timestamp   default now() - interval '7 days',
     _to             timestamp   default now(),
@@ -29,36 +32,56 @@ declare
     _nrows int;
     _npages int;
     _result int;
+    _scid int;
     _sisadmin int;
+    _sulevel int;
 
 begin
 
     if (_from is null) then _from := now() - interval '7 days'; end if;
     if (_to   is null) then _to   := now();                     end if;
 
-    if (_target_mid = 0) then
-        select isadmin into _sisadmin from members m where m.mid = _my_mid;
-        if (_sisadmin <> 1) then
+    if (_target_mid = 0) then -- Special Target 0
+
+        select m.cid, m.userlevel, m.isadmin into _scid, _sulevel, _sisadmin
+            from members m where m.mid = _source_mid;
+
+        if (_sisadmin = 1) then -- Everyone
+
+            create temporary table events_out on commit drop as
+                select e.eid, e.dt, e.code, re.description,
+                    cast(fdecrypt(e.x_data) as varchar) as event,
+                    e.cid, e.mid, 0 as nrows, 0 as npages
+                from events e left outer join ref_eventcodes re on (e.code = re.code)
+                where (e.dt between _from and _to)
+                  and (e.code in ('1000','1001'));
+
+        elsif (_sulevel <= 2) then -- Everyone in same CID
+
+            create temporary table events_out on commit drop as
+                select e.eid, e.dt, e.code, re.description,
+                    cast(fdecrypt(e.x_data) as varchar) as event,
+                    e.cid, e.mid, 0 as nrows, 0 as npages
+                from events e left outer join ref_eventcodes re on (e.code = re.code)
+                where (e.dt between _from and _to)
+                  and (e.code in ('1000','1001'))
+                  and (e.cid = _scid);
+
+        else -- No one else can call Special target 0
+
             perform log_permissions_error( EVENT_AUTHERR_GETTING_EVENT, _result, 
-                null, _my_mid, null, _target_mid );
+                null, _source_mid, null, _target_mid );
             return;
+
         end if;
 
-        create temporary table events_out on commit drop as
-            select e.eid, e.dt, e.code, re.description,
-                cast(fdecrypt(e.x_data) as varchar) as event,
-                e.cid, e.mid, 0 as nrows, 0 as npages
-            from events e left outer join ref_eventcodes re on (e.code = re.code)
-            where (e.dt between _from and _to)
-              and (e.code in ('1000','1001'));
-
-    else
+    else -- Standard targeted query
 
         select allowed, sisadmin into _result, _sisadmin
-            from member_can_view_member(_my_mid, _target_mid);
-        if (result < 1) then
+            from member_can_view_member(_source_mid, _target_mid);
+        if (_result < 1) then
             perform log_permissions_error( EVENT_AUTHERR_GETTING_EVENT, _result, 
-                null, _my_mid, null, _target_mid );
+                null, _source_mid, null, _target_mid );
             return;
         end if;
 
