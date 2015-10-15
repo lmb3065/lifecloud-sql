@@ -22,16 +22,16 @@ create table reg_codes
     account_life    int,
     discount        int,
     paypal_button_id_1 varchar(16),
-    period1_1       char(1),
-    period2_1       char(1),
-    period3_1       char(1),
+    period1_1       varchar(4),
+    period2_1       varchar(4),
+    period3_1       varchar(4),
     amount1_1       varchar(10),
     amount2_1       varchar(10),
     amount3_1       varchar(10),
     paypal_button_id_2 varchar(16),
-    period1_2       char(1),
-    period2_2       char(1),
-    period3_2       char(1),
+    period1_2       varchar(4),
+    period2_2       varchar(4),
+    period3_2       varchar(4),
     amount1_2       varchar(10),
     amount2_2       varchar(10),
     amount3_2       varchar(10)
@@ -49,9 +49,9 @@ alter table reg_codes owner to pgsql;
     alter table reg_codes rename amount2            to amount2_1;
     alter table reg_codes rename amount3            to amount3_1;
     alter table reg_codes add                          paypal_button_id_2   varchar(16);
-    alter table reg_codes add                          period1_2            char(1);
-    alter table reg_codes add                          period2_2            char(1);
-    alter table reg_codes add                          period3_2            char(1);
+    alter table reg_codes add                          period1_2            varchar(4);
+    alter table reg_codes add                          period2_2            varchar(4);
+    alter table reg_codes add                          period3_2            varchar(4);
     alter table reg_codes add                          amount1_2            varchar(10);
     alter table reg_codes add                          amount2_2            varchar(10);
     alter table reg_codes add                          amount3_2            varchar(10);
