@@ -27,7 +27,7 @@ create table reg_codes
     period3_1       char(1),
     amount1_1       varchar(10),
     amount2_1       varchar(10),
-    amount3_1       varchar(10)
+    amount3_1       varchar(10),
     paypal_button_id_2 varchar(16),
     period1_2       char(1),
     period2_2       char(1),
