@@ -49,8 +49,15 @@ begin
         ('babysitter'),             -- 32
         ('caregiver'),              -- 33
         ('carpool'),                -- 34
-        ('subscription');           -- 35
+        ('subscription'),           -- 35
+        ('gift'),                   -- 36
+        ('client'),                 -- 37
+        ('contact'),                -- 38
+        ('document'),               -- 39
+        ('service');                -- 40
+
     select count(*) from ref_itemtypes into nrows;
+    
     return 'ItemTypes reference table loaded: '||nrows||' rows.';
 
 end
