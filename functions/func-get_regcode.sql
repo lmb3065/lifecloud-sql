@@ -5,6 +5,7 @@
 --              drop function get_regcode(text);
 -- 2015-10-14 dbrown: Add 2nd group of Paypal fields
 
+-- drop function get_regcode(text);
 create or replace function get_regcode
 (
     _code text
@@ -24,7 +25,7 @@ create or replace function get_regcode
     period3_1           varchar(4),
     amount1_1           varchar(10),
     amount2_1           varchar(10),
-    amount3_1           varchar(10)
+    amount3_1           varchar(10),
     paypal_button_id_2  varchar(16),
     period1_2           varchar(4),
     period2_2           varchar(4),
