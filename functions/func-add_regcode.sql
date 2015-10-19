@@ -6,6 +6,7 @@
 -- 2015-06-27 dbrown: add new columns/fields periodN / amountN
 -- 2015-10-24 dbrown: add new columns/fields for 2nd Paypal button
 
+-- drop function add_regcode(text,int,timestamp,timestamp,timestamp,int,int,text,int,varchar,varchar,varchar,varchar,varchar,varchar,varchar)
 create or replace function add_regcode
 (
     _code               text,
@@ -55,7 +56,7 @@ begin
             code, maximum_uses, code_uses, description, code_effective,
             code_expires, account_expires, account_life, discount, 
             paypal_button_id_1, period1_1, period2_1, period3_1, amount1_1, amount2_1, amount3_1,
-            paypal_button_id_2, period1_2, period2_2, period3_2, amount1_2, amount2_2, amount3_2, )
+            paypal_button_id_2, period1_2, period2_2, period3_2, amount1_2, amount2_2, amount3_2 )
         values ( 
             _code, _maxuses, _uses, _description, _codeEff,
             _codeExp, _acctExp, _acctLife, _discount, 

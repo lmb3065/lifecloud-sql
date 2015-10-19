@@ -7,6 +7,7 @@
 -- 2015-06-27 dbrown : Add paypal columns periodN/amountN
 -- 2015-10-15 dbrown : Add 2nd paypal button columns
 
+-- drop function get_regcodes(int,int,int);
 create or replace function get_regcodes
 (
     _mid        int,
