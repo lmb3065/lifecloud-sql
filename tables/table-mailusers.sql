@@ -8,6 +8,7 @@
 -- --------------------------------------------------------------------------
 create table mailusers
 (
+    uid   int not null,
     x_un  bytea not null,
     x_pw  bytea not null
 );
