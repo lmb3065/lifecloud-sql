@@ -20,6 +20,7 @@
 -- 2014-01-03 dbrown Updated "status" documentation
 -- 2014-04-08 dbrown added alertCalendar
 -- 2014-05-02 dbrown set alertCalendar default 0
+-- 2016-01-27 dbrown Add column payment_type
 -- ----------------------------------------------------------------------------------------------
 
 create table Accounts
@@ -30,6 +31,7 @@ create table Accounts
     quota         bigint      not null,
     referrer      varchar(64),
     alertCalendar int         not null default 0,
+    payment_type  varchar(16),
     created       timestamp   default now(),
     updated       timestamp   default now(),
     expires       timestamp   default current_date + interval '1 year'
