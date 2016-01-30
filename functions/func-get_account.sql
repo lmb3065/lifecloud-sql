@@ -8,6 +8,7 @@
 -- 2013-11-01 dbrown: revised event code, add error logging
 -- 2013-11-11 dbrown: emphasized SQL, raises warning on missing args
 -- 2013-11-14 dbrown: organization, constants, more info in event logs
+-- 2016-01-29 dbrown: Add field payment_type
 -- ----------------------------------------------------------------------------------------------
 
 create or replace function get_account(
@@ -15,7 +16,7 @@ create or replace function get_account(
     _cid    int          default 0, -- you may search by either of these
     _email  varchar(64)  default ''  -- fields, leave the other NULL
 
-) returns account_ext_t as $$ -- see /types/account_ext_t.pgsql
+) returns account_ext_t as $$
 
 declare
     EVENT_USERERR_GETTING_ACCOUNT   constant char(4) := '4026';
@@ -51,8 +52,8 @@ begin
 
     SELECT count(*) INTO nmembers FROM Members WHERE cid = _cid;
 
-    SELECT a.cid, a.status, a.quota, a.referrer, a.created, a.updated,
-            a.expires, nmembers, m.mid,
+    SELECT a.cid, a.status, a.quota, a.referrer, a.payment_type, 
+            a.created, a.updated, a.expires, nmembers, m.mid,
             fdecrypt(x_userid), fdecrypt(x_email), fdecrypt(x_fname),
             fdecrypt(x_mi), fdecrypt(x_lname), fdecrypt(x_address1),
             fdecrypt(x_address2), fdecrypt(x_city), fdecrypt(x_state),
