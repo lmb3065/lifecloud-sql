@@ -13,6 +13,7 @@
 -- 2013-11-01 dbrown : revised eventcodes
 -- 2013-11-12 dbrown : raises warning on invalid FilterType
 -- 2013-11-14 dbrown : Fixed: attempt to return NULL in func returning table
+-- 2016-01-29 dbrown : Add field payment_type
 -------------------------------------------------------------------------------
 
 create or replace function get_accounts(
@@ -55,6 +56,7 @@ begin
         a.status                as account_status,
         a.quota                 as account_quota,
         a.referrer              as account_referrer,
+        a.payment_type          as account_payment_type,
         a.created               as account_created,
         a.updated               as account_updated,
         a.expires               as account_expires,

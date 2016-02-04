@@ -4,7 +4,8 @@
 -- 2015-01-15 dbrown: add new column/field 'discount'
 -- 2015-03-23 dbrown: add new column/field 'paypal_button_id'
 -- 2015-06-27 dbrown: add paypal columns PeriodN / AmountN
--- drop function update_regcode(text,text,int,int,timestamp,timestamp,timestamp,int,int,varchar);
+-- 2015-10-18 dbrown: Add 2nd set of PayPal fields
+-- drop function update_regcode(text,text,int,int,timestamp,timestamp,timestamp,int,int,varchar,varchar,varchar,varchar,varchar,varchar,varchar);
 
 create or replace function update_regcode
 (
@@ -17,13 +18,20 @@ create or replace function update_regcode
     _acctExpires timestamp,
     _acctLife int,
     _discount int,
-    _paypal_button_id varchar(16),
-    _period1    varchar(4),
-    _period2    varchar(4),
-    _period3    varchar(4),
-    _amount1    varchar(10),
-    _amount2    varchar(10),
-    _amount3    varchar(10)
+    _paypal_button_id_1 varchar(16),
+    _period1_1       varchar(4),
+    _period2_1       varchar(4),
+    _period3_1       varchar(4),
+    _amount1_1       varchar(10),
+    _amount2_1       varchar(10),
+    _amount3_1       varchar(10),
+    _paypal_button_id_2 varchar(16),
+    _period1_2       varchar(4),
+    _period2_2       varchar(4),
+    _period3_2       varchar(4),
+    _amount1_2       varchar(10),
+    _amount2_2       varchar(10),
+    _amount3_2       varchar(10)
 ) returns int as $$
 declare
 
@@ -54,13 +62,20 @@ begin
             account_expires = _acctExpires,
             account_life = _acctLife,
             discount = _discount,
-            paypal_button_id = _paypal_button_id,
-            period1     = _period1,
-            period2     = _period2,
-            period3     = _period3,
-            amount1     = _amount1,
-            amount2     = _amount2,
-            amount3     = _amount3
+            paypal_button_id_1 = _paypal_button_id_1,
+            period1_1     = _period1_1,
+            period2_1     = _period2_1,
+            period3_1     = _period3_1,
+            amount1_1     = _amount1_1,
+            amount2_1     = _amount2_1,
+            amount3_1     = _amount3_1,
+            paypal_button_id_2 = _paypal_button_id_2,
+            period1_2     = _period1_2,
+            period2_2     = _period2_2,
+            period3_2     = _period3_2,
+            amount1_2     = _amount1_2,
+            amount2_2     = _amount2_2,
+            amount3_2     = _amount3_2
         where code = _code;
 
         _found = FOUND;

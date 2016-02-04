@@ -7,6 +7,9 @@
 -- ======================================================================
 
 -- 2013-10-02 dbrown added accout_referrer
+-- 2016-01-29 dbrown added payment_type
+
+drop type account_ext_t cascade;
 
 create type account_ext_t as (
 
@@ -14,6 +17,7 @@ create type account_ext_t as (
     account_status  int,
     account_quota   bigint,
     account_referrer varchar,
+    account_payment_type varchar,
     account_created timestamp,
     account_updated timestamp,
     account_expires timestamp,

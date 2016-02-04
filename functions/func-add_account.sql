@@ -21,7 +21,10 @@
 -- 2013-11-24 dbrown: removed eventlog noise
 -- 2014-01-09 dbrown: change NULL account expiration dates to default of 1 yr
 --       Added new possible status of 3, same meaning as 9
+-- 2016-01-29 dbrown: Add new field payment_type
 -- ---------------------------------------------------------------------------
+
+drop function add_account(varchar,varchar,varchar,varchar,char,timestamp,varchar,varchar,varchar,varchar,char,varchar,char,varchar,int);
 
 create or replace function add_account
 (
@@ -40,7 +43,8 @@ create or replace function add_account
     _postalcode varchar(16)  default  '',
     _country    char(2)      default  '',
     _phone      varchar(20)  default  '',
-    _status     int          default  0
+    _status     int          default  0,
+    _payment_type varchar(16) default null
 
 ) returns int as $$
 
@@ -88,8 +92,8 @@ begin
         errdetail text;
     begin
         -- owner_mid = 0 until Owner is successfully created
-        INSERT INTO Accounts ( owner_mid, status, quota, referrer, expires )
-            VALUES ( 0, _status, C_QUOTA, _referrer, _expires );
+        INSERT INTO Accounts ( owner_mid, status, quota, referrer, payment_type, expires )
+            VALUES ( 0, _status, C_QUOTA, _referrer, _payment_type, _expires );
 
     exception when others then
         -- Couldn't add account!

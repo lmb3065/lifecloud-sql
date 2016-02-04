@@ -7,7 +7,10 @@
 -- 2013-10-04 dbrown created
 -- 2013-11-15 dbrown revised event codes, exception handling, retvals
 -- 2013-11-15 dbrown Handle non-existent account cleanly
+-- 2016-01-29 dbrown Add field payment_type
 -- -----------------------------------------------------------------------------
+
+drop function update_account(int,int,bigint,varchar,timestamp);
 
 create or replace function update_account
 (
@@ -15,6 +18,7 @@ create or replace function update_account
     _status   int         default null,
     _quota    bigint      default null,
     _referrer varchar(64) default null,
+    _payment_type varchar(16) default null,
     _expires  timestamp   default null
 
 ) returns int as $$
@@ -55,6 +59,7 @@ begin
         SET status   = coalesce(_status,   a.status),
             quota    = coalesce(_quota,    a.quota),
             referrer = coalesce(_referrer, a.referrer),
+            payment_type = coalesce(_payment_type, a.payment_type),
             expires  = coalesce(_expires,  a.expires),
             updated  = clock_timestamp()
         WHERE cid = _cid;
