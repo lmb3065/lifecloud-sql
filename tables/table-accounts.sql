@@ -38,3 +38,6 @@ create table Accounts
 );
 alter table Accounts owner to pgsql;
 
+-- LAST CHANGE:
+-- 
+-- alter table Accounts add column payment_type varchar(16);
