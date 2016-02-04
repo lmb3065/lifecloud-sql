@@ -6,7 +6,7 @@
 -- 2015-06-27 dbrown: add new columns/fields periodN / amountN
 -- 2015-10-24 dbrown: add new columns/fields for 2nd Paypal button
 
--- drop function add_regcode(text,int,timestamp,timestamp,timestamp,int,int,text,int,varchar,varchar,varchar,varchar,varchar,varchar,varchar)
+-- drop function add_regcode(text,int,timestamp,timestamp,timestamp,int,int,text,int,varchar,varchar,varchar,varchar,varchar,varchar,varchar);
 create or replace function add_regcode
 (
     _code               text,
