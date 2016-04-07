@@ -1,4 +1,23 @@
 
+-----------------------------------------------------------------------------
+Extract Production Dump To Development
+-----------------------------------------------------------------------------
+
+ssh -p 4422 pgsql@70.99.204.141
+ssh> pg_dump -f ~/lc.sql lc
+
+scp -P 4422 pgsql@70.99.204.141:~/lc.sql ./lc.sql
+
+createdb lc
+psql> create role pgsql; 
+psql> create role delphi;
+
+psql -f lc.sql -d lc
+
+-----------------------------------------------------------------------------
+Re-Encryption ETL
+-----------------------------------------------------------------------------
+
 etl-1. Extract data out into temp tables
 etl-2a. Insert new keys and passphrase into 'pgpkeys' table
 etl-2b. Update fencrypt and fdecrypt functions
