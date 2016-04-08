@@ -10,6 +10,7 @@
 -- 2013-12-11 dbrown: added item_uid
 -- 2013-12-20 dbrown: added updated
 -- 2013-12-24 dbrown: added form_data, changed isform to isprofile
+-- 2015-08-28 dbrown: added size
 -- -----------------------------------------------------------------------------
 
 create table Files
@@ -20,6 +21,7 @@ create table Files
     item_uid     int,        -- optional reference to Items(UID),
     x_name       bytea       not null,
     x_desc       bytea       not null,
+    size         bigint,
     content_type varchar,
     isprofile    int         default 0,
     category     int,           -- reference to ref_Categories(UID)

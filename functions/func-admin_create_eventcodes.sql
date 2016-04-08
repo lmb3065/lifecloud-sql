@@ -18,6 +18,7 @@
 -- 2015-01-02 dbrown: Added x12x 'Registration Codes' events
 -- 2015-01-15 dbrown: Added 6126 'Auth Failure Getting Regcodes'
 -- 2015-02-19 dnrowm: Add 1133 'Pending-Purchase Overwritten'
+-- 2015-09-04 dbrown: Add 6096 'Auth Fail Getting Event'
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -156,6 +157,7 @@ begin
         ( '6083', 'unauthorized attempt to modify file' ),
         ( '6086', 'unauthorized attempt to get files'),
         ( '6087', 'unauthorized attempt to delete file' ),
+        ( '6096', 'unauthorized attempt to get events' ),
         ( '6100', 'unauthorized attempt to add item' ),
         ( '6103', 'unauthorized attempt to update item' ),
         ( '6107', 'unauthorized attempt to delete item' ),

@@ -34,8 +34,30 @@ begin
         ('items'),                  -- 17
         ('reserved'),               -- 18
         ('reserved'),               -- 19
-        ('vehicle');                -- 20
+        ('vehicle'),                -- 20
+        ('emergency'),              -- 21
+        ('memory'),                 -- 22
+        ('item location list'),     -- 23
+        ('insurance policy'),       -- 24
+        ('banking document'),       -- 25
+        ('activity'),               -- 26
+        ('funeral plan'),           -- 27
+        ('major purchase'),         -- 28
+        ('to-do list'),             -- 29
+        ('vacation'),               -- 30
+        ('tax item'),               -- 31
+        ('babysitter'),             -- 32
+        ('caregiver'),              -- 33
+        ('carpool'),                -- 34
+        ('subscription'),           -- 35
+        ('gift'),                   -- 36
+        ('client'),                 -- 37
+        ('contact'),                -- 38
+        ('document'),               -- 39
+        ('service');                -- 40
+
     select count(*) from ref_itemtypes into nrows;
+    
     return 'ItemTypes reference table loaded: '||nrows||' rows.';
 
 end

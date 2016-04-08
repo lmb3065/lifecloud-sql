@@ -1,0 +1,22 @@
+
+[X] Admin_Create_Applist
+    [X] CHECK AGAINST TABLE
+[X] Admin_Create_ItemTypes
+    [X] CHECK AGAINST TABLE
+
+[X] Alter Table Reg_Codes
+[X] Add_RegCode
+[X] Get RegCode
+[X] Get RegCodeSSS
+[X] Update RegCode
+
+[X] Drop Type Account_Ext_T
+[X] Create Type Account_Ext_T
+
+[X] Alter Table Accounts
+[X] Add_Account
+[X] Get Account
+[X] Get AccountSSS
+[X] Update Account
+
+[X] Get Mail PW
