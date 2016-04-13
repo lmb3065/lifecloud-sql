@@ -30,3 +30,5 @@ Copy ETL2.SQL into target.  This contains immediate commands.
 
 Copy ETL3.SQL into target.  This contains immediate commands.
 run etl3()
+
+Copy ETL4.SQL into target.  This contains immediate commands.
