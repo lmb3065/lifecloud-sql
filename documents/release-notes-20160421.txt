@@ -1,0 +1,4 @@
+
+ [x] add table delphi_contacts
+ [x] add function add_delphi_contact()
+ [x] add function get_delphi_contacts()     
