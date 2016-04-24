@@ -13,6 +13,7 @@ declare
     events_c  cursor for select * from _ct_Events;
     defaultfolders_c cursor for select * from _ct_DefaultFolders;
     sessions_c cursor for select * from _ct_Sessions;
+    delphicontacts_c cursor for select * from _ct_Delphi_Contacts;
 
 begin
 
@@ -133,6 +134,21 @@ begin
         update Sessions set x_ipaddr = fencrypt(r.ipaddr)
         where Sessions.sid = r.sid;
     end loop;
+
+    -----------------------------------------------------------------------------
+    raise notice 'Re-Encrypting Delphi Contacts';
+
+    truncate table delphi_contacts;
+    for r in delphicontacts_c loop
+        insert into Delphi_Contacts
+        values (
+            fencrypt(r.email),
+            fencrypt(r.fname),
+            fencrypt(r.lname),
+            r.dt_added
+            );
+        where 
+
 
     return 0;
 end;

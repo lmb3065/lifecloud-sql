@@ -11,6 +11,7 @@ begin
     DROP TABLE IF EXISTS _ct_IPN;
     DROP TABLE IF EXISTS _ct_Events;
     DROP TABLE IF EXISTS _ct_DefaultFolders;
+    DROP TABLE IF EXISTS _ct_Delphi_Contacts;
     raise notice '-------------------- Ignore all errors above!';
 
 -- =============================================================================
@@ -137,6 +138,18 @@ begin
         sid,
         fdecrypt(x_ipaddr) as ipaddr
     from Sessions;
+
+-- =============================================================================
+-- 1.9. Decrypt/Extract Delphi Contacts
+-- =============================================================================
+    raise notice 'Decrypting Delphi_Contacts';
+
+    create table _ct_Delphi_Contacts as select
+        fdecrypt(x_email) as email,
+        fdecrypt(x_fname) as fname,
+        fdecrypt(x_lname) as lname,
+        dt_added
+    from Delphi_Contacts;
 
     return 0;
 
