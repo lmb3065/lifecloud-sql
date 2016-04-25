@@ -147,8 +147,7 @@ begin
             fencrypt(r.lname),
             r.dt_added
             );
-        where 
-
+    end loop;
 
     return 0;
 end;
