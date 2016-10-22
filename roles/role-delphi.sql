@@ -12,6 +12,7 @@ grant all on
     files,       files_uid_seq,
     folders,     folders_uid_seq,
     items,       items_uid_seq,
+    help_links,
     member_apps,
     reg_codes,
     members,     members_mid_seq,

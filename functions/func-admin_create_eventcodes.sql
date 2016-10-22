@@ -193,6 +193,7 @@ begin
         ( '9123', 'error updating registration code'),
         ( '9140', 'error adding IPN' ),
         
+        ( '9998', 'Unknown'),
         ( '9999', 'ASSERT failure');
 
     select count(*) into nrows from ref_eventcodes;
