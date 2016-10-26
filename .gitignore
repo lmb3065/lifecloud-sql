@@ -19,3 +19,6 @@ CVS
 
 #jedit noise
 \#*\#
+
+# Do not archive data files
+prod-*.sql
