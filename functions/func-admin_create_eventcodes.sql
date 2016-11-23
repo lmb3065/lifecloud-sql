@@ -19,6 +19,7 @@
 -- 2015-01-15 dbrown: Added 6126 'Auth Failure Getting Regcodes'
 -- 2015-02-19 dnrowm: Add 1133 'Pending-Purchase Overwritten'
 -- 2015-09-04 dbrown: Add 6096 'Auth Fail Getting Event'
+-- 2016-11-23 dbrown: Add New 4000-series login failure codes
 -----------------------------------------------------------------------------
 
 create or replace function admin_create_eventcodes() returns text as $$
@@ -126,7 +127,11 @@ begin
     -- 4000 - 4999 : User's Fault errors
 
         ( '4000', 'invalid login attempt' ),
-        ( '4001', 'login denied' ),
+        ( '4001', 'login denied: account has expired' ),
+        ( '4002', 'login denied: account is suspended' ),
+        ( '4003', 'login denied: account is closed' ),
+        ( '4004', 'login denied: account signup is incomplete' ),
+        ( '4005', 'login denied: member status disallows login'),
         ( '4006', 'unauthorized page attempt' ),
         ( '4020', 'user could not add account' ),
         ( '4030', 'user could not add member' ),

@@ -4,6 +4,7 @@
  --  2013-12-20 dbrown: added -15, -27 (items)
  --  2014-04-12 dbrown: added -16 (reminder)
  --  2015-01-02 dbrown: add 17, -28 (registration codes)
+ --  2016-11-23 dbrown: add new login failure codes
  -- -----------------------------------------------------------------------------
 
  create or replace function admin_create_retvals() returns text as $$
@@ -16,6 +17,12 @@
 
         ( 1,   'Success' ),
         ( 0,   'A required argument was invalid' ),
+
+        (  -5, 'Member status disallows login'),
+        (  -6, 'Account signup is incomplete'),
+        (  -7, 'Account is closed'),
+        (  -8, 'Account is suspended'),
+        (  -9, 'Account is expired'),
 
         ( -10, 'Account does not exist' ),
         ( -11, 'Member does not exist' ),
