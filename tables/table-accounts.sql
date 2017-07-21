@@ -21,6 +21,7 @@
 -- 2014-04-08 dbrown added alertCalendar
 -- 2014-05-02 dbrown set alertCalendar default 0
 -- 2016-01-27 dbrown Add column payment_type
+-- 2017-07-21 dbrown Default Expires column to NULL (open subscription)
 -- ----------------------------------------------------------------------------------------------
 
 create table Accounts
@@ -34,7 +35,7 @@ create table Accounts
     payment_type  varchar(16),
     created       timestamp   default now(),
     updated       timestamp   default now(),
-    expires       timestamp   default current_date + interval '1 year'
+    expires       timestamp   default null
 );
 alter table Accounts owner to pgsql;
 
