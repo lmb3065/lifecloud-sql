@@ -22,9 +22,11 @@
 -- 2014-01-09 dbrown: change NULL account expiration dates to default of 1 yr
 --       Added new possible status of 3, same meaning as 9
 -- 2016-01-29 dbrown: Add new field payment_type
+-- 2017-07-21 dbrown: Default to NULL expiration date (open subscription)
 -- ---------------------------------------------------------------------------
 
 drop function add_account(varchar,varchar,varchar,varchar,char,timestamp,varchar,varchar,varchar,varchar,char,varchar,char,varchar,int);
+drop function add_account(varchar,varchar,varchar,varchar,char,timestamp,varchar,varchar,varchar,varchar,char,varchar,char,varchar,int,varchar);
 
 create or replace function add_account
 (
@@ -62,9 +64,6 @@ declare
     C_QUOTA constant int := 100000000;
 
 begin
-
-    -- Enforce a valid expiration date
-    if (_expires is null) then _expires := current_date + interval '1 year'; end if;
 
     -- Check for an existing account with this e-mail address
     _email := lower(_email); -- Case insensitive

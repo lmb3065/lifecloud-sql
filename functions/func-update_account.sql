@@ -3,14 +3,17 @@
 -- -----------------------------------------------------------------------------
 -- Pass a CID to specify which account to update.
 --      NULL arguments are preserved, non-null arguments are updated
+--      (except expiration date, which is always updated, even to NULL.)
 -- -----------------------------------------------------------------------------
 -- 2013-10-04 dbrown created
 -- 2013-11-15 dbrown revised event codes, exception handling, retvals
 -- 2013-11-15 dbrown Handle non-existent account cleanly
 -- 2016-01-29 dbrown Add field payment_type
+-- 2017-07-21 dbrown Allow NULL expiration date (do not use COALESCE)
 -- -----------------------------------------------------------------------------
 
 drop function update_account(int,int,bigint,varchar,timestamp);
+drop function update_account(int,int,bigint,varchar,varchar,timestamp);
 
 create or replace function update_account
 (
@@ -60,7 +63,7 @@ begin
             quota    = coalesce(_quota,    a.quota),
             referrer = coalesce(_referrer, a.referrer),
             payment_type = coalesce(_payment_type, a.payment_type),
-            expires  = coalesce(_expires,  a.expires),
+            expires  = a.expires,
             updated  = clock_timestamp()
         WHERE cid = _cid;
 
